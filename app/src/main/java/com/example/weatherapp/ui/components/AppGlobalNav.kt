@@ -9,10 +9,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.model.Settings
 
+data class OptionMenuItem(val menuId: String, val text: String)
+
 @Composable
 fun AppGlobalNav(
     context: Context,
-    settings: Settings
+    settings: Settings,
+    menuItems: List<OptionMenuItem>,
+    onMenuItemClicked: (menuId: String) -> Unit
 ) {
 
     var mDisplayMenu by remember { mutableStateOf(false) }
@@ -28,13 +32,6 @@ fun AppGlobalNav(
 
         actions = {
 
-//                  IconButton(onClick = {
-//                      Toast.makeText(mContext,
-//                          "Hello", Toast.LENGTH_SHORT).show()
-//                  }) {
-//                      Icon(painter = painterResource(id = R.drawable.ic_baseline_home_24), null)
-//                  }
-
             // Creates a "..." button for dropdown menu
             IconButton(
                 onClick = {
@@ -45,11 +42,16 @@ fun AppGlobalNav(
             }
 
             DropdownMenu(expanded = mDisplayMenu, onDismissRequest = { mDisplayMenu = false }) {
-                DropdownMenuItem(onClick = {
-                    Toast.makeText(context, "", Toast.LENGTH_SHORT).show()
+
+                menuItems.forEach { item -> DropdownMenuItem(onClick = {
+                    // close the dropdown menu
+                    mDisplayMenu = false
+
+                    // Execute the callback
+                    onMenuItemClicked(item.menuId)
                 }) {
-                    Text(text = "場所の変更")
-                }
+                    Text(text = item.text)
+                }}
             }
         }
     )
