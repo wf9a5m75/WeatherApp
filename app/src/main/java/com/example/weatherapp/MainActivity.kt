@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,11 +22,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.model.Settings
+import com.example.weatherapp.ui.AppTabs
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 
@@ -45,22 +49,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Action: The menu button has been tapped
-     * @param menu {Menu?} The options menu which you place your items
-     */
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        this.menuInflater.inflate(R.menu.option_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Toast.makeText(this, "「${item.title}」が押されました",
-            Toast.LENGTH_SHORT).show()
-        return true
-    }
 }
-
 
 @Composable
 @Preview(showBackground = true)
@@ -71,14 +60,19 @@ fun WeatherApp(modifier: Modifier = Modifier) {
         city_id = remember { mutableStateOf("hyogo_kobe") }
     )
 
+
     WeatherAppTheme {
         Column(
             modifier = Modifier.fillMaxSize()
+                .background(Color.White)
         ) {
             AppGlobalNav(
                 context = mContext,
                 settings = settings
             )
+
+            AppTabs()
+
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(text = settings.city_id.value)
