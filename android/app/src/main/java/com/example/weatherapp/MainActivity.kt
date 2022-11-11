@@ -2,29 +2,22 @@ package com.example.weatherapp
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.weatherapp.model.Settings
 import com.example.weatherapp.ui.AppTabs
 import com.example.weatherapp.ui.components.AppGlobalNav
@@ -38,6 +31,7 @@ import com.example.weatherapp.ui.theme.WeatherAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             WeatherAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -132,7 +126,6 @@ fun WeatherApp(modifier: Modifier = Modifier) {
 @Composable
 fun MainScreen(context: Context, settings: Settings, onChangeCity: () -> Unit) {
 
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -156,7 +149,16 @@ fun MainScreen(context: Context, settings: Settings, onChangeCity: () -> Unit) {
         )
 
         AppTabs(
-            context = context
+            onTabChanged = {
+                tabIndex ->
+                    when(tabIndex) {
+                        0 -> ShowTodayScreen(context = context)
+
+                        1 -> ShowTomorrowScreen(context = context)
+
+                        2 -> ShowWeeklyScreen(context = context)
+                    }
+            }
         )
 
     }
@@ -167,7 +169,7 @@ fun SettingsScreen(context: Context, settings: Settings, onClick: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        SelectCityScreen(onClick)
+        SelectCityScreen(context, settings, onClick)
     }
 }
 
@@ -189,4 +191,28 @@ fun NavHostController.navigateSingleTopTo(route: String) = this.navigate(route) 
 
     // Restore state when reselecting a previously selected item
     restoreState = true
+}
+
+
+@Composable
+fun ShowTodayScreen(context: Context) {
+    TodayWeatherScreen()
+}
+
+@Composable
+fun ShowTomorrowScreen(context: Context) {
+    TomorrowWeatherScreen(
+        onClick = {
+            Toast.makeText(context, "This is tomorrow screen!", Toast.LENGTH_SHORT).show()
+        }
+    )
+}
+
+@Composable
+fun ShowWeeklyScreen(context: Context) {
+    WeeklyWeatherScreen(
+        onClick = {
+            Toast.makeText(context, "This is weekly screen!", Toast.LENGTH_SHORT).show()
+        }
+    )
 }

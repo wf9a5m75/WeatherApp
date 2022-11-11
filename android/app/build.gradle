@@ -47,11 +47,24 @@ android {
 }
 
 dependencies {
+    // coroutine (thread manager)
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+
+    // Navigation (UI navigation)
     implementation("androidx.navigation:navigation-compose:2.5.3")
 
+    // retrofit (http library)
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+
+    // GSON (json)
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    // accompanist-pager (swipeable pager)
     implementation "com.google.accompanist:accompanist-pager:0.27.0"
     implementation "com.google.accompanist:accompanist-pager-indicators:0.27.0"
+
+
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     implementation 'androidx.activity:activity-compose:1.3.1'
