@@ -2,6 +2,7 @@ package com.example.weatherapp
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
@@ -18,7 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.weatherapp.model.Settings
+import com.example.weatherapp.model.*
 import com.example.weatherapp.ui.AppTabs
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.OptionMenuItem
@@ -27,6 +29,10 @@ import com.example.weatherapp.ui.screens.TodayWeatherScreen
 import com.example.weatherapp.ui.screens.TomorrowWeatherScreen
 import com.example.weatherapp.ui.screens.WeeklyWeatherScreen
 import com.example.weatherapp.ui.theme.WeatherAppTheme
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,12 +100,49 @@ fun WeatherApp(modifier: Modifier = Modifier) {
     val mContext = LocalContext.current
 
     // Keep the values as a Data class
-    var settings = Settings(
+    val settings = Settings(
         city_id = remember { mutableStateOf("hyogo_kobe") }
     )
 
+    val cities = mutableListOf<Prefecture>()
+
+//    val defaultCities = mutableListOf<Prefecture>(
+//        Prefecture(
+//            id = "osaka",
+//            name = "大阪府",
+//            cities = listOf(
+//                City("osaka_hirakata", "枚方市"),
+//                City("osaka_osaka", "大阪市"),
+//                City("osaka_sakai", "堺市")
+//            )
+//        ),
+//
+//        Prefecture(
+//            id = "hyogo",
+//            name = "兵庫県",
+//            cities = listOf(
+//                City("hyogo_himeji", "姫路市"),
+//                City("hyogo_kobe", "神戸市"),
+//                City("hyogo_tamba", "丹波市")
+//            )
+//        )
+//    )
+
+    runBlocking {
+        val locationsDeferred = async { getLocationsFromServer(mContext) }
+        val response = locationsDeferred.await()
+        if (response.code() == 200) {
+            val result = response.body()!!
+            cities.clear()
+            cities.addAll(result.prefectures)
+        }
+    }
+
     WeatherAppTheme {
         NavHost(navController = navigationController, startDestination = "main") {
+            composable(route = "loading") {
+                LoadingScreen()
+            }
             composable(route = "main") {
                 MainScreen(
                     context = mContext,
@@ -110,9 +153,11 @@ fun WeatherApp(modifier: Modifier = Modifier) {
                 )
             }
             composable(route = "settings") {
+
                 SettingsScreen(
                     context = mContext,
                     settings = settings,
+                    cities = cities,
                     onClick = {
                         navigationController.navigateUp()
                     }
@@ -164,12 +209,20 @@ fun MainScreen(context: Context, settings: Settings, onChangeCity: () -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun SettingsScreen(context: Context, settings: Settings, onClick: () -> Unit) {
+fun LoadingScreen() {
+    Column(modifier = Modifier.fillMaxSize()) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun SettingsScreen(context: Context, settings: Settings, cities: MutableCollection<Prefecture>, onClick: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        SelectCityScreen(context, settings, onClick)
+        SelectCityScreen(context, settings, cities, onClick)
     }
 }
 

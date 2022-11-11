@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,30 +27,10 @@ import kotlinx.coroutines.launch
 fun SelectCityScreen(
     context: Context? = null,
     settings: Settings? = null,
+    cities: MutableCollection<Prefecture> = mutableStateListOf<Prefecture>(),
     onClick: () -> Unit = {}
 ) {
 
-    val cities = listOf(
-        Prefecture(
-            id = "osaka",
-            name = "大阪府",
-            cities = listOf(
-                City("osaka_hirakata", "枚方市"),
-                City("osaka_osaka", "大阪市"),
-                City("osaka_sakai", "堺市")
-            )
-        ),
-
-        Prefecture(
-            id = "hyogo",
-            name = "兵庫県",
-            cities = listOf(
-                City("hyogo_himeji", "姫路市"),
-                City("hyogo_kobe", "神戸市"),
-                City("hyogo_tamba", "丹波市")
-            )
-        )
-    )
     val initSelect = settings?.city_id?.value ?: "hyogo_kobe"
 
     val selected = remember { mutableStateOf(initSelect) }
@@ -132,15 +113,3 @@ fun SelectCityScreen(
     }
 }
 
-
-fun getCities(context: Context) {
-    val weatherApi = RetrofitHelper.getInstance(context).create(WeatherApi::class.java)
-
-    GlobalScope.launch {
-        val result = weatherApi.getLocations()
-        if (result.code() == 200) {
-            val locationRes = result.body()
-            Log.d("weather", "-----> lastUpdate = ${locationRes!!.last_update}")
-        }
-    }
-}

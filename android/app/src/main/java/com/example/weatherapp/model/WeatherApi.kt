@@ -2,6 +2,9 @@ package com.example.weatherapp.model
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Response
@@ -49,12 +52,10 @@ object RetrofitHelper {
 
     fun getInstance(context: Context): Retrofit {
         if (_instance != null) {
-            Log.d("weather", "--->cache hit!")
             return _instance!!
         }
-        var cacheSize = 10 * 1024 * 1024L // 1 MB
-        var cache: Cache = Cache(context.cacheDir, cacheSize)
-
+        val cacheSize = 10 * 1024 * 1024L // 1 MB
+        val cache = Cache(context.cacheDir, cacheSize)
         val clint = OkHttpClient.Builder()
             .cache(cache)
             .build()
@@ -64,7 +65,12 @@ object RetrofitHelper {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        Log.d("weather", "--->create new instance!")
         return _instance!!
     }
+}
+
+suspend fun getLocationsFromServer(context: Context): Response<LocationResponse> {
+    val weatherApi = RetrofitHelper.getInstance(context).create(WeatherApi::class.java)
+
+    return weatherApi.getLocations()
 }
