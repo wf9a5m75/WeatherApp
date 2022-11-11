@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -15,6 +16,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.weatherapp.model.Settings
 import com.example.weatherapp.ui.AppTabs
 import com.example.weatherapp.ui.components.AppGlobalNav
@@ -41,6 +48,42 @@ class MainActivity : ComponentActivity() {
     }
 
 }
+//@Preview(showBackground = true)
+//@Composable
+//fun WeatherApp2(modifier: Modifier = Modifier) {
+//    val navController = rememberNavController()
+//
+//    NavHost(
+//        modifier = Modifier.fillMaxSize(),
+//        navController = navController, startDestination = "screen1") {
+//        composable(route = "screen1") {
+//            val text = "Hello"
+//            val id=1234
+//            TodayWeatherScreen(
+//                onClick = {
+//                    navController.navigate("screen2/${text}/${id}")
+//                }
+//            )
+//        }
+//        composable(route = "screen2/{text}/{id}",
+//            arguments = listOf(
+//                navArgument("text") { type = NavType.StringType},
+//                navArgument("id") { type = NavType.IntType }
+//            )) {
+//                backStackEntry ->
+//                    val text = backStackEntry.arguments?.getString("text") ?: ""
+//                    val id = backStackEntry.arguments?.getInt("id") ?: -1
+//
+//                    Log.d("test", "text = '${text}'")
+//
+//                    TomorrowWeatherScreen(
+//                        onClick = {
+//                            navController.navigateUp()
+//                        }
+//                    )
+//        }
+//    }
+//}
 
 @OptIn(ExperimentalUnitApi::class)
 @Composable
@@ -51,12 +94,6 @@ fun WeatherApp(modifier: Modifier = Modifier) {
     var settings = Settings(
         city_id = remember { mutableStateOf("hyogo_kobe") }
     )
-
-    val pages = listOf(
-            TodayWeatherScreen(),
-            TomorrowWeatherScreen(),
-            WeeklyWeatherScreen()
-        )
 
     WeatherAppTheme {
         Column(
@@ -92,7 +129,7 @@ fun WeatherApp(modifier: Modifier = Modifier) {
             )
 
             AppTabs(
-                pages = pages
+                context = mContext
             )
 
         }

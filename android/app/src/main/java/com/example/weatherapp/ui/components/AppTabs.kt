@@ -1,6 +1,8 @@
 package com.example.weatherapp.ui
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,22 +13,31 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
+import com.example.weatherapp.R
+import com.example.weatherapp.ui.screens.TodayWeatherScreen
+import com.example.weatherapp.ui.screens.TomorrowWeatherScreen
+import com.example.weatherapp.ui.screens.WeeklyWeatherScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
+import java.util.*
 
 @OptIn(ExperimentalPagerApi::class)
 @ExperimentalUnitApi
 @Composable
-fun AppTabs(pages: List<Unit>) {
-    val tabTitles = listOf("One", "Two", "Three")
+fun AppTabs(context: Context) {
+    val tabTitles = listOf<String>(
+        stringResource(R.string.tab_today),
+        stringResource(R.string.tab_tomorrow),
+        stringResource(R.string.tab_weekly)
+    )
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
-    val bgColors = listOf<Color>(Color.Red, Color.Green, Color.Blue)
 
     Column {
         TabRow(
@@ -41,11 +52,12 @@ fun AppTabs(pages: List<Unit>) {
             }
         ) {
 
+            // Move the tab indicator when you tap on a tab
             tabTitles.forEachIndexed { index, title ->
                 Tab(
                     selected = pagerState.currentPage == index,
                     onClick = {
-                        Log.d("test", "tab should be ${index}")
+                        // Change the current tab view with animation
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(index)
                         }
@@ -57,25 +69,47 @@ fun AppTabs(pages: List<Unit>) {
             }
         }
 
+
         HorizontalPager(
             count = tabTitles.size,
             state = pagerState
         ) {
+            // Invoked when selected tab has been changed
             tabIndex ->
+                when(tabIndex) {
+                    0 -> showTodayScreen(context = context)
 
-                Column(modifier = Modifier
-                    .fillMaxSize()
-                    .background(bgColors[tabIndex])) {
+                    1 -> showTomorrowScreen(context = context)
 
-                    Text(
-                        "${tabIndex.toString()} page",
-                        modifier = Modifier
-                            .size(20.dp)
-                    )
-                    Button(onClick = { /*TODO*/ }) {
-                        Text("Click me!")
-                    }
+                    2 -> showWeeklyScreen(context = context)
                 }
         }
     }
+}
+
+@Composable
+fun showTodayScreen(context: Context) {
+    TodayWeatherScreen(
+        onClick = {
+            Toast.makeText(context, "This is today screen!", Toast.LENGTH_SHORT).show()
+        }
+    )
+}
+
+@Composable
+fun showTomorrowScreen(context: Context) {
+    TomorrowWeatherScreen(
+        onClick = {
+            Toast.makeText(context, "This is tomorrow screen!", Toast.LENGTH_SHORT).show()
+        }
+    )
+}
+
+@Composable
+fun showWeeklyScreen(context: Context) {
+    WeeklyWeatherScreen(
+        onClick = {
+            Toast.makeText(context, "This is weekly screen!", Toast.LENGTH_SHORT).show()
+        }
+    )
 }
