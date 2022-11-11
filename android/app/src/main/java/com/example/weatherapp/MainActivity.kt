@@ -1,5 +1,6 @@
 package com.example.weatherapp
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -17,6 +18,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,6 +29,7 @@ import com.example.weatherapp.model.Settings
 import com.example.weatherapp.ui.AppTabs
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.OptionMenuItem
+import com.example.weatherapp.ui.screens.SelectCityScreen
 import com.example.weatherapp.ui.screens.TodayWeatherScreen
 import com.example.weatherapp.ui.screens.TomorrowWeatherScreen
 import com.example.weatherapp.ui.screens.WeeklyWeatherScreen
@@ -85,53 +89,104 @@ class MainActivity : ComponentActivity() {
 //    }
 //}
 
+
+
 @OptIn(ExperimentalUnitApi::class)
 @Composable
 @Preview(showBackground = true)
 fun WeatherApp(modifier: Modifier = Modifier) {
+    val navigationController = rememberNavController()
+    // Hold the context handle
     val mContext = LocalContext.current
-    var count by remember { mutableStateOf(0) }
+
+    // Keep the values as a Data class
     var settings = Settings(
         city_id = remember { mutableStateOf("hyogo_kobe") }
     )
 
     WeatherAppTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-            AppGlobalNav(
-                context = mContext,
-                settings = settings,
-                menuItems = listOf(
-                    OptionMenuItem("change_city", "場所の変更"),
-                    OptionMenuItem("change_timezone", "タイムゾーンの変更"),
-                ),
-                onMenuItemClicked = {
-                    menuId ->
-                        Toast.makeText(mContext, "${menuId} is clicked", Toast.LENGTH_SHORT).show()
-
-                        when (menuId) {
-                            "change_city" -> {
-                                count = (count + 1) % 3
-                                settings.city_id.value = when(count) {
-                                    0 -> "hyogo_kobe"
-                                    1 -> "osaka_osaka"
-                                    else -> "somewhere"
-                                }
-                                Log.d("Test", "selected menu is ${menuId}")
-                            }
-
-                            else -> { /* stub */ }
-                        }
-                }
-            )
-
-            AppTabs(
-                context = mContext
-            )
-
+        NavHost(navController = navigationController, startDestination = "main") {
+            composable(route = "main") {
+                MainScreen(
+                    context = mContext,
+                    settings = settings,
+                    onChangeCity = {
+                        navigationController.navigateSingleTopTo("settings")
+                    }
+                )
+            }
+            composable(route = "settings") {
+                SettingsScreen(
+                    context = mContext,
+                    settings = settings,
+                    onClick = {
+                        navigationController.navigateUp()
+                    }
+                )
+            }
         }
     }
+}
+
+@OptIn(ExperimentalUnitApi::class)
+@Composable
+fun MainScreen(context: Context, settings: Settings, onChangeCity: () -> Unit) {
+
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        AppGlobalNav(
+            context = context,
+            settings = settings,
+            menuItems = listOf(
+                OptionMenuItem("change_city", "場所の変更"),
+                OptionMenuItem("change_timezone", "タイムゾーンの変更"),
+            ),
+            onMenuItemClicked = {
+                    menuId ->
+                Toast.makeText(context, "${menuId} is clicked", Toast.LENGTH_SHORT).show()
+
+                when (menuId) {
+                    "change_city" -> onChangeCity()
+
+                    else -> { /* stub */ }
+                }
+            }
+        )
+
+        AppTabs(
+            context = context
+        )
+
+    }
+}
+
+@Composable
+fun SettingsScreen(context: Context, settings: Settings, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        SelectCityScreen(onClick)
+    }
+}
+
+
+fun NavHostController.navigateSingleTopTo(route: String) = this.navigate(route) {
+
+    // Pop up to the start destination of the graph
+    // to avoid building up a large stack of destinations
+    // on the back stack as users select items
+    popUpTo(
+        this@navigateSingleTopTo.graph.findStartDestination().id
+    ) {
+        saveState = true
+    }
+
+    // Avoid multiple copies of the same destination
+    // when reselecting the same item
+    launchSingleTop = true
+
+    // Restore state when reselecting a previously selected item
+    restoreState = true
 }
