@@ -101,32 +101,10 @@ fun WeatherApp(modifier: Modifier = Modifier) {
 
     // Keep the values as a Data class
     val settings = Settings(
-        city_id = remember { mutableStateOf("hyogo_kobe") }
+        city = remember { mutableStateOf(City(id = "", name = "")) }
     )
 
     val cities = mutableListOf<Prefecture>()
-
-//    val defaultCities = mutableListOf<Prefecture>(
-//        Prefecture(
-//            id = "osaka",
-//            name = "大阪府",
-//            cities = listOf(
-//                City("osaka_hirakata", "枚方市"),
-//                City("osaka_osaka", "大阪市"),
-//                City("osaka_sakai", "堺市")
-//            )
-//        ),
-//
-//        Prefecture(
-//            id = "hyogo",
-//            name = "兵庫県",
-//            cities = listOf(
-//                City("hyogo_himeji", "姫路市"),
-//                City("hyogo_kobe", "神戸市"),
-//                City("hyogo_tamba", "丹波市")
-//            )
-//        )
-//    )
 
     runBlocking {
         val locationsDeferred = async { getLocationsFromServer(mContext) }

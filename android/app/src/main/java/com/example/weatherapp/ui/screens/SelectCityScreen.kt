@@ -31,7 +31,7 @@ fun SelectCityScreen(
     onClick: () -> Unit = {}
 ) {
 
-    val initSelect = settings?.city_id?.value ?: "hyogo_kobe"
+    val initSelect = settings?.city?.value ?: City("", "")
 
     val selected = remember { mutableStateOf(initSelect) }
 
@@ -77,26 +77,26 @@ fun SelectCityScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .selectable(
-                                            selected = (city.id == selected.value),
+                                            selected = (city == selected.value),
                                             onClick = {
-                                                selected.value = city.id
+                                                selected.value = city
 
                                                 // if not preview
                                                 if (settings != null) {
-                                                    settings.city_id.value = city.id
+                                                    settings.city.value = city
                                                 }
                                             }
                                         )
                                         .padding(horizontal = 16.dp)
                                 ) {
                                     RadioButton(
-                                        selected = (city.id == selected.value),
+                                        selected = (city == selected.value),
                                         onClick = {
-                                            selected.value = city.id
+                                            selected.value = city
 
                                             // if not preview
                                             if (settings != null) {
-                                                settings.city_id.value = city.id
+                                                settings.city.value = city
                                             }
                                         })
                                     Text(

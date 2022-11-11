@@ -26,7 +26,7 @@ fun AppGlobalNav(
         elevation = 4.dp,
         title = {
             Text(
-                text = settings.city_id.value
+                text = settings.city.value.name
             )
         },
 

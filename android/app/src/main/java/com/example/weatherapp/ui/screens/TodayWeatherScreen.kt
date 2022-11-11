@@ -22,13 +22,6 @@ fun TodayWeatherScreen() {
         .fillMaxSize()
         .background(color = Color.Yellow)
     ) {
-        Button(onClick = {
-            getServerResponse()
-        }) {
-            Text("Today weather!!")
-        }
+        Text("Today weather!!")
     }
-}
-
-fun getServerResponse() {
 }
