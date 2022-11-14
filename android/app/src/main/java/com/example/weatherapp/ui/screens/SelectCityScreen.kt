@@ -28,7 +28,8 @@ fun SelectCityScreen(
     context: Context? = null,
     settings: Settings? = null,
     cities: MutableCollection<Prefecture> = mutableStateListOf<Prefecture>(),
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onClose: () -> Unit = {}
 ) {
 
     val initSelect = settings?.city?.value ?: City("", "")

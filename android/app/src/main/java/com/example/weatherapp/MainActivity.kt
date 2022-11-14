@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
@@ -24,15 +23,10 @@ import com.example.weatherapp.model.*
 import com.example.weatherapp.ui.AppTabs
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.OptionMenuItem
-import com.example.weatherapp.ui.screens.SelectCityScreen
-import com.example.weatherapp.ui.screens.TodayWeatherScreen
-import com.example.weatherapp.ui.screens.TomorrowWeatherScreen
-import com.example.weatherapp.ui.screens.WeeklyWeatherScreen
+import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
+import com.example.weatherapp.utils.NetworkUtil
+import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,46 +46,7 @@ class MainActivity : ComponentActivity() {
     }
 
 }
-//@Preview(showBackground = true)
-//@Composable
-//fun WeatherApp2(modifier: Modifier = Modifier) {
-//    val navController = rememberNavController()
-//
-//    NavHost(
-//        modifier = Modifier.fillMaxSize(),
-//        navController = navController, startDestination = "screen1") {
-//        composable(route = "screen1") {
-//            val text = "Hello"
-//            val id=1234
-//            TodayWeatherScreen(
-//                onClick = {
-//                    navController.navigate("screen2/${text}/${id}")
-//                }
-//            )
-//        }
-//        composable(route = "screen2/{text}/{id}",
-//            arguments = listOf(
-//                navArgument("text") { type = NavType.StringType},
-//                navArgument("id") { type = NavType.IntType }
-//            )) {
-//                backStackEntry ->
-//                    val text = backStackEntry.arguments?.getString("text") ?: ""
-//                    val id = backStackEntry.arguments?.getInt("id") ?: -1
-//
-//                    Log.d("test", "text = '${text}'")
-//
-//                    TomorrowWeatherScreen(
-//                        onClick = {
-//                            navController.navigateUp()
-//                        }
-//                    )
-//        }
-//    }
-//}
 
-
-
-@OptIn(ExperimentalUnitApi::class)
 @Composable
 @Preview(showBackground = true)
 fun WeatherApp(modifier: Modifier = Modifier) {
@@ -99,22 +54,13 @@ fun WeatherApp(modifier: Modifier = Modifier) {
     // Hold the context handle
     val mContext = LocalContext.current
 
-    // Keep the values as a Data class
+    // holder for keeping setting values
     val settings = Settings(
         city = remember { mutableStateOf(City(id = "", name = "")) }
     )
 
+    // The holder for keeping locations
     val cities = mutableListOf<Prefecture>()
-
-    runBlocking {
-        val locationsDeferred = async { getLocationsFromServer(mContext) }
-        val response = locationsDeferred.await()
-        if (response.code() == 200) {
-            val result = response.body()!!
-            cities.clear()
-            cities.addAll(result.prefectures)
-        }
-    }
 
     WeatherAppTheme {
         NavHost(navController = navigationController, startDestination = "main") {
@@ -138,11 +84,63 @@ fun WeatherApp(modifier: Modifier = Modifier) {
                     cities = cities,
                     onClick = {
                         navigationController.navigateUp()
+                    },
+                    onClose = {
+
                     }
                 )
             }
+
+            composable(route = "no_internet_error") {
+                OfflineScreen()
+            }
         }
     }
+
+
+
+    runBlocking {
+
+//        CoroutineScope(Dispatchers.IO).launch {
+//            // -------------------------------------------
+//            //  Load setting values from Database
+//            // -------------------------------------------
+//            settings.load(mContext)
+//        }
+        // -------------------------------------------
+        //  Obtain the location list from the server
+        // -------------------------------------------
+
+        // -------------------------------------------
+        //  Load setting values from Database
+        // -------------------------------------------
+        if (!NetworkUtil.isOnline(mContext)) {
+            navigationController.navigate("no_internet_error")
+        } else {
+            val locationsDeferred = async { getLocationsFromServer(mContext) }
+            val response = locationsDeferred.await()
+
+            when(response.code()) {
+                200 -> {
+                    val result = response.body()!!
+                    cities.clear()
+                    cities.addAll(result.prefectures)
+
+                    if (settings.city.value.id == "") {
+                        navigationController.navigate("settings")
+                    } else {
+                        navigationController.navigate("main")
+                    }
+                }
+
+                else -> {
+                    navigationController.popupToInclusive("no_internet_error")
+                }
+            }
+        }
+
+    }
+
 }
 
 @OptIn(ExperimentalUnitApi::class)
@@ -156,18 +154,15 @@ fun MainScreen(context: Context, settings: Settings, onChangeCity: () -> Unit) {
             context = context,
             settings = settings,
             menuItems = listOf(
-                OptionMenuItem("change_city", "場所の変更"),
-                OptionMenuItem("change_timezone", "タイムゾーンの変更"),
+                OptionMenuItem("change_city", "場所の変更")
             ),
             onMenuItemClicked = {
-                    menuId ->
-                Toast.makeText(context, "${menuId} is clicked", Toast.LENGTH_SHORT).show()
+                menuId ->
+                    when (menuId) {
+                        "change_city" -> onChangeCity()
 
-                when (menuId) {
-                    "change_city" -> onChangeCity()
-
-                    else -> { /* stub */ }
-                }
+                        else -> { /* stub */ }
+                    }
             }
         )
 
@@ -175,7 +170,7 @@ fun MainScreen(context: Context, settings: Settings, onChangeCity: () -> Unit) {
             onTabChanged = {
                 tabIndex ->
                     when(tabIndex) {
-                        0 -> ShowTodayScreen(context = context)
+                        0 -> ShowTodayScreen()
 
                         1 -> ShowTomorrowScreen(context = context)
 
@@ -196,11 +191,17 @@ fun LoadingScreen() {
 }
 
 @Composable
-fun SettingsScreen(context: Context, settings: Settings, cities: MutableCollection<Prefecture>, onClick: () -> Unit) {
+fun SettingsScreen(
+    context: Context,
+    settings: Settings,
+    cities: MutableCollection<Prefecture>,
+    onClick: () -> Unit,
+    onClose: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        SelectCityScreen(context, settings, cities, onClick)
+        SelectCityScreen(context, settings, cities, onClick, onClose)
     }
 }
 
@@ -224,17 +225,41 @@ fun NavHostController.navigateSingleTopTo(route: String) = this.navigate(route) 
     restoreState = true
 }
 
+fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
 
+    // Pop up to the start destination of the graph
+    // to avoid building up a large stack of destinations
+    // on the back stack as users select items
+    popUpTo(
+        this@popupToInclusive.graph.findStartDestination().id
+    ) {
+        saveState = false
+        inclusive = true
+    }
+
+    // Avoid multiple copies of the same destination
+    // when reselecting the same item
+    launchSingleTop = true
+
+    // Restore state when reselecting a previously selected item
+    restoreState = true
+}
+
+
+@Preview(showBackground = true)
 @Composable
-fun ShowTodayScreen(context: Context) {
+fun ShowTodayScreen() {
     TodayWeatherScreen()
 }
 
+@Preview(showBackground = true)
 @Composable
-fun ShowTomorrowScreen(context: Context) {
+fun ShowTomorrowScreen(context: Context? = null) {
     TomorrowWeatherScreen(
         onClick = {
-            Toast.makeText(context, "This is tomorrow screen!", Toast.LENGTH_SHORT).show()
+            if (context != null) {
+                Toast.makeText(context, "This is tomorrow screen!", Toast.LENGTH_SHORT).show()
+            }
         }
     )
 }
