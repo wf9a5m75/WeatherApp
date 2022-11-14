@@ -1,20 +1,13 @@
 package com.example.weatherapp.model
 
 import android.content.Context
-import android.util.Log
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.example.weatherapp.utils.NetworkUtil
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 /**
  *  ref: Retrofit with Kotlin Coroutine in Android
@@ -40,28 +33,43 @@ data class City(
     val name: String
 )
 
+data class ForecastResponse(
+    val last_update: String,
+    val overall: String,
+    val forecasts: List<Forecast>
+)
+
+data class Forecast(
+    val time: String,
+    val temperature: Float,
+    val status: String
+)
 
 
 interface WeatherApi {
     @GET("/api/v1/locations")
     suspend fun getLocations(): Response<LocationResponse>
+
+    @GET("/api/v1/forecast")
+    suspend fun getForecast(
+        @Query("city_id") city_id: String,
+        @Query("day") day: Int
+    ): Response<ForecastResponse>
 }
 
 
 
 object RetrofitHelper {
-    val baseUrl = "https://alpha2022-mk-chat.web.app/"
+    private const val baseUrl = "https://weather-app-8a034.web.app"
 
-    var _instance: Retrofit? = null
+    private var instance: Retrofit? = null
 
     fun getInstance(context: Context): Retrofit {
-        Log.d("debug", "--->before creating cache")
-        if (_instance != null) {
-            return _instance!!
+        if (this.instance != null) {
+            return this.instance!!
         }
         val cacheSize = 10 * 1024 * 1024L // 1 MB
         val cache = Cache(context.cacheDir, cacheSize)
-        Log.d("debug", "--->after creating cache")
 
         val clint = OkHttpClient.Builder()
             .cache(cache)
@@ -69,14 +77,12 @@ object RetrofitHelper {
             .followSslRedirects(true)
             .build()
 
-        Log.d("debug", "--->after creating client")
-        _instance = Retrofit.Builder().baseUrl(baseUrl)
+        this.instance = Retrofit.Builder().baseUrl(baseUrl)
             .client(clint)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        Log.d("debug", "--->after creating instance")
-        return _instance!!
+        return this.instance!!
     }
 }
 

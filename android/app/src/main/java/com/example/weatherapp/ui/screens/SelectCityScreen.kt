@@ -28,13 +28,24 @@ fun SelectCityScreen(
     context: Context? = null,
     settings: Settings? = null,
     cities: MutableCollection<Prefecture> = mutableStateListOf<Prefecture>(),
-    onClick: () -> Unit = {},
     onClose: () -> Unit = {}
 ) {
 
     val initSelect = settings?.city?.value ?: City("", "")
 
     val selected = remember { mutableStateOf(initSelect) }
+
+
+    val onClick: (city: City) -> Unit = {
+        city ->
+            selected.value = city
+
+            // if not preview
+            if (settings != null) {
+                settings.city.value = city
+            }
+    }
+
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -46,7 +57,7 @@ fun SelectCityScreen(
                 contentDescription = "Back",
                 modifier = Modifier
                     .padding(16.dp)
-                    .clickable { onClick() }
+                    .clickable { onClose() }
             )
             Text(
                 text = "場所を選択",
@@ -79,27 +90,13 @@ fun SelectCityScreen(
                                         .fillMaxWidth()
                                         .selectable(
                                             selected = (city == selected.value),
-                                            onClick = {
-                                                selected.value = city
-
-                                                // if not preview
-                                                if (settings != null) {
-                                                    settings.city.value = city
-                                                }
-                                            }
+                                            onClick = { onClick(city) }
                                         )
                                         .padding(horizontal = 16.dp)
                                 ) {
                                     RadioButton(
                                         selected = (city == selected.value),
-                                        onClick = {
-                                            selected.value = city
-
-                                            // if not preview
-                                            if (settings != null) {
-                                                settings.city.value = city
-                                            }
-                                        })
+                                        onClick = { onClick(city) })
                                     Text(
                                         text = city.name,
                                         style = MaterialTheme.typography.body1.merge(),

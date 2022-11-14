@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,8 @@ import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import com.example.weatherapp.utils.NetworkUtil
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
@@ -82,11 +85,14 @@ fun WeatherApp(modifier: Modifier = Modifier) {
                     context = mContext,
                     settings = settings,
                     cities = cities,
-                    onClick = {
-                        navigationController.navigateUp()
-                    },
                     onClose = {
+                        if (settings.city.value.id != "") {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                settings.save(mContext)
+                            }
 
+                            navigationController.navigateUp()
+                        }
                     }
                 )
             }
@@ -101,43 +107,47 @@ fun WeatherApp(modifier: Modifier = Modifier) {
 
     runBlocking {
 
-//        CoroutineScope(Dispatchers.IO).launch {
-//            // -------------------------------------------
-//            //  Load setting values from Database
-//            // -------------------------------------------
-//            settings.load(mContext)
-//        }
-        // -------------------------------------------
-        //  Obtain the location list from the server
-        // -------------------------------------------
+        CoroutineScope(Dispatchers.IO).launch {
+            // -------------------------------------------
+            //  Load setting values from Database
+            // -------------------------------------------
+            settings.load(mContext)
 
-        // -------------------------------------------
-        //  Load setting values from Database
-        // -------------------------------------------
-        if (!NetworkUtil.isOnline(mContext)) {
-            navigationController.navigate("no_internet_error")
-        } else {
-            val locationsDeferred = async { getLocationsFromServer(mContext) }
-            val response = locationsDeferred.await()
-
-            when(response.code()) {
-                200 -> {
-                    val result = response.body()!!
-                    cities.clear()
-                    cities.addAll(result.prefectures)
-
-                    if (settings.city.value.id == "") {
-                        navigationController.navigate("settings")
-                    } else {
-                        navigationController.navigate("main")
-                    }
+            // -------------------------------------------
+            //  Load setting values from Database
+            // -------------------------------------------
+            if (!NetworkUtil.isOnline(mContext)) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    navigationController.navigate("no_internet_error")
                 }
+            } else {
+                val locationsDeferred = async { getLocationsFromServer(mContext) }
+                val response = locationsDeferred.await()
 
-                else -> {
-                    navigationController.popupToInclusive("no_internet_error")
+                when(response.code()) {
+                    200 -> {
+                        val result = response.body()!!
+                        cities.clear()
+                        cities.addAll(result.prefectures)
+
+                        CoroutineScope(Dispatchers.Main).launch {
+                            if (settings.city.value.id == "") {
+                                navigationController.navigate("settings")
+                            } else {
+                                navigationController.navigate("main")
+                            }
+                        }
+                    }
+
+                    else -> {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            navigationController.popupToInclusive("no_internet_error")
+                        }
+                    }
                 }
             }
         }
+
 
     }
 
@@ -157,25 +167,25 @@ fun MainScreen(context: Context, settings: Settings, onChangeCity: () -> Unit) {
                 OptionMenuItem("change_city", "場所の変更")
             ),
             onMenuItemClicked = {
-                menuId ->
-                    when (menuId) {
-                        "change_city" -> onChangeCity()
+                    menuId ->
+                when (menuId) {
+                    "change_city" -> onChangeCity()
 
-                        else -> { /* stub */ }
-                    }
+                    else -> { /* stub */ }
+                }
             }
         )
 
         AppTabs(
             onTabChanged = {
-                tabIndex ->
-                    when(tabIndex) {
-                        0 -> ShowTodayScreen()
+                    tabIndex ->
+                when(tabIndex) {
+                    0 -> ShowTodayScreen(context = context)
 
-                        1 -> ShowTomorrowScreen(context = context)
+                    1 -> ShowTomorrowScreen(context = context)
 
-                        2 -> ShowWeeklyScreen(context = context)
-                    }
+                    2 -> ShowWeeklyScreen(context = context)
+                }
             }
         )
 
@@ -195,13 +205,15 @@ fun SettingsScreen(
     context: Context,
     settings: Settings,
     cities: MutableCollection<Prefecture>,
-    onClick: () -> Unit,
     onClose: () -> Unit
 ) {
+    BackHandler(true) {
+        onClose()
+    }
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        SelectCityScreen(context, settings, cities, onClick, onClose)
+        SelectCityScreen(context, settings, cities, onClose)
     }
 }
 
@@ -248,8 +260,18 @@ fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
 
 @Preview(showBackground = true)
 @Composable
-fun ShowTodayScreen() {
-    TodayWeatherScreen()
+fun ShowTodayScreen(context: Context? = null) {
+
+    TodayWeatherScreen(onRefresh = {
+        state ->
+            if ((context == null) || (!NetworkUtil.isOnline(context))) {
+                return@TodayWeatherScreen
+            }
+            state.isRefreshing = true
+
+
+
+    })
 }
 
 @Preview(showBackground = true)

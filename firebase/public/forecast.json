@@ -1,0 +1,16 @@
+{
+  "last_update": "2022-11-05T00:00",
+  "overall": "cloudy",
+  "forecasts": [
+    {
+      "time": "2022-11-05T00:00",
+      "temperature": 16.5,
+      "status": "sunny",
+    },
+    {
+      "time": "2022-11-05T23:00",
+      "temperature": 12,
+      "status": "cloudy"
+    }
+  ]
+}

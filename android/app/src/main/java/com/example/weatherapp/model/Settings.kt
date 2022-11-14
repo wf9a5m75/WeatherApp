@@ -63,7 +63,7 @@ interface SettingDao {
     fun findByKey(keyId: String): SettingsValue?
 
     // vararg is similar to the arguments object of JS
-    @Insert
+    @Upsert
     fun insertAll(vararg values: SettingsValue)
 
     @Delete

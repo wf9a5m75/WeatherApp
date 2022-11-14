@@ -64,13 +64,17 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
-    // accompanist-pager (swipeable pager)
+    // accompanist-pager (Swipeable pager)
     implementation "com.google.accompanist:accompanist-pager:0.27.0"
     implementation "com.google.accompanist:accompanist-pager-indicators:0.27.0"
 
+    // accompanist-pager (Swipe Refresh)
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.27.0"
+
     // room
-    implementation "androidx.room:room-runtime:2.4.3"
-    kapt "androidx.room:room-compiler:2.4.3"
+    implementation "androidx.room:room-runtime:2.5.0-beta02"
+    kapt "androidx.room:room-compiler:2.5.0-beta02"
+
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'

@@ -1,0 +1,46 @@
+{
+  "last_update": "2022-11-01T00:00",
+  "prefectures": [
+    {
+      "id": "osaka",
+      "name": "大阪府",
+      "cities": [
+        {
+          "name": "枚方市",
+          "id": "osaka_hirakata"
+        },
+        {
+          "name": "大阪市",
+          "id": "osaka_osaka"
+        },
+        {
+          "name": "堺市",
+          "id": "osaka_sakai"
+        },
+        {
+          "name": "関西国際空港",
+          "id": "osaka_kansai-airport"
+        }
+      ]
+    },
+
+    {
+      "id": "hyogo",
+      "name": "兵庫県",
+      "cities": [
+        {
+          "name": "姫路市",
+          "id": "hyogo_himeji"
+        },
+        {
+          "name": "神戸市",
+          "id": "hyogo_kobe"
+        },
+        {
+          "name": "丹波市",
+          "id": "hyogo_tamba"
+        }
+      ]
+    }
+  ]
+}
