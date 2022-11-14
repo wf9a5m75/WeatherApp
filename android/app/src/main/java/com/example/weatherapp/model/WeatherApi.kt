@@ -1,8 +1,14 @@
 package com.example.weatherapp.model
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.os.Build
+import android.util.Log
+import com.example.weatherapp.BuildConfig
 import okhttp3.Cache
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -41,12 +47,12 @@ data class ForecastResponse(
 
 data class Forecast(
     val time: String,
-    val temperature: Float,
+    val temperature: Double,
     val status: String
 )
 
 
-interface WeatherApi {
+interface IWeatherApi {
     @GET("/api/v1/locations")
     suspend fun getLocations(): Response<LocationResponse>
 
@@ -56,7 +62,6 @@ interface WeatherApi {
         @Query("day") day: Int
     ): Response<ForecastResponse>
 }
-
 
 
 object RetrofitHelper {
@@ -71,10 +76,17 @@ object RetrofitHelper {
         val cacheSize = 10 * 1024 * 1024L // 1 MB
         val cache = Cache(context.cacheDir, cacheSize)
 
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.level = when(context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) {
+            0 -> HttpLoggingInterceptor.Level.BODY
+            else -> HttpLoggingInterceptor.Level.NONE
+        }
+
         val clint = OkHttpClient.Builder()
             .cache(cache)
             .followRedirects(true)
             .followSslRedirects(true)
+            .addNetworkInterceptor(interceptor)
             .build()
 
         this.instance = Retrofit.Builder().baseUrl(baseUrl)
@@ -86,7 +98,21 @@ object RetrofitHelper {
     }
 }
 
-suspend fun getLocationsFromServer(context: Context): Response<LocationResponse> {
-    val weatherApi = RetrofitHelper.getInstance(context).create(WeatherApi::class.java)
-    return weatherApi.getLocations()
+class WeatherApi(context: Context) {
+    private var instance: IWeatherApi
+
+    init {
+        this.instance = RetrofitHelper.getInstance(context).create(IWeatherApi::class.java)
+    }
+
+    suspend fun getLocationsFromServer(): Response<LocationResponse> {
+
+        return this.instance.getLocations()
+    }
+    suspend fun getForecastFromServer(city: City, day: Int): Response<ForecastResponse> {
+        return this.instance.getForecast(
+            city_id = city.id,
+            day = day
+        )
+    }
 }
