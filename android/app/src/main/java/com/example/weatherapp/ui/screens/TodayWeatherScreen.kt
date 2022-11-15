@@ -25,12 +25,16 @@ import androidx.compose.ui.unit.sp
 import com.example.weatherapp.R
 import com.example.weatherapp.model.Settings
 import com.example.weatherapp.model.WeatherApi
+import com.example.weatherapp.model.getCurrentHour
+import com.example.weatherapp.model.weatherIconResource
 import com.example.weatherapp.utils.NetworkUtil
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import java.time.LocalDate
+import java.time.temporal.Temporal
 
 @Preview(showBackground = true)
 @Composable
@@ -80,7 +84,12 @@ fun TodayWeatherScreen(context: Context? = null, settings: Settings? = null, api
     SwipeRefresh(state = refreshState, onRefresh = {
         onRefresh(refreshState)
     }) {
-
+        Image(
+            painter = painterResource(id = R.drawable.bg_sunny),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
         Text(
             text = "11/12/2022 14:31",
             modifier = Modifier
@@ -98,7 +107,7 @@ fun TodayWeatherScreen(context: Context? = null, settings: Settings? = null, api
         ) {
 
             Image(
-                painter = weatherIconResource(currentWeatherIcon),
+                painter = weatherIconResource(currentWeatherIcon, getCurrentHour()),
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -122,19 +131,19 @@ fun TodayWeatherScreen(context: Context? = null, settings: Settings? = null, api
                 WeatherIcon(
                     weather = "sunny",
                     temperature = 18,
-                    time = "12pm",
+                    hour24 = 12,
                     modifier = Modifier.weight(1f)
                 )
                 WeatherIcon(
                     weather = "sunny",
-                    temperature = 18,
-                    time = "3pm",
+                    temperature = 17,
+                    hour24 = 15,
                     modifier = Modifier.weight(1f)
                 )
                 WeatherIcon(
                     weather = "sunny",
-                    temperature = 18,
-                    time = "6pm",
+                    temperature = 15,
+                    hour24 = 18,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -147,9 +156,13 @@ fun TodayWeatherScreen(context: Context? = null, settings: Settings? = null, api
 fun WeatherIcon(
     weather: String,
     temperature: Int,
-    time: String,
+    hour24: Int,
     modifier: Modifier = Modifier
 ) {
+
+    val time = "${hour24 % 12} ${when(hour24 < 12) {
+        true -> "am"
+        else -> "pm"}}"
     Column(
         modifier = modifier
             .size(
@@ -169,7 +182,7 @@ fun WeatherIcon(
         )
 
         Image(
-            painter = weatherIconResource(weather),
+            painter = weatherIconResource(weather, hour24),
             contentDescription = "",
             contentScale = ContentScale.Fit,
             modifier = Modifier
@@ -188,14 +201,5 @@ fun WeatherIcon(
             style = MaterialTheme.typography.body2
         )
 
-    }
-}
-
-@Composable
-fun weatherIconResource(weather: String): Painter {
-    return when(weather) {
-        "sunny" -> painterResource(id = R.drawable.cloud_sun)
-
-        else -> painterResource(id = R.drawable.cloud_sun)
     }
 }
