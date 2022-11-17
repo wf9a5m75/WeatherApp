@@ -1,10 +1,10 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
 }
-//apply plugin: 'kotlin-android'
-//apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'  // add this line
+
+apply plugin: 'kotlin-kapt'
 
 android {
     namespace 'com.example.weatherapp'
@@ -61,9 +61,11 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
 
-    // GSON (json)
-    implementation 'com.google.code.gson:gson:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    // Kotlin Serialization
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+
+    // Retrofit2 Converter Factory for Kotlin serialization
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
 
     // accompanist-pager (Swipeable pager)
     implementation "com.google.accompanist:accompanist-pager:0.27.0"
@@ -77,8 +79,11 @@ dependencies {
     kapt "androidx.room:room-compiler:2.5.0-beta02"
 
     // ViewModel
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
-    implementation "androidx.activity:activity-ktx:1.4.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+    implementation "androidx.activity:activity-ktx:1.6.1"
+
+    // Preferences DataStore
+    implementation  "androidx.datastore:datastore-preferences:1.0.0"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'

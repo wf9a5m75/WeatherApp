@@ -2,6 +2,7 @@ package com.example.weatherapp
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
+import androidx.datastore.core.DataStore
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -30,7 +32,6 @@ import com.example.weatherapp.utils.NetworkUtil
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,17 +55,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 // @Preview(showBackground = true)
-fun WeatherApp(modifier: Modifier = Modifier, viewModel: AppViewModel) {
+fun WeatherApp(viewModel: AppViewModel) {
 
 
     val navigationController = rememberNavController()
     // Hold the context handle
     val mContext = LocalContext.current
-
-    // holder for keeping setting values
-//    val settings = Settings(
-//        city = remember { mutableStateOf(City(id = "", name = "")) }
-//    )
 
     // The holder for keeping locations
     val weatherApi = WeatherApi(mContext)
@@ -91,8 +87,9 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: AppViewModel) {
                     viewModel = viewModel,
                     onClose = {
                         if (viewModel.city.id != "") {
+
                             CoroutineScope(Dispatchers.IO).launch {
-//                                settings.save(mContext)
+                                savePrefCity(mContext, viewModel.city)
                             }
 
                             navigationController.navigateUp()
@@ -115,7 +112,7 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: AppViewModel) {
             // -------------------------------------------
             //  Load setting values from Database
             // -------------------------------------------
-//            settings.load(mContext)
+            viewModel.city = loadPrefCity(mContext)
 
             // -------------------------------------------
             //  Load setting values from Database
@@ -128,6 +125,7 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: AppViewModel) {
                 val locationsDeferred = async { weatherApi.getLocationsFromServer() }
                 val response = locationsDeferred.await()
 
+                Log.d("loading", "response.code() = $response.code()")
                 when(response.code()) {
                     200 -> {
                         val result = response.body()!!
@@ -151,8 +149,6 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: AppViewModel) {
                 }
             }
         }
-
-
     }
 
 }

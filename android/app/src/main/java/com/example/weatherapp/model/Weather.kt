@@ -6,16 +6,20 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import com.example.weatherapp.BuildConfig
 import com.example.weatherapp.R
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import okhttp3.Cache
+import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
-import java.util.Calendar
+import java.util.*
 
 /**
  *  ref: Retrofit with Kotlin Coroutine in Android
@@ -25,28 +29,33 @@ import java.util.Calendar
  *  https://futurestud.io/tutorials/retrofit-2-activate-response-caching-etag-last-modified
  */
 
+@Serializable
 data class LocationResponse(
     val last_update: String,
     val prefectures: List<Prefecture>
 )
 
+@Serializable
 data class Prefecture(
     val id: String,
     val name: String,
     val cities: List<City>
 )
 
-data class City(
+@Serializable
+class City(
     val id: String,
     val name: String
 )
 
+@Serializable
 data class ForecastResponse(
     val last_update: String,
     val overall: String,
     val forecasts: List<Forecast>
 )
 
+@Serializable
 data class Forecast(
     val time: String,
     val temperature: Double,
@@ -79,8 +88,8 @@ object RetrofitHelper {
         val cache = Cache(context.cacheDir, cacheSize)
 
         val interceptor = HttpLoggingInterceptor()
-        interceptor.level = when(context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) {
-            0 -> HttpLoggingInterceptor.Level.BODY
+        interceptor.level = when(BuildConfig.DEBUG) {
+            true -> HttpLoggingInterceptor.Level.BASIC
             else -> HttpLoggingInterceptor.Level.NONE
         }
 
@@ -88,12 +97,13 @@ object RetrofitHelper {
             .cache(cache)
             .followRedirects(true)
             .followSslRedirects(true)
-            .addNetworkInterceptor(interceptor)
+            .addInterceptor(interceptor)
             .build()
 
+        val contentType = MediaType.get("application/json")
         this.instance = Retrofit.Builder().baseUrl(baseUrl)
             .client(clint)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(Json.asConverterFactory(contentType))
             .build()
 
         return this.instance!!

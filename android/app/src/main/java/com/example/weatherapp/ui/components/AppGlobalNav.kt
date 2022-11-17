@@ -1,14 +1,11 @@
 package com.example.weatherapp.ui.components
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.model.AppViewModel
-import com.example.weatherapp.model.Settings
 
 data class OptionMenuItem(val menuId: String, val text: String)
 
