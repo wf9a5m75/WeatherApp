@@ -2,11 +2,11 @@ package com.example.weatherapp
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
@@ -27,14 +27,16 @@ import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import com.example.weatherapp.utils.NetworkUtil
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+        val viewModel: AppViewModel by viewModels()
         setContent {
             WeatherAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -42,7 +44,7 @@ class MainActivity : ComponentActivity() {
                     //modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    WeatherApp()
+                    WeatherApp(viewModel = viewModel)
                 }
             }
         }
@@ -51,20 +53,20 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-@Preview(showBackground = true)
-fun WeatherApp(modifier: Modifier = Modifier) {
+// @Preview(showBackground = true)
+fun WeatherApp(modifier: Modifier = Modifier, viewModel: AppViewModel) {
+
+
     val navigationController = rememberNavController()
     // Hold the context handle
     val mContext = LocalContext.current
 
     // holder for keeping setting values
-    val settings = Settings(
-        city = remember { mutableStateOf(City(id = "", name = "")) }
-    )
+//    val settings = Settings(
+//        city = remember { mutableStateOf(City(id = "", name = "")) }
+//    )
 
     // The holder for keeping locations
-    val cities = mutableListOf<Prefecture>()
-
     val weatherApi = WeatherApi(mContext)
 
     WeatherAppTheme {
@@ -75,7 +77,7 @@ fun WeatherApp(modifier: Modifier = Modifier) {
             composable(route = "main") {
                 MainScreen(
                     context = mContext,
-                    settings = settings,
+                    viewModel = viewModel,
                     api = weatherApi,
                     onChangeCity = {
                         navigationController.navigateSingleTopTo("settings")
@@ -86,12 +88,11 @@ fun WeatherApp(modifier: Modifier = Modifier) {
 
                 SettingsScreen(
                     context = mContext,
-                    settings = settings,
-                    cities = cities,
+                    viewModel = viewModel,
                     onClose = {
-                        if (settings.city.value.id != "") {
+                        if (viewModel.city.id != "") {
                             CoroutineScope(Dispatchers.IO).launch {
-                                settings.save(mContext)
+//                                settings.save(mContext)
                             }
 
                             navigationController.navigateUp()
@@ -114,7 +115,7 @@ fun WeatherApp(modifier: Modifier = Modifier) {
             // -------------------------------------------
             //  Load setting values from Database
             // -------------------------------------------
-            settings.load(mContext)
+//            settings.load(mContext)
 
             // -------------------------------------------
             //  Load setting values from Database
@@ -130,11 +131,11 @@ fun WeatherApp(modifier: Modifier = Modifier) {
                 when(response.code()) {
                     200 -> {
                         val result = response.body()!!
-                        cities.clear()
-                        cities.addAll(result.prefectures)
+                        viewModel.cities.clear()
+                        viewModel.cities.addAll(result.prefectures)
 
                         CoroutineScope(Dispatchers.Main).launch {
-                            if (settings.city.value.id == "") {
+                            if (viewModel.city.id == "") {
                                 navigationController.navigate("settings")
                             } else {
                                 navigationController.navigate("main")
@@ -160,7 +161,7 @@ fun WeatherApp(modifier: Modifier = Modifier) {
 @Composable
 fun MainScreen(
     context: Context,
-    settings: Settings,
+    viewModel: AppViewModel,
     api: WeatherApi,
     onChangeCity: () -> Unit
 ) {
@@ -169,8 +170,7 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         AppGlobalNav(
-            context = context,
-            settings = settings,
+            viewModel = viewModel,
             menuItems = listOf(
                 OptionMenuItem("change_city", "場所の変更")
             ),
@@ -189,7 +189,7 @@ fun MainScreen(
                 when(tabIndex) {
                     0 -> ShowTodayScreen(
                         context = context,
-                        settings = settings,
+                        viewModel = viewModel,
                         api = api
                     )
 
@@ -220,8 +220,7 @@ fun LoadingScreen() {
 @Composable
 fun SettingsScreen(
     context: Context,
-    settings: Settings,
-    cities: MutableCollection<Prefecture>,
+    viewModel: AppViewModel,
     onClose: () -> Unit
 ) {
     BackHandler(true) {
@@ -230,7 +229,7 @@ fun SettingsScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        SelectCityScreen(context, settings, cities, onClose)
+        SelectCityScreen(context, viewModel, onClose)
     }
 }
 
@@ -277,9 +276,9 @@ fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
 
 @Preview(showBackground = true)
 @Composable
-fun ShowTodayScreen(context: Context? = null, settings: Settings? = null, api: WeatherApi? = null) {
+fun ShowTodayScreen(context: Context? = null, viewModel: AppViewModel? = null, api: WeatherApi? = null) {
 
-    TodayWeatherScreen(context, settings, api)
+    TodayWeatherScreen(context, viewModel, api)
 }
 
 @Preview(showBackground = true)

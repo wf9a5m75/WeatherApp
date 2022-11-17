@@ -26,14 +26,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun SelectCityScreen(
     context: Context? = null,
-    settings: Settings? = null,
-    cities: MutableCollection<Prefecture> = mutableStateListOf<Prefecture>(),
+    viewModel: AppViewModel? = null,
     onClose: () -> Unit = {}
 ) {
 
-    val initSelect = settings?.city?.value ?: City("", "")
-
-    val selected = remember { mutableStateOf(initSelect) }
+    val selected = remember { mutableStateOf(viewModel?.city) }
 
 
     val onClick: (city: City) -> Unit = {
@@ -41,8 +38,8 @@ fun SelectCityScreen(
             selected.value = city
 
             // if not preview
-            if (settings != null) {
-                settings.city.value = city
+            if (viewModel != null) {
+                viewModel.city = city
             }
     }
 
@@ -65,7 +62,7 @@ fun SelectCityScreen(
             )
         }
 
-        cities.forEach {
+        viewModel?.cities?.forEach {
             prefecture ->
                 Row(
                     modifier = Modifier.fillMaxWidth()

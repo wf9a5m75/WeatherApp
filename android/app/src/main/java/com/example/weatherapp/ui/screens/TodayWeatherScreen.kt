@@ -23,10 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherapp.R
-import com.example.weatherapp.model.Settings
-import com.example.weatherapp.model.WeatherApi
-import com.example.weatherapp.model.getCurrentHour
-import com.example.weatherapp.model.weatherIconResource
+import com.example.weatherapp.model.*
 import com.example.weatherapp.utils.NetworkUtil
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
@@ -38,7 +35,7 @@ import java.time.temporal.Temporal
 
 @Preview(showBackground = true)
 @Composable
-fun TodayWeatherScreen(context: Context? = null, settings: Settings? = null, api: WeatherApi? = null) {
+fun TodayWeatherScreen(context: Context? = null, viewModel: AppViewModel? = null, api: WeatherApi? = null) {
     val refreshState = rememberSwipeRefreshState(isRefreshing = false)
     val scrollState = rememberScrollState()
 
@@ -48,7 +45,7 @@ fun TodayWeatherScreen(context: Context? = null, settings: Settings? = null, api
     val onRefresh : (refreshState: SwipeRefreshState) -> Unit = {
             state ->
                 if ((context != null) &&
-                    (settings != null) &&
+                    (viewModel != null) &&
                     (api != null) &&
                     (NetworkUtil.isOnline(context))) {
 
@@ -57,7 +54,7 @@ fun TodayWeatherScreen(context: Context? = null, settings: Settings? = null, api
                     runBlocking {
                         val deferred = async {
                             api.getForecastFromServer(
-                                city = settings.city.value,
+                                city = viewModel.city,
                                 day = 0
                             )
                         }

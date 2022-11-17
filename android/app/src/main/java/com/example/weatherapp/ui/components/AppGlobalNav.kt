@@ -7,14 +7,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
+import com.example.weatherapp.model.AppViewModel
 import com.example.weatherapp.model.Settings
 
 data class OptionMenuItem(val menuId: String, val text: String)
 
 @Composable
 fun AppGlobalNav(
-    context: Context,
-    settings: Settings,
+    viewModel: AppViewModel,
     menuItems: List<OptionMenuItem>,
     onMenuItemClicked: (menuId: String) -> Unit
 ) {
@@ -26,7 +26,7 @@ fun AppGlobalNav(
         elevation = 4.dp,
         title = {
             Text(
-                text = settings.city.value.name
+                text = viewModel.city.name
             )
         },
 
