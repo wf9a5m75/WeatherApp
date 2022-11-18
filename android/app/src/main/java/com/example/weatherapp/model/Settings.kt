@@ -1,14 +1,12 @@
 package com.example.weatherapp.model
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
@@ -18,30 +16,26 @@ val PREF_ID = stringPreferencesKey("id")
 val PREF_TYPE = stringPreferencesKey("type")
 val PREF_VALUE = stringPreferencesKey("value")
 
-suspend fun savePrefCity(context: Context, city: City) {
+suspend fun savePrefCity(dataStore: DataStore<Preferences>, city: City) {
 
-
-
-    context.dataStore.edit { pref ->
+    dataStore.edit { pref ->
         pref[PREF_ID] = "pref_city"
         pref[PREF_TYPE] = "city"
         pref[PREF_VALUE] = Json.encodeToString(city)
     }
 }
 
-suspend fun loadPrefCity(context: Context): City {
-    val result = runBlocking {
-        context.dataStore.data
-//            .filter {
-//                pref -> pref[PREF_ID] == "pref_city"
-//            }
-            .map { pref ->
-                when(pref[PREF_ID]) {
-                    "pref_city" -> Json.decodeFromString<City>(pref[PREF_VALUE].toString())
-                    else -> null
-                }
+suspend fun loadPrefCity(dataStore: DataStore<Preferences>): City {
+    val result = dataStore.data
+//        .filter { pref ->
+//            pref[PREF_ID] == "pref_city"
+//        }
+        .map { pref ->
+            when (pref[PREF_ID]) {
+                "pref_city" -> Json.decodeFromString<City>(pref[PREF_VALUE].toString())
+                else -> null
+            }
         }
-    }
     return result.first() ?: City("", "")
 }
 

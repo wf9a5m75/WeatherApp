@@ -19,6 +19,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.io.File
 import java.util.*
 
 /**
@@ -80,12 +81,12 @@ object RetrofitHelper {
 
     private var instance: Retrofit? = null
 
-    fun getInstance(context: Context): Retrofit {
+    fun getInstance(cacheDir: File): Retrofit {
         if (this.instance != null) {
             return this.instance!!
         }
         val cacheSize = 10 * 1024 * 1024L // 1 MB
-        val cache = Cache(context.cacheDir, cacheSize)
+        val cache = Cache(cacheDir, cacheSize)
 
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = when(BuildConfig.DEBUG) {
@@ -110,11 +111,11 @@ object RetrofitHelper {
     }
 }
 
-class WeatherApi(context: Context) {
+class WeatherApi(cacheDir: File) {
     private var instance: IWeatherApi
 
     init {
-        this.instance = RetrofitHelper.getInstance(context).create(IWeatherApi::class.java)
+        this.instance = RetrofitHelper.getInstance(cacheDir).create(IWeatherApi::class.java)
     }
 
     suspend fun getLocationsFromServer(): Response<LocationResponse> {

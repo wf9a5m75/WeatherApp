@@ -1,8 +1,8 @@
 package com.example.weatherapp
 
 import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -13,10 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
-import androidx.datastore.core.DataStore
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -28,16 +26,22 @@ import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
-import com.example.weatherapp.utils.NetworkUtil
 import kotlinx.coroutines.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.weatherapp.utils.NetworkUtil
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: AppViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        viewModel.connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        viewModel.datastore = this.dataStore
+        viewModel.weatherApi = WeatherApi(cacheDir)
 
-        val viewModel: AppViewModel by viewModels()
         setContent {
             WeatherAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -57,13 +61,7 @@ class MainActivity : ComponentActivity() {
 // @Preview(showBackground = true)
 fun WeatherApp(viewModel: AppViewModel) {
 
-
     val navigationController = rememberNavController()
-    // Hold the context handle
-    val mContext = LocalContext.current
-
-    // The holder for keeping locations
-    val weatherApi = WeatherApi(mContext)
 
     WeatherAppTheme {
         NavHost(navController = navigationController, startDestination = "main") {
@@ -72,9 +70,7 @@ fun WeatherApp(viewModel: AppViewModel) {
             }
             composable(route = "main") {
                 MainScreen(
-                    context = mContext,
                     viewModel = viewModel,
-                    api = weatherApi,
                     onChangeCity = {
                         navigationController.navigateSingleTopTo("settings")
                     }
@@ -83,17 +79,10 @@ fun WeatherApp(viewModel: AppViewModel) {
             composable(route = "settings") {
 
                 SettingsScreen(
-                    context = mContext,
                     viewModel = viewModel,
                     onClose = {
-                        if (viewModel.city.id != "") {
-
-                            CoroutineScope(Dispatchers.IO).launch {
-                                savePrefCity(mContext, viewModel.city)
-                            }
-
-                            navigationController.navigateUp()
-                        }
+                        navigationController.popBackStack()
+                        viewModel.savePrefCity()
                     }
                 )
             }
@@ -104,61 +93,22 @@ fun WeatherApp(viewModel: AppViewModel) {
         }
     }
 
+    viewModel.checkOnline()
 
-
-    runBlocking {
-
-        CoroutineScope(Dispatchers.IO).launch {
-            // -------------------------------------------
-            //  Load setting values from Database
-            // -------------------------------------------
-            viewModel.city = loadPrefCity(mContext)
-
-            // -------------------------------------------
-            //  Load setting values from Database
-            // -------------------------------------------
-            if (!NetworkUtil.isOnline(mContext)) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    navigationController.navigate("no_internet_error")
-                }
-            } else {
-                val locationsDeferred = async { weatherApi.getLocationsFromServer() }
-                val response = locationsDeferred.await()
-
-                Log.d("loading", "response.code() = $response.code()")
-                when(response.code()) {
-                    200 -> {
-                        val result = response.body()!!
-                        viewModel.cities.clear()
-                        viewModel.cities.addAll(result.prefectures)
-
-                        CoroutineScope(Dispatchers.Main).launch {
-                            if (viewModel.city.id == "") {
-                                navigationController.navigate("settings")
-                            } else {
-                                navigationController.navigate("main")
-                            }
-                        }
-                    }
-
-                    else -> {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            navigationController.popupToInclusive("no_internet_error")
-                        }
-                    }
-                }
-            }
-        }
+    if (!viewModel.isOnline) {
+        navigationController.navigate("no_internet_error")
+        return
     }
 
+    viewModel.getLocationsFromServer { direction ->
+        navigationController.navigate(direction)
+    }
 }
 
 @OptIn(ExperimentalUnitApi::class)
 @Composable
 fun MainScreen(
-    context: Context,
     viewModel: AppViewModel,
-    api: WeatherApi,
     onChangeCity: () -> Unit
 ) {
 
@@ -170,34 +120,26 @@ fun MainScreen(
             menuItems = listOf(
                 OptionMenuItem("change_city", "場所の変更")
             ),
-            onMenuItemClicked = {
-                    menuId ->
+            onMenuItemClicked = { menuId ->
                 when (menuId) {
                     "change_city" -> onChangeCity()
 
-                    else -> { /* stub */ }
+                    else -> { /* stub */
+                    }
                 }
             }
         )
 
         AppTabs(
             onTabChanged = { tabIndex ->
-                when(tabIndex) {
+                when (tabIndex) {
                     0 -> ShowTodayScreen(
-                        context = context,
                         viewModel = viewModel,
-                        api = api
                     )
 
-                    1 -> ShowTomorrowScreen(
-                        context = context,
-                        api = api
-                    )
+                    1 -> ShowTomorrowScreen()
 
-                    2 -> ShowWeeklyScreen(
-                        context = context,
-                        api = api
-                    )
+                    2 -> ShowWeeklyScreen()
                 }
             }
         )
@@ -215,7 +157,6 @@ fun LoadingScreen() {
 
 @Composable
 fun SettingsScreen(
-    context: Context,
     viewModel: AppViewModel,
     onClose: () -> Unit
 ) {
@@ -225,7 +166,7 @@ fun SettingsScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        SelectCityScreen(context, viewModel, onClose)
+        SelectCityScreen(viewModel, onClose)
     }
 }
 
@@ -272,28 +213,26 @@ fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
 
 @Preview(showBackground = true)
 @Composable
-fun ShowTodayScreen(context: Context? = null, viewModel: AppViewModel? = null, api: WeatherApi? = null) {
+fun ShowTodayScreen(
+    viewModel: AppViewModel = viewModel(),
+) {
 
-    TodayWeatherScreen(context, viewModel, api)
+    TodayWeatherScreen(viewModel)
 }
 
 @Preview(showBackground = true)
 @Composable
-fun ShowTomorrowScreen(context: Context? = null, api: WeatherApi? = null) {
+fun ShowTomorrowScreen() {
     TomorrowWeatherScreen(
         onClick = {
-            if (context != null) {
-                Toast.makeText(context, "This is tomorrow screen!", Toast.LENGTH_SHORT).show()
-            }
         }
     )
 }
 
 @Composable
-fun ShowWeeklyScreen(context: Context, api: WeatherApi? = null) {
+fun ShowWeeklyScreen() {
     WeeklyWeatherScreen(
         onClick = {
-            Toast.makeText(context, "This is weekly screen!", Toast.LENGTH_SHORT).show()
         }
     )
 }
