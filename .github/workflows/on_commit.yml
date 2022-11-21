@@ -2,7 +2,8 @@ name: on_commit
 
 on:
   push:
-    - "android/app/src/**/*.kt"
+    paths:
+      - "android/app/src/**/*.kt"
 
 jobs:
   ktlint:
