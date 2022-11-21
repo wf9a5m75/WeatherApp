@@ -89,7 +89,7 @@ object RetrofitHelper {
 
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = when(BuildConfig.DEBUG) {
-            true -> HttpLoggingInterceptor.Level.BASIC
+            true -> HttpLoggingInterceptor.Level.HEADERS
             else -> HttpLoggingInterceptor.Level.NONE
         }
 

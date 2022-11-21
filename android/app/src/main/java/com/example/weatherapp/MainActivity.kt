@@ -2,7 +2,6 @@ package com.example.weatherapp
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -16,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
-import androidx.datastore.core.DataStore
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -66,7 +64,7 @@ fun WeatherApp(viewModel: AppViewModel) {
     val weatherApi = WeatherApi(mContext)
 
     WeatherAppTheme {
-        NavHost(navController = navigationController, startDestination = "main") {
+        NavHost(navController = navigationController, startDestination = "loading") {
             composable(route = "loading") {
                 LoadingScreen()
             }
@@ -125,12 +123,11 @@ fun WeatherApp(viewModel: AppViewModel) {
                 val locationsDeferred = async { weatherApi.getLocationsFromServer() }
                 val response = locationsDeferred.await()
 
-                Log.d("loading", "response.code() = $response.code()")
                 when(response.code()) {
                     200 -> {
                         val result = response.body()!!
-                        viewModel.cities.clear()
-                        viewModel.cities.addAll(result.prefectures)
+                        viewModel.locations.clear()
+                        viewModel.locations.addAll(result.prefectures)
 
                         CoroutineScope(Dispatchers.Main).launch {
                             if (viewModel.city.id == "") {
@@ -202,14 +199,6 @@ fun MainScreen(
             }
         )
 
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoadingScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        CircularProgressIndicator()
     }
 }
 
