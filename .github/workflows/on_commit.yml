@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "android/app/src/**/*.kt"
+      - ".github/workflows/on_commit.yml"
 
 jobs:
   ktlint:
