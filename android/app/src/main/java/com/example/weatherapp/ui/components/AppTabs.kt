@@ -1,4 +1,4 @@
-package com.example.weatherapp.ui
+package com.example.weatherapp.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
@@ -29,8 +29,8 @@ fun AppTabs(onTabChanged: @Composable (tabIndex: Int) -> Unit) {
     Column {
         TabRow(
             selectedTabIndex = pagerState.currentPage,
-            indicator = {
-                tabPositions -> TabRowDefaults.Indicator(
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
                     Modifier.pagerTabIndicatorOffset(
                         pagerState,
                         tabPositions
@@ -56,13 +56,12 @@ fun AppTabs(onTabChanged: @Composable (tabIndex: Int) -> Unit) {
             }
         }
 
-
         HorizontalPager(
             count = tabTitles.size,
             state = pagerState
-        ) {
+        ) { tabIndex ->
             // Invoked when selected tab has been changed
-            tabIndex -> onTabChanged(tabIndex)
+            onTabChanged(tabIndex)
         }
     }
 }

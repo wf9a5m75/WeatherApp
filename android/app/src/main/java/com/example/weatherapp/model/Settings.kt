@@ -1,7 +1,6 @@
 package com.example.weatherapp.model
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -9,10 +8,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 val PREF_ID = stringPreferencesKey("id")
@@ -52,20 +50,20 @@ data class LocationValue(
 @Dao
 interface LocationsDao {
     @Query("SELECT * FROM SettingsValue")
-    fun getAll(): List<SettingsValue>
+    fun getAll(): List<LocationValue>
 
     @Query("SELECT * FROM SettingsValue where keyId = :keyId")
-    fun findByKey(keyId: String): SettingsValue?
+    fun findByKey(keyId: String): LocationValue?
 
     // vararg is similar to the arguments object of JS
     @Upsert
-    fun insertAll(vararg values: SettingsValue)
+    fun insertAll(vararg values: LocationValue)
 
     @Query("DELETE FROM Settings")
     fun clear()
 }
 
-@Database(entities = [SettingsValue::class], version = 1)
+@Database(entities = [LocationValue::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locaitonDao(): LocationsDao
 }

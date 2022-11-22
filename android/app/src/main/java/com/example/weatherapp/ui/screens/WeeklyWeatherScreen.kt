@@ -13,9 +13,11 @@ import androidx.compose.ui.graphics.Color
 fun WeeklyWeatherScreen(
     onClick: () -> Unit = {}
 ) {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(color = Color.Green)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Green)
+    ) {
         Button(onClick = onClick) {
             Text("weekly weather!!")
         }

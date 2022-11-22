@@ -20,8 +20,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.weatherapp.model.*
-import com.example.weatherapp.ui.AppTabs
+import com.example.weatherapp.model.AppViewModel
+import com.example.weatherapp.model.WeatherApi
+import com.example.weatherapp.model.loadPrefCity
+import com.example.weatherapp.model.savePrefCity
+import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.*
@@ -34,13 +37,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         val viewModel: AppViewModel by viewModels()
         setContent {
             WeatherAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    //modifier = Modifier.fillMaxSize(),
+                    // modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
                     WeatherApp(viewModel = viewModel)
@@ -48,13 +50,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
 
-@Composable
 // @Preview(showBackground = true)
+@Composable
 fun WeatherApp(viewModel: AppViewModel) {
-
 
     val navigationController = rememberNavController()
     // Hold the context handle
@@ -102,8 +102,6 @@ fun WeatherApp(viewModel: AppViewModel) {
         }
     }
 
-
-
     runBlocking {
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -123,7 +121,7 @@ fun WeatherApp(viewModel: AppViewModel) {
                 val locationsDeferred = async { weatherApi.getLocationsFromServer() }
                 val response = locationsDeferred.await()
 
-                when(response.code()) {
+                when (response.code()) {
                     200 -> {
                         val result = response.body()!!
                         viewModel.locations.clear()
@@ -147,7 +145,6 @@ fun WeatherApp(viewModel: AppViewModel) {
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalUnitApi::class)
@@ -167,19 +164,19 @@ fun MainScreen(
             menuItems = listOf(
                 OptionMenuItem("change_city", "場所の変更")
             ),
-            onMenuItemClicked = {
-                    menuId ->
+            onMenuItemClicked = { menuId ->
                 when (menuId) {
                     "change_city" -> onChangeCity()
 
-                    else -> { /* stub */ }
+                    else -> { /* stub */
+                    }
                 }
             }
         )
 
         AppTabs(
             onTabChanged = { tabIndex ->
-                when(tabIndex) {
+                when (tabIndex) {
                     0 -> ShowTodayScreen(
                         context = context,
                         viewModel = viewModel,
@@ -198,7 +195,6 @@ fun MainScreen(
                 }
             }
         )
-
     }
 }
 
@@ -217,7 +213,6 @@ fun SettingsScreen(
         SelectCityScreen(context, viewModel, onClose)
     }
 }
-
 
 fun NavHostController.navigateSingleTopTo(route: String) = this.navigate(route) {
 
@@ -258,10 +253,13 @@ fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
     restoreState = true
 }
 
-
 @Preview(showBackground = true)
 @Composable
-fun ShowTodayScreen(context: Context? = null, viewModel: AppViewModel? = null, api: WeatherApi? = null) {
+fun ShowTodayScreen(
+    context: Context? = null,
+    viewModel: AppViewModel? = null,
+    api: WeatherApi? = null
+) {
 
     TodayWeatherScreen(context, viewModel, api)
 }

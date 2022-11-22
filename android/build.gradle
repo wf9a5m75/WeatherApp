@@ -2,11 +2,55 @@ buildscript {
     ext {
         compose_ui_version = '1.1.1'
     }
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        //ktlint Plugin
+        classpath "org.jlleitschuh.gradle:ktlint-gradle:11.0.0"
+    }
 }// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
 plugins {
     id 'com.android.application' version '7.3.1' apply false
     id 'com.android.library' version '7.3.1' apply false
     id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
     id 'org.jlleitschuh.gradle.ktlint' version '11.0.0' apply true
+}
 
+subprojects {
+    apply plugin: "org.jlleitschuh.gradle.ktlint"
+
+    ktlint {
+        debug = true
+    }
+}
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+ktlint {
+    android.set(true)
+    // debug.set(true)
+    // verbose.set(true)
+    outputToConsole.set(true)
+    outputColorName.set("RED")
+//    additionalEditorconfigFile = file(".editorconfig")
+//    reporters {
+//
+//        customReporters {
+//            register("html") {
+//                fileExtension = "html"
+//                dependency = "me.cassiano:ktlint-html-reporter:0.2.3"
+//            }
+//        }
+//    }
+    filter {
+        exclude("**/build/**")
+        include("**/kotlin/**")
+    }
 }

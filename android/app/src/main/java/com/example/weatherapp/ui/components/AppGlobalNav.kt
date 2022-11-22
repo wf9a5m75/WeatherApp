@@ -40,15 +40,17 @@ fun AppGlobalNav(
 
             DropdownMenu(expanded = mDisplayMenu, onDismissRequest = { mDisplayMenu = false }) {
 
-                menuItems.forEach { item -> DropdownMenuItem(onClick = {
-                    // close the dropdown menu
-                    mDisplayMenu = false
+                menuItems.forEach { item ->
+                    DropdownMenuItem(onClick = {
+                        // close the dropdown menu
+                        mDisplayMenu = false
 
-                    // Execute the callback
-                    onMenuItemClicked(item.menuId)
-                }) {
-                    Text(text = item.text)
-                }}
+                        // Execute the callback
+                        onMenuItemClicked(item.menuId)
+                    }) {
+                        Text(text = item.text)
+                    }
+                }
             }
         }
     )

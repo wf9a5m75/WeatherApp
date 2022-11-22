@@ -13,12 +13,16 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun LoadingScreen() {
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
-            .wrapContentSize()) {
+            .wrapContentSize()
+    ) {
 
-        Text(text = "サーバーに接続しています...",
+        Text(
+            text = "サーバーに接続しています...",
             fontSize = 18.sp,
-            color = MaterialTheme.colors.onBackground)
+            color = MaterialTheme.colors.onBackground
+        )
     }
 }

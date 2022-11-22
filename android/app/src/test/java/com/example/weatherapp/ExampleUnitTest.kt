@@ -1,8 +1,9 @@
 package com.example.weatherapp
 
-import org.junit.Test
-
+/* ktlint-disable no-wildcard-imports */
 import org.junit.Assert.*
+import org.junit.Test
+/* ktlint-enable no-wildcard-imports */
 
 /**
  * Example local unit test, which will execute on the development machine (host).
