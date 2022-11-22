@@ -1,0 +1,21 @@
+name: on_commit
+
+on:
+  pull_request:
+
+jobs:
+  ktlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Kotlin linter
+        uses: ScaCap/action-ktlint@master
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          android: true
