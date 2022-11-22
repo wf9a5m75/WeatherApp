@@ -40,45 +40,45 @@ suspend fun loadPrefCity(context: Context): City {
 
     return result.first() ?: City("", "")
 }
-
-@Entity
-data class LocationValue(
-    @PrimaryKey val id: String,
-    @ColumnInfo val value: String?
-)
-
-@Dao
-interface LocationsDao {
-    @Query("SELECT * FROM SettingsValue")
-    fun getAll(): List<LocationValue>
-
-    @Query("SELECT * FROM SettingsValue where keyId = :keyId")
-    fun findByKey(keyId: String): LocationValue?
-
-    // vararg is similar to the arguments object of JS
-    @Upsert
-    fun insertAll(vararg values: LocationValue)
-
-    @Query("DELETE FROM Settings")
-    fun clear()
-}
-
-@Database(entities = [LocationValue::class], version = 1)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun locaitonDao(): LocationsDao
-}
-
-suspend fun saveLocations(context: Context, locations: List<Prefecture>) {
-    val db: AppDatabase = Room.databaseBuilder(
-        context = context,
-        klass = AppDatabase::class.java,
-        name = "app-database"
-    ).build()
-
-    val locationDao = db.locaitonDao()
-
-    locationDao.clear()
-    locationDao.insertAll()
-
-    db.close()
-}
+//
+// @Entity
+// data class LocationValue(
+//    @PrimaryKey val id: String,
+//    @ColumnInfo val value: String?
+// )
+//
+// @Dao
+// interface LocationsDao {
+//    @Query("SELECT * FROM LocationValue")
+//    fun getAll(): List<LocationValue>
+//
+//    @Query("SELECT * FROM LocationValue where keyId = :keyId")
+//    fun findByKey(keyId: String): LocationValue?
+//
+//    // vararg is similar to the arguments object of JS
+//    @Upsert
+//    fun insertAll(vararg values: LocationValue)
+//
+//    @Query("DELETE FROM LocationValue")
+//    fun clear()
+// }
+//
+// @Database(entities = [LocationValue::class], version = 1)
+// abstract class AppDatabase : RoomDatabase() {
+//    abstract fun locaitonDao(): LocationsDao
+// }
+//
+// fun saveLocations(context: Context, locations: List<Prefecture>) {
+//    val db: AppDatabase = Room.databaseBuilder(
+//        context = context,
+//        klass = AppDatabase::class.java,
+//        name = "app-database"
+//    ).build()
+//
+//    val locationDao = db.locaitonDao()
+//
+//    locationDao.clear()
+//    locationDao.insertAll()
+//
+//    db.close()
+// }

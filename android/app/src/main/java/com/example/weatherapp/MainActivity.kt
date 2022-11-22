@@ -24,8 +24,8 @@ import com.example.weatherapp.model.AppViewModel
 import com.example.weatherapp.model.WeatherApi
 import com.example.weatherapp.model.loadPrefCity
 import com.example.weatherapp.model.savePrefCity
-import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.AppGlobalNav
+import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
