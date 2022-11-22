@@ -2,18 +2,7 @@ buildscript {
     ext {
         compose_ui_version = '1.1.1'
     }
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-
-    dependencies {
-        //ktlint Plugin
-        classpath "org.jlleitschuh.gradle:ktlint-gradle:11.0.0"
-    }
-}// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
+}
 plugins {
     id 'com.android.application' version '7.3.1' apply false
     id 'com.android.library' version '7.3.1' apply false
@@ -22,15 +11,11 @@ plugins {
 }
 
 subprojects {
-    apply plugin: "org.jlleitschuh.gradle.ktlint"
+    apply plugin: "org.jlleitschuh.gradle.ktlint" // Version should be inherited from parent
 
+    // Optionally configure plugin
     ktlint {
         debug = true
-    }
-}
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 }
 ktlint {
