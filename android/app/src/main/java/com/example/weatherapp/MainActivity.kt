@@ -3,7 +3,6 @@ package com.example.weatherapp
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.*
+import java.lang.System.exit
 
 class MainActivity : ComponentActivity() {
 
@@ -31,7 +31,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val viewModel: AppViewModel by viewModels()
+        Log.d("debug", "--------->track: before initialize")
         viewModel.initialize(this)
+
+        viewModel.readValue("selected_city") { selectedCityId ->
+            Log.d("debug", "--------->track: selectedCityId = $selectedCityId")
+            viewModel.changeCity(selectedCityId)
+        }
+//        Log.d("debug", "--------->track: after readValue")
+//
+//        Log.d("debug", "--------->track: after changeCity")
 
         setContent {
             WeatherAppTheme {
@@ -66,11 +75,12 @@ fun WeatherApp(viewModel: AppViewModel) {
                 )
             }
             composable(route = "settings") {
-
-                SettingsScreen(
-                    viewModel = viewModel,
-                    onClose = {
-                        viewModel.saveSettings()
+                SelectCityScreen(
+                    locations = viewModel.locations,
+                    currentCity = viewModel.city.value,
+                    onClose = { selectedCity ->
+                        viewModel.city.value = selectedCity
+                        viewModel.saveValue("selected_city", selectedCity.id)
                         navigationController.navigateUp()
                     }
                 )
@@ -82,64 +92,31 @@ fun WeatherApp(viewModel: AppViewModel) {
         }
     }
 
-    if (!viewModel.networkMonitor.isOnline) {
-        navigationController.navigateSingleTopTo("no_internet_error")
+    if (viewModel.city.value.id != "") {
+        navigationController.navigate("main")
         return
     }
+    viewModel.getLocations { locations ->
 
-    viewModel.getLocations { result -> Log.d("debug", result.toString()) }
+        if (locations == null) {
+            if (!viewModel.networkMonitor.isOnline) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    navigationController.navigateSingleTopTo("no_internet_error")
+                }
+            } else {
+                // TODO: Error process for unknown error
+                exit(1)
+            }
+            return@getLocations
+        }
 
-//    viewModel.getTodayWeather { code, result ->
-//        if (code != HttpURLConnection.HTTP_ACCEPTED) {
-//            Log.e("debug", "----->Cannot obtain forecast from server")
-//            return@getTodayWeather
-//        }
-//
-//    }
+        viewModel.locations.clear()
+        viewModel.locations.addAll(locations.prefectures)
 
-//    runBlocking {
-//
-//        CoroutineScope(Dispatchers.IO).launch {
-//            // -------------------------------------------
-//            //  Load setting values from Database
-//            // -------------------------------------------
-//            viewModel.city = loadPrefCity(mContext)
-//
-//            // -------------------------------------------
-//            //  Load setting values from Database
-//            // -------------------------------------------
-//            if (!NetworkUtil.isOnline(mContext)) {
-//                CoroutineScope(Dispatchers.Main).launch {
-//                    navigationController.navigate("no_internet_error")
-//                }
-//            } else {
-//                val locationsDeferred = async { weatherApi.getLocationsFromServer() }
-//                val response = locationsDeferred.await()
-//
-//                when (response.code()) {
-//                    200 -> {
-//                        val result = response.body()!!
-//                        viewModel.locations.clear()
-//                        viewModel.locations.addAll(result.prefectures)
-//
-//                        CoroutineScope(Dispatchers.Main).launch {
-//                            if (viewModel.city.id == "") {
-//                                navigationController.navigate("settings")
-//                            } else {
-//                                navigationController.navigate("main")
-//                            }
-//                        }
-//                    }
-//
-//                    else -> {
-//                        CoroutineScope(Dispatchers.Main).launch {
-//                            navigationController.popupToInclusive("no_internet_error")
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+        CoroutineScope(Dispatchers.Main).launch {
+            navigationController.navigateSingleTopTo("settings")
+        }
+    }
 }
 
 @OptIn(ExperimentalUnitApi::class)
@@ -177,21 +154,6 @@ fun MainScreen(
                 }
             }
         )
-    }
-}
-
-@Composable
-fun SettingsScreen(
-    viewModel: AppViewModel,
-    onClose: () -> Unit
-) {
-    BackHandler(true) {
-        onClose()
-    }
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        SelectCityScreen(viewModel, onClose)
     }
 }
 

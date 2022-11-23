@@ -1,41 +1,11 @@
 package com.example.weatherapp.model
 
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.*
 import kotlinx.coroutines.flow.*
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-val PREF_ID = stringPreferencesKey("id")
-val PREF_VALUE = stringPreferencesKey("value")
-//
-// suspend fun savePrefCity(context: Context, city: City) {
-//    context.dataStore.edit { pref ->
-//        pref[PREF_ID] = "pref_city"
-//        pref[PREF_TYPE] = "city"
-//        pref[PREF_VALUE] = Json.encodeToString(city)
-//    }
-// }
-//
-// suspend fun loadPrefCity(context: Context): City {
-//    val result =
-//        context.dataStore.data
-// //            .filter {
-// //                pref -> pref[PREF_ID] == "pref_city"
-// //            }
-//            .map { pref ->
-//                when (pref[PREF_ID]) {
-//                    "pref_city" -> Json.decodeFromString<City>(pref[PREF_VALUE].toString())
-//                    else -> null
-//                }
-//            }
-//
-//    return result.first() ?: City("", "")
-// }
-
+/**
+ * Location DAO
+ */
 @Entity
 data class LocationValue(
     @PrimaryKey val id: String,
@@ -63,22 +33,31 @@ interface LocationsDao {
     fun count(): Int
 }
 
-@Database(entities = [LocationValue::class], version = 1)
+/**
+ * General values
+ */
+@Entity
+data class KeyValuePair(
+    @PrimaryKey val id: String,
+    @ColumnInfo val value: String
+)
+
+@Dao
+interface KeyValueDao {
+
+    @Query("SELECT * FROM KeyValuePair where id = :keyId limit 1")
+    fun get(keyId: String): KeyValuePair?
+
+    @Upsert
+    fun put(keyValue: KeyValuePair)
+
+    @Upsert
+    fun putAll(vararg keyValue: KeyValuePair)
+}
+
+@Database(entities = [LocationValue::class, KeyValuePair::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locaitonDao(): LocationsDao
+
+    abstract fun keyValueDao(): KeyValueDao
 }
-//
-// fun saveLocations(context: Context, locations: List<Prefecture>) {
-//    val db: AppDatabase = Room.databaseBuilder(
-//        context = context,
-//        klass = AppDatabase::class.java,
-//        name = "app-database"
-//    ).build()
-//
-//    val locationDao = db.locaitonDao()
-//
-//    locationDao.clear()
-//    locationDao.insertAll()
-//
-//    db.close()
-// }

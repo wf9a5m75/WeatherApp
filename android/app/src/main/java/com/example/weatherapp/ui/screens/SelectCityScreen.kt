@@ -17,24 +17,26 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weatherapp.model.AppViewModel
 import com.example.weatherapp.model.City
+import com.example.weatherapp.model.Prefecture
 
 @Preview(showBackground = true)
 @Composable
 fun SelectCityScreen(
-    viewModel: AppViewModel? = null,
-    onClose: () -> Unit = {}
+    locations: List<Prefecture> = arrayListOf(),
+    currentCity: City = City("", ""),
+    onClose: (city: City) -> Unit = {}
 ) {
-
-    val onClick: (city: City) -> Unit = { city ->
-        viewModel?.city?.value = city
-    }
+    var selectedCity by remember { mutableStateOf(currentCity) }
 
     Column(
         modifier = Modifier
@@ -48,7 +50,7 @@ fun SelectCityScreen(
                 contentDescription = "Back",
                 modifier = Modifier
                     .padding(16.dp)
-                    .clickable { onClose() }
+                    .clickable { onClose(selectedCity) }
             )
             Text(
                 text = "場所を選択",
@@ -56,7 +58,7 @@ fun SelectCityScreen(
             )
         }
 
-        viewModel?.locations?.forEach { prefecture ->
+        locations.forEach { prefecture ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,14 +82,14 @@ fun SelectCityScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = (city == viewModel.city.value),
-                                    onClick = { onClick(city) }
+                                    selected = (city == selectedCity),
+                                    onClick = { selectedCity = city }
                                 )
                                 .padding(horizontal = 16.dp)
                         ) {
                             RadioButton(
-                                selected = (city == viewModel.city.value),
-                                onClick = { onClick(city) }
+                                selected = (city == selectedCity),
+                                onClick = { selectedCity = city }
                             )
                             Text(
                                 text = city.name,

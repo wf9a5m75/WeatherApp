@@ -63,7 +63,7 @@ ij_java_packages_to_use_import_on_demand = unset
 
 [*.kt]
 ktlint_disabled_rules=no-wildcard-imports,import-ordering,no-empty-first-line-in-method-block,argument-list-wrapping
-ij_kotlin_packages_to_use_import_on_demand = java.**,org.junit.**,androidx.compose.**
+ij_kotlin_packages_to_use_import_on_demand = androidx.**, kotlinx.**, com.example.weatherapp.**, java.**
 ij_kotlin_code_style_defaults = android
 ij_kotlin_keep_blank_lines_in_declarations = 1
 ij_kotlin_keep_blank_lines_in_code = 1

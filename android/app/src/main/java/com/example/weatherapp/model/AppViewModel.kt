@@ -1,7 +1,6 @@
 package com.example.weatherapp.model
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -70,6 +69,9 @@ class AppViewModel : ViewModel() {
         val retrofit = RetrofitHelper.getInstance(cacheDB).create(IWeatherApi::class.java)
         this.weatherApi = WeatherApi(retrofit)
 
+        /*
+         * database
+         */
         this.appDb = Room.databaseBuilder(
             context = context,
             klass = AppDatabase::class.java,
@@ -77,23 +79,41 @@ class AppViewModel : ViewModel() {
         ).build()
     }
 
-    fun saveSettings() {
-//
-//
-//        if (viewModel.city.id != "") {
-//
-//            CoroutineScope(Dispatchers.IO).launch {
-//                savePrefCity(mContext, viewModel.city)
-//            }
-//
-//        }
-        TODO("Not yet implemented")
+    fun saveValue(
+        key: String,
+        value: String,
+        onFinished: () -> Unit = {}
+    ) {
+        viewModelScope.launch(context = Dispatchers.IO) {
+            this@AppViewModel.appDb.keyValueDao().put(KeyValuePair(key, value))
+            onFinished()
+        }
+    }
+    fun readValue(
+        key: String,
+        onFinished: (value: String?) -> Unit
+    ) {
+        viewModelScope.launch(context = Dispatchers.IO) {
+            onFinished(this@AppViewModel.appDb.keyValueDao().get(key)?.value)
+        }
     }
 
     fun getLocations(
         onFinished: (result: LocationResponse?) -> Unit
     ) {
         viewModelScope.launch {
+            if (!this@AppViewModel.networkMonitor.isOnline) {
+
+                // Read locations from the DB if offline
+                if (this@AppViewModel.appDb.locaitonDao().count() > 0) {
+                    onFinished(readLocationsFromDB())
+                } else {
+                    onFinished(null)
+                }
+                return@launch
+            }
+
+            // Obtain the latest location list from the server
             internalGetLocations { locations -> onFinished(locations) }
         }
     }
@@ -104,19 +124,16 @@ class AppViewModel : ViewModel() {
         val defer = async { weatherApi.getLocationsFromServer() }
         val response = defer.await()
 
-        Log.d("debug", "--------->track: response = ${response.code()}")
         when (response.code()) {
 
             // 200: OK
             HttpURLConnection.HTTP_OK -> {
-                Log.d("debug", "--------->track: HTTP_OK")
                 saveLocationsToDB(response.body()!!)
                 onFinished(response.body()!!)
             }
 
             // 304: Not modified
             HttpURLConnection.HTTP_NOT_MODIFIED -> {
-                Log.d("debug", "--------->track: HTTP_NOT_MODIFIED")
                 onFinished(readLocationsFromDB())
             }
 
@@ -129,10 +146,7 @@ class AppViewModel : ViewModel() {
         val prefToCityMap = LinkedHashMap<String, MutableList<City>>()
         val prefectureNames = LinkedHashMap<String, String>()
 
-        Log.d("debug", "--------->track: locations = ${locations.size}")
-
         locations.forEach { item ->
-            Log.d("debug", "--------->$item")
             when (item.kind) {
                 "prefecture" -> {
                     prefectureNames[item.id] = item.value
@@ -160,7 +174,7 @@ class AppViewModel : ViewModel() {
         }
 
         return LocationResponse(
-            last_update = "something",
+            last_update = this.appDb.keyValueDao().get("location_lastupdate")?.value ?: "(unknown)",
             prefectures = prefectures
         )
     }
@@ -191,6 +205,9 @@ class AppViewModel : ViewModel() {
         }
 
         this.appDb.locaitonDao().insertAll(*locations.toTypedArray())
+        this.appDb.keyValueDao().put(
+            KeyValuePair("location_lastupdate", locationResponse.last_update)
+        )
     }
 
     fun getTodayWeather(onFinished: (code: Int, result: ForecastResponse?) -> Unit) {
@@ -213,5 +230,16 @@ class AppViewModel : ViewModel() {
                 day = day.day
             )
         )
+    }
+
+    fun changeCity(selectedCityId: String?) {
+        if (selectedCityId == null) {
+            return
+        }
+        val location = this.appDb.locaitonDao().findByKey(selectedCityId)
+        if ((location == null) || (location.kind != "city")) {
+            return
+        }
+        this.city.value = City(location.id, location.value)
     }
 }
