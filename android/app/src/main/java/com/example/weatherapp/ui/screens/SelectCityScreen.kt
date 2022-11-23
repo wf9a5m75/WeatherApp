@@ -1,6 +1,5 @@
 package com.example.weatherapp.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,8 +17,6 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,20 +28,12 @@ import com.example.weatherapp.model.City
 @Preview(showBackground = true)
 @Composable
 fun SelectCityScreen(
-    context: Context? = null,
     viewModel: AppViewModel? = null,
     onClose: () -> Unit = {}
 ) {
 
-    val selected = remember { mutableStateOf(viewModel?.city) }
-
     val onClick: (city: City) -> Unit = { city ->
-        selected.value = city
-
-        // if not preview
-        if (viewModel != null) {
-            viewModel.city = city
-        }
+        viewModel?.city?.value = city
     }
 
     Column(
@@ -91,13 +80,13 @@ fun SelectCityScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = (city == selected.value),
+                                    selected = (city == viewModel.city.value),
                                     onClick = { onClick(city) }
                                 )
                                 .padding(horizontal = 16.dp)
                         ) {
                             RadioButton(
-                                selected = (city == selected.value),
+                                selected = (city == viewModel.city.value),
                                 onClick = { onClick(city) }
                             )
                             Text(

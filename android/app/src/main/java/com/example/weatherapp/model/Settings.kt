@@ -3,70 +3,70 @@ package com.example.weatherapp.model
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.*
 import kotlinx.coroutines.flow.*
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 val PREF_ID = stringPreferencesKey("id")
-val PREF_TYPE = stringPreferencesKey("type")
 val PREF_VALUE = stringPreferencesKey("value")
-
-suspend fun savePrefCity(context: Context, city: City) {
-    context.dataStore.edit { pref ->
-        pref[PREF_ID] = "pref_city"
-        pref[PREF_TYPE] = "city"
-        pref[PREF_VALUE] = Json.encodeToString(city)
-    }
-}
-
-suspend fun loadPrefCity(context: Context): City {
-    val result =
-        context.dataStore.data
-//            .filter {
-//                pref -> pref[PREF_ID] == "pref_city"
+//
+// suspend fun savePrefCity(context: Context, city: City) {
+//    context.dataStore.edit { pref ->
+//        pref[PREF_ID] = "pref_city"
+//        pref[PREF_TYPE] = "city"
+//        pref[PREF_VALUE] = Json.encodeToString(city)
+//    }
+// }
+//
+// suspend fun loadPrefCity(context: Context): City {
+//    val result =
+//        context.dataStore.data
+// //            .filter {
+// //                pref -> pref[PREF_ID] == "pref_city"
+// //            }
+//            .map { pref ->
+//                when (pref[PREF_ID]) {
+//                    "pref_city" -> Json.decodeFromString<City>(pref[PREF_VALUE].toString())
+//                    else -> null
+//                }
 //            }
-            .map { pref ->
-                when (pref[PREF_ID]) {
-                    "pref_city" -> Json.decodeFromString<City>(pref[PREF_VALUE].toString())
-                    else -> null
-                }
-            }
+//
+//    return result.first() ?: City("", "")
+// }
 
-    return result.first() ?: City("", "")
+@Entity
+data class LocationValue(
+    @PrimaryKey val id: String,
+    @ColumnInfo val sortOrder: Int,
+    @ColumnInfo val kind: String,
+    @ColumnInfo val value: String
+)
+
+@Dao
+interface LocationsDao {
+    @Query("SELECT * FROM LocationValue order by sortOrder")
+    fun getAll(): List<LocationValue>
+
+    @Query("SELECT * FROM LocationValue where id = :keyId")
+    fun findByKey(keyId: String): LocationValue?
+
+    // vararg is similar to the arguments object of JS
+    @Upsert
+    fun insertAll(vararg values: LocationValue)
+
+    @Query("DELETE FROM LocationValue")
+    fun clear()
+
+    @Query("SELECT count(*) FROM LocationValue")
+    fun count(): Int
 }
-//
-// @Entity
-// data class LocationValue(
-//    @PrimaryKey val id: String,
-//    @ColumnInfo val value: String?
-// )
-//
-// @Dao
-// interface LocationsDao {
-//    @Query("SELECT * FROM LocationValue")
-//    fun getAll(): List<LocationValue>
-//
-//    @Query("SELECT * FROM LocationValue where keyId = :keyId")
-//    fun findByKey(keyId: String): LocationValue?
-//
-//    // vararg is similar to the arguments object of JS
-//    @Upsert
-//    fun insertAll(vararg values: LocationValue)
-//
-//    @Query("DELETE FROM LocationValue")
-//    fun clear()
-// }
-//
-// @Database(entities = [LocationValue::class], version = 1)
-// abstract class AppDatabase : RoomDatabase() {
-//    abstract fun locaitonDao(): LocationsDao
-// }
+
+@Database(entities = [LocationValue::class], version = 1)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun locaitonDao(): LocationsDao
+}
 //
 // fun saveLocations(context: Context, locations: List<Prefecture>) {
 //    val db: AppDatabase = Room.databaseBuilder(

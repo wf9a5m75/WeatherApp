@@ -24,16 +24,16 @@ ktlint {
     // verbose.set(true)
     outputToConsole.set(true)
     outputColorName.set("RED")
-//    additionalEditorconfigFile = file(".editorconfig")
-//    reporters {
-//
-//        customReporters {
-//            register("html") {
-//                fileExtension = "html"
-//                dependency = "me.cassiano:ktlint-html-reporter:0.2.3"
-//            }
-//        }
-//    }
+    additionalEditorconfigFile = file(".editorconfig")
+    reporters {
+
+        customReporters {
+            register("html") {
+                fileExtension = "html"
+                dependency = "me.cassiano:ktlint-html-reporter:0.2.3"
+            }
+        }
+    }
     filter {
         exclude("**/build/**")
         include("**/kotlin/**")

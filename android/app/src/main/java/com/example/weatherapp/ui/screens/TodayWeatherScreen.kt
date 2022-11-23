@@ -1,7 +1,5 @@
 package com.example.weatherapp.ui.screens
 
-import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,70 +14,62 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.*
 import com.example.weatherapp.R
 import com.example.weatherapp.model.AppViewModel
-import com.example.weatherapp.model.WeatherApi
 import com.example.weatherapp.model.getCurrentHour
 import com.example.weatherapp.model.weatherIconResource
-import com.example.weatherapp.utils.NetworkUtil
 import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 
 @Preview(showBackground = true)
 @Composable
-fun TodayWeatherScreen(
-    context: Context? = null,
-    viewModel: AppViewModel? = null,
-    api: WeatherApi? = null
-) {
+fun TodayWeatherScreen(viewModel: AppViewModel? = viewModel()) {
     val refreshState = rememberSwipeRefreshState(isRefreshing = false)
     val scrollState = rememberScrollState()
 
     var currentWeatherIcon by remember { mutableStateOf("sunny") }
     var lastUpdateTime by remember { mutableStateOf("") }
 
-    val onRefresh: (refreshState: SwipeRefreshState) -> Unit = { state ->
-        if ((context != null) &&
-            (viewModel != null) &&
-            (api != null) &&
-            (NetworkUtil.isOnline(context))
-        ) {
-
-            state.isRefreshing = true
-
-            runBlocking {
-                val deferred = async {
-                    api.getForecastFromServer(
-                        city = viewModel.city,
-                        day = 0
-                    )
-                }
-                state.isRefreshing = false
-
-                val response = deferred.await()
-                if (response.code() != 200) {
-                    return@runBlocking
-                }
-
-                val forecastRes = response.body()
-                if (forecastRes == null) {
-                    return@runBlocking
-                }
-                currentWeatherIcon = forecastRes.forecasts[0].status
-                lastUpdateTime = forecastRes.last_update
-                Log.d("debug", response.body().toString())
-            }
-        }
-    }
-    onRefresh(refreshState)
+//    val onRefresh: (refreshState: SwipeRefreshState) -> Unit = { state ->
+//        if ((context != null) &&
+//            (viewModel != null) &&
+//            (api != null) &&
+//            (NetworkUtil.isOnline(context))
+//        ) {
+//
+//            state.isRefreshing = true
+//
+//            runBlocking {
+//                val deferred = async {
+//                    api.getForecastFromServer(
+//                        city = viewModel.city,
+//                        day = 0
+//                    )
+//                }
+//                state.isRefreshing = false
+//
+//                val response = deferred.await()
+//                if (response.code() != 200) {
+//                    return@runBlocking
+//                }
+//
+//                val forecastRes = response.body()
+//                if (forecastRes == null) {
+//                    return@runBlocking
+//                }
+//                currentWeatherIcon = forecastRes.forecasts[0].status
+//                lastUpdateTime = forecastRes.last_update
+//                Log.d("debug", response.body().toString())
+//            }
+//        }
+//    }
+//    onRefresh(refreshState)
 
     SwipeRefresh(
         state = refreshState,
         onRefresh = {
-            onRefresh(refreshState)
+//            onRefresh(refreshState)
         }
     ) {
         Image(
