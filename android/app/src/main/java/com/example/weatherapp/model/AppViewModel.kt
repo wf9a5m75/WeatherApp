@@ -10,17 +10,19 @@ import com.example.weatherapp.utils.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Response
-import java.net.HttpURLConnection
-import java.util.Date
-import java.util.Timer
-import java.util.TimerTask
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.util.*
 
 class AppViewModel : ViewModel() {
+
     private val TAG = "ViewModel"
 
-    var city: MutableState<City> = mutableStateOf(City("", ""))
+    var city: MutableState<City> = mutableStateOf(
+        City("", "")
+    )
 
     val locations: MutableList<Prefecture> = mutableListOf()
 
@@ -79,167 +81,77 @@ class AppViewModel : ViewModel() {
         ).build()
     }
 
-    fun saveValue(
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun loadSelectedCity() = viewModelScope.async(Dispatchers.IO) {
+        val cityJson = readValue("selected_city")
+        return@async cityJson?.let { Json.decodeFromString<City>(it) }
+    }.await()
+
+    @OptIn(ExperimentalSerializationApi::class)
+    fun saveSelectedCity(
+        city: City
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            saveValue("selected_city", Json.encodeToString(city))
+        }
+    }
+
+    suspend fun saveValue(
         key: String,
-        value: String,
-        onFinished: () -> Unit = {}
-    ) {
-        viewModelScope.launch(context = Dispatchers.IO) {
-            this@AppViewModel.appDb.keyValueDao().put(KeyValuePair(key, value))
-            onFinished()
-        }
-    }
-    fun readValue(
-        key: String,
-        onFinished: (value: String?) -> Unit
-    ) {
-        viewModelScope.launch(context = Dispatchers.IO) {
-            onFinished(this@AppViewModel.appDb.keyValueDao().get(key)?.value)
-        }
-    }
+        value: String
+    ) = viewModelScope.async(Dispatchers.IO) {
+        this@AppViewModel.appDb.keyValueDao().put(KeyValuePair(key, value))
+    }.await()
 
-    fun getLocations(
-        onFinished: (result: LocationResponse?) -> Unit
-    ) {
-        viewModelScope.launch {
-            if (!this@AppViewModel.networkMonitor.isOnline) {
+    suspend fun readValue(
+        key: String
+    ) = viewModelScope.async(Dispatchers.IO) {
+        return@async this@AppViewModel.appDb.keyValueDao().get(key)?.value
+    }.await()
 
-                // Read locations from the DB if offline
-                if (this@AppViewModel.appDb.locaitonDao().count() > 0) {
-                    onFinished(readLocationsFromDB())
-                } else {
-                    onFinished(null)
-                }
-                return@launch
-            }
+    suspend fun getLocations() = viewModelScope.async(Dispatchers.IO) {
 
-            // Obtain the latest location list from the server
-            internalGetLocations { locations -> onFinished(locations) }
-        }
-    }
+        if (!this@AppViewModel.networkMonitor.isOnline) {
 
-    private suspend fun internalGetLocations(
-        onFinished: (result: LocationResponse?) -> Unit
-    ) = withContext(Dispatchers.IO) {
-        val defer = async { weatherApi.getLocationsFromServer() }
-        val response = defer.await()
-
-        when (response.code()) {
-
-            // 200: OK
-            HttpURLConnection.HTTP_OK -> {
-                saveLocationsToDB(response.body()!!)
-                onFinished(response.body()!!)
-            }
-
-            // 304: Not modified
-            HttpURLConnection.HTTP_NOT_MODIFIED -> {
-                onFinished(readLocationsFromDB())
-            }
-
-            else -> onFinished(null)
-        }
-    }
-
-    private fun readLocationsFromDB(): LocationResponse {
-        val locations = this.appDb.locaitonDao().getAll()
-        val prefToCityMap = LinkedHashMap<String, MutableList<City>>()
-        val prefectureNames = LinkedHashMap<String, String>()
-
-        locations.forEach { item ->
-            when (item.kind) {
-                "prefecture" -> {
-                    prefectureNames[item.id] = item.value
-                    prefToCityMap[item.id] = mutableListOf()
-                }
-
-                "city" -> {
-                    val tmp = item.id.split(":")
-                    val prefectureId = tmp[0]
-                    val cityId = tmp[1]
-                    prefToCityMap[prefectureId]?.add(City(cityId, item.value))
-                }
+            // Read locations from the DB if offline
+            return@async if (this@AppViewModel.appDb.prefectureDao().count() > 0) {
+                readLocationsFromDB()
+            } else {
+                // TODO: Do something for the case, no list and internet
+                null
             }
         }
 
-        val prefectures = ArrayList<Prefecture>()
-        for (prefectureId in prefToCityMap.keys) {
-            prefectures.add(
-                Prefecture(
-                    id = prefectureId,
-                    name = prefectureNames[prefectureId] ?: prefectureId,
-                    cities = prefToCityMap[prefectureId] ?: listOf()
-                )
-            )
+        val response = weatherApi.getLocationsFromServer()
+        if (response.code() == 200) {
+            saveLocationsToDB(response.body()!!)
         }
+        return@async readLocationsFromDB()
+    }.await()
 
-        return LocationResponse(
-            last_update = this.appDb.keyValueDao().get("location_lastupdate")?.value ?: "(unknown)",
-            prefectures = prefectures
-        )
-    }
+    private suspend fun readLocationsFromDB() = viewModelScope.async(Dispatchers.IO) {
+        val prefectures = this@AppViewModel.appDb.prefectureDao().getAll()
+        return@async prefectures
+    }.await()
 
     private fun saveLocationsToDB(locationResponse: LocationResponse) {
-        this.appDb.locaitonDao().clear()
-        val locations = arrayListOf<LocationValue>()
-        var prefCnt = 100
-        locationResponse.prefectures.forEach { prefecture ->
-            val prefValue = LocationValue(
-                id = prefecture.id,
-                value = prefecture.name,
-                sortOrder = prefCnt,
-                kind = "prefecture"
-            )
-            locations.add(prefValue)
-
-            var cityCnt = prefCnt++
-            prefecture.cities.forEach { city ->
-                val cityValue = LocationValue(
-                    id = "${prefecture.id}:${city.id}",
-                    value = city.name,
-                    kind = "city",
-                    sortOrder = ++cityCnt
-                )
-                locations.add(cityValue)
-            }
-        }
-
-        this.appDb.locaitonDao().insertAll(*locations.toTypedArray())
+        this.appDb.prefectureDao().clear()
+        this.appDb.prefectureDao().insertAll(*locationResponse.prefectures.toTypedArray())
         this.appDb.keyValueDao().put(
             KeyValuePair("location_lastupdate", locationResponse.last_update)
         )
     }
 
-    fun getTodayWeather(onFinished: (code: Int, result: ForecastResponse?) -> Unit) {
-        viewModelScope.launch {
-            internalGetWeather(ForecastDay.TODAY) { response ->
-                onFinished(
-                    response.code(),
-                    response.body()
-                )
-            }
-        }
-    }
-    private suspend fun internalGetWeather(
-        day: ForecastDay,
-        onFinished: (response: Response<ForecastResponse>) -> Unit
-    ) = withContext(Dispatchers.IO) {
-        onFinished(
-            this@AppViewModel.weatherApi.getForecastFromServer(
-                city = city.value,
-                day = day.day
-            )
-        )
-    }
+//    suspend fun getTodayWeather(day: ForecastDay) = viewModelScope.async(Dispatchers.IO) {
+//
+//        val response = this@AppViewModel.weatherApi.getForecastFromServer(
+//            city = city.value,
+//            day = day.day
+//        )
+//        return@async response.body()
+//    }.await()
 
-    fun changeCity(selectedCityId: String?) {
-        if (selectedCityId == null) {
-            return
-        }
-        val location = this.appDb.locaitonDao().findByKey(selectedCityId)
-        if ((location == null) || (location.kind != "city")) {
-            return
-        }
-        this.city.value = City(location.id, location.value)
+    fun setCurrentCity(city: City) {
+        this.city.value = city
     }
 }

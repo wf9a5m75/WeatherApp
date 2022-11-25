@@ -2,34 +2,42 @@ package com.example.weatherapp.model
 
 import androidx.room.*
 import kotlinx.coroutines.flow.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
+class Converters {
+    @OptIn(ExperimentalSerializationApi::class)
+    @TypeConverter
+    public fun fromList(cities: List<City>): String {
+        return Json.encodeToString(cities)
+    }
+
+    @TypeConverter
+    public fun toList(citiesJson: String): List<City> {
+        return Json.decodeFromString(citiesJson)
+    }
+}
 /**
- * Location DAO
+ * Prefecture DAO
  */
-@Entity
-data class LocationValue(
-    @PrimaryKey val id: String,
-    @ColumnInfo val sortOrder: Int,
-    @ColumnInfo val kind: String,
-    @ColumnInfo val value: String
-)
-
 @Dao
-interface LocationsDao {
-    @Query("SELECT * FROM LocationValue order by sortOrder")
-    fun getAll(): List<LocationValue>
+interface PrefectureDao {
+    @Query("SELECT * FROM Prefecture")
+    fun getAll(): List<Prefecture>
 
-    @Query("SELECT * FROM LocationValue where id = :keyId")
-    fun findByKey(keyId: String): LocationValue?
+    @Query("SELECT * FROM Prefecture where id = :keyId")
+    fun findByKey(keyId: String): Prefecture?
 
     // vararg is similar to the arguments object of JS
     @Upsert
-    fun insertAll(vararg values: LocationValue)
+    fun insertAll(vararg values: Prefecture)
 
-    @Query("DELETE FROM LocationValue")
+    @Query("DELETE FROM Prefecture")
     fun clear()
 
-    @Query("SELECT count(*) FROM LocationValue")
+    @Query("SELECT count(*) FROM Prefecture")
     fun count(): Int
 }
 
@@ -55,9 +63,10 @@ interface KeyValueDao {
     fun putAll(vararg keyValue: KeyValuePair)
 }
 
-@Database(entities = [LocationValue::class, KeyValuePair::class], version = 1)
+@Database(entities = [Prefecture::class, KeyValuePair::class], version = 1)
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun locaitonDao(): LocationsDao
+    abstract fun prefectureDao(): PrefectureDao
 
     abstract fun keyValueDao(): KeyValueDao
 }

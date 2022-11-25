@@ -46,10 +46,11 @@ data class LocationResponse(
 )
 
 @Serializable
+@Entity
 data class Prefecture(
-    val id: String,
-    val name: String,
-    var cities: List<City> = listOf()
+    @PrimaryKey val id: String,
+    @ColumnInfo val name: String,
+    @ColumnInfo var cities: List<City> = listOf()
 )
 
 @Serializable

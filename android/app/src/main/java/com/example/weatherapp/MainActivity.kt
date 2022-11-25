@@ -23,6 +23,7 @@ import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.*
+import kotlinx.serialization.ExperimentalSerializationApi
 import java.lang.System.exit
 
 class MainActivity : ComponentActivity() {
@@ -33,14 +34,6 @@ class MainActivity : ComponentActivity() {
         val viewModel: AppViewModel by viewModels()
         Log.d("debug", "--------->track: before initialize")
         viewModel.initialize(this)
-
-        viewModel.readValue("selected_city") { selectedCityId ->
-            Log.d("debug", "--------->track: selectedCityId = $selectedCityId")
-            viewModel.changeCity(selectedCityId)
-        }
-//        Log.d("debug", "--------->track: after readValue")
-//
-//        Log.d("debug", "--------->track: after changeCity")
 
         setContent {
             WeatherAppTheme {
@@ -57,6 +50,7 @@ class MainActivity : ComponentActivity() {
 }
 
 // @Preview(showBackground = true)
+@OptIn(ExperimentalSerializationApi::class)
 @Composable
 fun WeatherApp(viewModel: AppViewModel) {
 
@@ -80,7 +74,7 @@ fun WeatherApp(viewModel: AppViewModel) {
                     currentCity = viewModel.city.value,
                     onClose = { selectedCity ->
                         viewModel.city.value = selectedCity
-                        viewModel.saveValue("selected_city", selectedCity.id)
+                        viewModel.saveSelectedCity(selectedCity)
                         navigationController.navigateUp()
                     }
                 )
@@ -92,13 +86,25 @@ fun WeatherApp(viewModel: AppViewModel) {
         }
     }
 
-    if (viewModel.city.value.id != "") {
-        navigationController.navigate("main")
-        return
-    }
-    viewModel.getLocations { locations ->
+    runBlocking {
+        /**
+         * Load the last selected city
+         */
+        val selectedCity = viewModel.loadSelectedCity()
+        Log.d("debug", "--------->track: selectedCityId = $selectedCity")
+        if (selectedCity != null) {
+            viewModel.setCurrentCity(selectedCity)
+            CoroutineScope(Dispatchers.Main).launch {
+                navigationController.navigate("main")
+            }
+            return@runBlocking
+        }
 
-        if (locations == null) {
+        /**
+         * Show the settings screen for the first time or failed to load the settings (just in case)
+         */
+        val prefectures = viewModel.getLocations()
+        if (prefectures == null) {
             if (!viewModel.networkMonitor.isOnline) {
                 CoroutineScope(Dispatchers.Main).launch {
                     navigationController.navigateSingleTopTo("no_internet_error")
@@ -107,11 +113,11 @@ fun WeatherApp(viewModel: AppViewModel) {
                 // TODO: Error process for unknown error
                 exit(1)
             }
-            return@getLocations
+            return@runBlocking
         }
 
         viewModel.locations.clear()
-        viewModel.locations.addAll(locations.prefectures)
+        viewModel.locations.addAll(prefectures)
 
         CoroutineScope(Dispatchers.Main).launch {
             navigationController.navigateSingleTopTo("settings")
