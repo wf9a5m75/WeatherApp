@@ -23,7 +23,7 @@ fun AppGlobalNav(
         elevation = 4.dp,
         title = {
             Text(
-                text = viewModel.city.value.name
+                text = viewModel.city?.name ?: "N/A"
             )
         },
 

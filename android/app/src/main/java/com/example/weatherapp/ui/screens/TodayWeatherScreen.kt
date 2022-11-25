@@ -94,6 +94,11 @@ fun TodayWeatherScreen(viewModel: AppViewModel? = viewModel()) {
                 .verticalScroll(state = scrollState, enabled = true)
         ) {
 
+            val errorMessage = viewModel.errorMessage
+            if (errorMessage != null) {
+                Text(text = errorMessage)
+            }
+
             Image(
                 painter = weatherIconResource(currentWeatherIcon, getCurrentHour()),
                 contentDescription = "",

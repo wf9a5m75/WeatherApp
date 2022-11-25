@@ -1,8 +1,10 @@
 package com.example.weatherapp.model
 
 import android.content.Context
-import androidx.compose.runtime.MutableState
+import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
@@ -14,15 +16,14 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.net.HttpURLConnection
 import java.util.*
 
 class AppViewModel : ViewModel() {
 
     private val TAG = "ViewModel"
 
-    var city: MutableState<City> = mutableStateOf(
-        City("", "")
-    )
+    var city by mutableStateOf<City?>(null)
 
     val locations: MutableList<Prefecture> = mutableListOf()
 
@@ -82,10 +83,17 @@ class AppViewModel : ViewModel() {
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun loadSelectedCity() = viewModelScope.async(Dispatchers.IO) {
+    fun loadSelectedCity() = viewModelScope.launch {
+        city = internalLoadSelectedCity()
+        Log.d("debug", "--------->track: selectedCityId = $city")
+    }
+
+    private suspend fun internalLoadSelectedCity(): City? {
         val cityJson = readValue("selected_city")
-        return@async cityJson?.let { Json.decodeFromString<City>(it) }
-    }.await()
+        cityJson ?: return null
+
+        return Json.decodeFromString<City>(cityJson)
+    }
 
     @OptIn(ExperimentalSerializationApi::class)
     fun saveSelectedCity(
@@ -109,30 +117,44 @@ class AppViewModel : ViewModel() {
         return@async this@AppViewModel.appDb.keyValueDao().get(key)?.value
     }.await()
 
-    suspend fun getLocations() = viewModelScope.async(Dispatchers.IO) {
+    suspend fun getLocations() = viewModelScope.launch(Dispatchers.IO) {
+        internalGetLocation()
+    }
 
-        if (!this@AppViewModel.networkMonitor.isOnline) {
+    var errorMessage by mutableStateOf<String?>(null)
 
-            // Read locations from the DB if offline
-            return@async if (this@AppViewModel.appDb.prefectureDao().count() > 0) {
-                readLocationsFromDB()
-            } else {
-                // TODO: Do something for the case, no list and internet
-                null
+    private suspend fun internalGetLocation() {
+        if (this@AppViewModel.networkMonitor.isOnline) {
+            val response = weatherApi.getLocationsFromServer()
+
+            when (response.code()) {
+                HttpURLConnection.HTTP_OK -> {
+                    val body = response.body()
+                    if (body == null) {
+                        Log.w(TAG, "getLocationsFromServer body null.")
+                        return
+                    }
+                    saveLocationsToDB(body)
+                }
+                HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+                }
             }
         }
-
-        val response = weatherApi.getLocationsFromServer()
-        if (response.code() == 200) {
-            saveLocationsToDB(response.body()!!)
+        // Read locations from the DB if offline
+        if (this@AppViewModel.appDb.prefectureDao().count() > 0) {
+            loadLocationsFromDB()
+        } else {
+            Log.w(TAG, "prefecture list size = 0")
         }
-        return@async readLocationsFromDB()
-    }.await()
+    }
 
-    private suspend fun readLocationsFromDB() = viewModelScope.async(Dispatchers.IO) {
-        val prefectures = this@AppViewModel.appDb.prefectureDao().getAll()
-        return@async prefectures
-    }.await()
+    private suspend fun loadLocationsFromDB() {
+        val locationList = appDb.prefectureDao().getAll()
+        locationList.also {
+            locations.clear()
+            locations.addAll(it)
+        }
+    }
 
     private fun saveLocationsToDB(locationResponse: LocationResponse) {
         this.appDb.prefectureDao().clear()
@@ -150,8 +172,4 @@ class AppViewModel : ViewModel() {
 //        )
 //        return@async response.body()
 //    }.await()
-
-    fun setCurrentCity(city: City) {
-        this.city.value = city
-    }
 }

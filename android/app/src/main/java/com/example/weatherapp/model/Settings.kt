@@ -10,12 +10,12 @@ import kotlinx.serialization.json.Json
 class Converters {
     @OptIn(ExperimentalSerializationApi::class)
     @TypeConverter
-    public fun fromList(cities: List<City>): String {
+    fun fromList(cities: List<City>): String {
         return Json.encodeToString(cities)
     }
 
     @TypeConverter
-    public fun toList(citiesJson: String): List<City> {
+    fun toList(citiesJson: String): List<City> {
         return Json.decodeFromString(citiesJson)
     }
 }
@@ -26,7 +26,7 @@ class Converters {
 @Dao
 interface PrefectureDao {
     @Query("SELECT * FROM Prefecture")
-    fun getAll(): List<Prefecture>
+    suspend fun getAll(): List<Prefecture>
 
     @Query("SELECT * FROM Prefecture where id = :keyId")
     fun findByKey(keyId: String): Prefecture?

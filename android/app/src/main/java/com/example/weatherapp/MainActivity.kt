@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.weatherapp.model.AppViewModel
+import com.example.weatherapp.model.City
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.OptionMenuItem
@@ -71,9 +72,9 @@ fun WeatherApp(viewModel: AppViewModel) {
             composable(route = "settings") {
                 SelectCityScreen(
                     locations = viewModel.locations,
-                    currentCity = viewModel.city.value,
+                    currentCity = viewModel.city ?: City("", ""),
                     onClose = { selectedCity ->
-                        viewModel.city.value = selectedCity
+                        viewModel.city = selectedCity
                         viewModel.saveSelectedCity(selectedCity)
                         navigationController.navigateUp()
                     }
@@ -86,43 +87,28 @@ fun WeatherApp(viewModel: AppViewModel) {
         }
     }
 
-    runBlocking {
-        /**
-         * Load the last selected city
-         */
-        val selectedCity = viewModel.loadSelectedCity()
-        Log.d("debug", "--------->track: selectedCityId = $selectedCity")
-        if (selectedCity != null) {
-            viewModel.setCurrentCity(selectedCity)
-            CoroutineScope(Dispatchers.Main).launch {
-                navigationController.navigate("main")
-            }
-            return@runBlocking
-        }
-
-        /**
-         * Show the settings screen for the first time or failed to load the settings (just in case)
-         */
-        val prefectures = viewModel.getLocations()
-        if (prefectures == null) {
-            if (!viewModel.networkMonitor.isOnline) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    navigationController.navigateSingleTopTo("no_internet_error")
-                }
-            } else {
-                // TODO: Error process for unknown error
-                exit(1)
-            }
-            return@runBlocking
-        }
-
-        viewModel.locations.clear()
-        viewModel.locations.addAll(prefectures)
-
-        CoroutineScope(Dispatchers.Main).launch {
-            navigationController.navigateSingleTopTo("settings")
-        }
+    /**
+     * Load the last selected city
+     */
+    viewModel.loadSelectedCity()
+    if (viewModel.city != null) {
+        navigationController.navigate("main")
+        return
     }
+
+    /**
+     * Show the settings screen for the first time or failed to load the settings (just in case)
+     */
+    if (viewModel.locations.isEmpty()) {
+        // TODO: Show error page
+        return
+    }
+
+    if (!viewModel.networkMonitor.isOnline) {
+        navigationController.navigateSingleTopTo("no_internet_error")
+    }
+
+    navigationController.navigateSingleTopTo("settings")
 }
 
 @OptIn(ExperimentalUnitApi::class)
