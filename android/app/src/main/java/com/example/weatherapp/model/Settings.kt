@@ -19,6 +19,7 @@ class Converters {
         return Json.decodeFromString(citiesJson)
     }
 }
+
 /**
  * Prefecture DAO
  */
