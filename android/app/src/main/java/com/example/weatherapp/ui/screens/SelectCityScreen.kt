@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,9 @@ fun SelectCityScreen(
     onClose: (city: City) -> Unit = {}
 ) {
     var selectedCity by remember { mutableStateOf(currentCity) }
+    BackHandler(true) {
+        onClose(selectedCity)
+    }
 
     Column(
         modifier = Modifier

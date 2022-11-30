@@ -123,7 +123,7 @@ interface CacheDao {
 @Database(entities = [CacheValue::class], version = 1)
 @TypeConverters(DateToLongConverter::class)
 abstract class CacheDB : RoomDatabase() {
-    abstract fun dao(): CacheDao
+    abstract fun cacheDao(): CacheDao
 }
 
 class ETagInterceptor(db: CacheDB) : Interceptor {
@@ -135,7 +135,7 @@ class ETagInterceptor(db: CacheDB) : Interceptor {
         val url = request.url().toString()
 
         // Add "If-None-Match" header if cached ETag is available
-        val cache = this.db.dao().get(url)
+        val cache = this.db.cacheDao().get(url)
             ?: CacheValue(
                 url = url,
                 eTag = "",
@@ -159,7 +159,7 @@ class ETagInterceptor(db: CacheDB) : Interceptor {
         // Save ETag and Last-Modified values to the Cache DB
         cache.eTag = response.header("ETag") ?: ""
         cache.lastModified = response.header("Last-Modified") ?: getCurrentTime()
-        this.db.dao().put(cache)
+        this.db.cacheDao().put(cache)
         return response
     }
 

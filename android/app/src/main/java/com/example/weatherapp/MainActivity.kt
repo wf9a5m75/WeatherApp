@@ -24,7 +24,6 @@ import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.*
 import kotlinx.serialization.ExperimentalSerializationApi
-import java.lang.System.exit
 
 class MainActivity : ComponentActivity() {
 
@@ -64,20 +63,20 @@ fun WeatherApp(viewModel: AppViewModel) {
                 MainScreen(
                     viewModel = viewModel,
                     onChangeCity = {
-                        navigationController.navigateSingleTopTo("settings")
+                        navigationController.navigate("settings")
                     }
                 )
             }
             composable(route = "settings") {
                 SelectCityScreen(
                     locations = viewModel.locations,
-                    currentCity = viewModel.city.value,
-                    onClose = { selectedCity ->
-                        viewModel.city.value = selectedCity
-                        viewModel.saveSelectedCity(selectedCity)
-                        navigationController.navigateUp()
-                    }
-                )
+                    currentCity = viewModel.city.value
+                ) { selectedCity ->
+                    Log.d("MainActivity", "----------->onClose: $selectedCity")
+                    viewModel.city.value = selectedCity
+                    viewModel.saveSelectedCity(selectedCity)
+                    navigationController.navigate("main")
+                }
             }
 
             composable(route = "no_internet_error") {
@@ -86,41 +85,21 @@ fun WeatherApp(viewModel: AppViewModel) {
         }
     }
 
-    runBlocking {
-        /**
-         * Load the last selected city
-         */
-        val selectedCity = viewModel.loadSelectedCity()
-        Log.d("debug", "--------->track: selectedCityId = $selectedCity")
-        if (selectedCity != null) {
-            viewModel.setCurrentCity(selectedCity)
-            CoroutineScope(Dispatchers.Main).launch {
-                navigationController.navigate("main")
-            }
-            return@runBlocking
+    // Load the last selected city
+    viewModel.loadSelectedCity {
+        if (viewModel.city.value.id != "") {
+            navigationController.navigate("main")
+            return@loadSelectedCity
         }
 
-        /**
-         * Show the settings screen for the first time or failed to load the settings (just in case)
-         */
-        val prefectures = viewModel.getLocations()
-        if (prefectures == null) {
-            if (!viewModel.networkMonitor.isOnline) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    navigationController.navigateSingleTopTo("no_internet_error")
-                }
-            } else {
-                // TODO: Error process for unknown error
-                exit(1)
+        // If no preference, move to the selectCity screen
+        viewModel.getLocations {
+            if (viewModel.locations.size == 0) {
+                Log.e("WeatherApp", "サーバーからデータの取得に失敗しました")
+                return@getLocations
             }
-            return@runBlocking
-        }
 
-        viewModel.locations.clear()
-        viewModel.locations.addAll(prefectures)
-
-        CoroutineScope(Dispatchers.Main).launch {
-            navigationController.navigateSingleTopTo("settings")
+            navigationController.navigate("settings")
         }
     }
 }
@@ -200,4 +179,34 @@ fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
 
     // Restore state when reselecting a previously selected item
     restoreState = true
+}
+
+@Composable
+fun showAlert(title: String, message: String, onClosed: () -> Unit = {}) {
+    val openDialog = remember { mutableStateOf(false) }
+    if (!openDialog.value) {
+        return
+    }
+
+    AlertDialog(
+        onDismissRequest = {
+            openDialog.value = false
+            onClosed()
+        },
+        title = {
+            Text(text = title)
+        },
+        text = {
+            Text(text = message)
+        },
+        confirmButton = { },
+        dismissButton = {
+            Button(onClick = {
+                openDialog.value = false
+                onClosed()
+            }) {
+                Text(text = "閉じる")
+            }
+        }
+    )
 }
