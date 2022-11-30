@@ -75,7 +75,7 @@ fun WeatherApp(viewModel: AppViewModel) {
                     Log.d("MainActivity", "----------->onClose: $selectedCity")
                     viewModel.city.value = selectedCity
                     viewModel.saveSelectedCity(selectedCity)
-                    navigationController.navigate("main")
+                    navigationController.popupToInclusive("main")
                 }
             }
 
@@ -88,7 +88,7 @@ fun WeatherApp(viewModel: AppViewModel) {
     // Load the last selected city
     viewModel.loadSelectedCity {
         if (viewModel.city.value.id != "") {
-            navigationController.navigate("main")
+            navigationController.popupToInclusive("main")
             return@loadSelectedCity
         }
 
@@ -100,7 +100,7 @@ fun WeatherApp(viewModel: AppViewModel) {
                 return@getLocations
             }
 
-            navigationController.navigate("settings")
+            navigationController.popupToInclusive("settings")
         }
     }
 }
