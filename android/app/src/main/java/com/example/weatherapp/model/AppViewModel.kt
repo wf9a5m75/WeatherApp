@@ -146,7 +146,8 @@ class AppViewModel : ViewModel() {
                 }
 
                 else -> {
-                    Log.e(TAG, "getLcationsFromServer returns something $response")
+                    // TODO: install preset list from JSON file
+                    Log.e(TAG, "getLocationsFromServer returns something $response")
                 }
             }
             viewModelScope.launch {

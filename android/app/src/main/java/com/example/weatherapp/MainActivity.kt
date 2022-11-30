@@ -95,6 +95,7 @@ fun WeatherApp(viewModel: AppViewModel) {
         // If no preference, move to the selectCity screen
         viewModel.getLocations {
             if (viewModel.locations.size == 0) {
+                // TODO:
                 Log.e("WeatherApp", "サーバーからデータの取得に失敗しました")
                 return@getLocations
             }
