@@ -1,5 +1,8 @@
 name: Android Test CI
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   android-unit-test:

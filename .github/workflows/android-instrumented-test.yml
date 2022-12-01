@@ -1,5 +1,11 @@
-name: android-instrumented-test
-on: [workflow_dispatch]
+name: Android instrumented test
+on:
+  - workflow_dispatch
+    push:
+      branches:
+        - main
+        - test
+
 
 jobs:
   android-instrumented-test:
