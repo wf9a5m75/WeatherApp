@@ -9,12 +9,7 @@ import com.example.weatherapp.ui.screens.LoadingScreen
 import org.junit.Rule
 import org.junit.Test
 
-class LoadingScreenInstrumentedTest {
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    fun getString(@StringRes resId: Int) = composeTestRule.activity.getString(resId)
+class LoadingScreenInstrumentedTest : BaseActivityInstrumentedTest() {
 
     @Test
     fun loadingScreenTest_shouldDisplayMessage() {
