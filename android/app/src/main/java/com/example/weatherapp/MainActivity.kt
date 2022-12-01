@@ -181,33 +181,3 @@ fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
     // Restore state when reselecting a previously selected item
     restoreState = true
 }
-
-@Composable
-fun showAlert(title: String, message: String, onClosed: () -> Unit = {}) {
-    val openDialog = remember { mutableStateOf(false) }
-    if (!openDialog.value) {
-        return
-    }
-
-    AlertDialog(
-        onDismissRequest = {
-            openDialog.value = false
-            onClosed()
-        },
-        title = {
-            Text(text = title)
-        },
-        text = {
-            Text(text = message)
-        },
-        confirmButton = { },
-        dismissButton = {
-            Button(onClick = {
-                openDialog.value = false
-                onClosed()
-            }) {
-                Text(text = "閉じる")
-            }
-        }
-    )
-}

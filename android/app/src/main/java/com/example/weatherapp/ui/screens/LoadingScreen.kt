@@ -8,19 +8,22 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
+import com.example.weatherapp.R
 
 @Composable
 fun LoadingScreen() {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .wrapContentSize()
     ) {
 
         Text(
-            text = "サーバーに接続しています...",
+            text = stringResource(id = R.string.loading_message),
             fontSize = 18.sp,
             color = MaterialTheme.colors.onBackground
         )
