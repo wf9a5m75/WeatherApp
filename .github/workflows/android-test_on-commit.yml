@@ -1,0 +1,20 @@
+name: Android Test CI
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: set up JDK 1.8
+        uses: actions/setup-java@2
+        with:
+            java-version: '17'
+            distribution: 'temurin'
+
+      - name: Unit Test
+        run: |
+          cd android
+          ./gradlew test
