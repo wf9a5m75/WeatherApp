@@ -1,5 +1,8 @@
 package com.example.weatherapp
 
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelectable
 import androidx.compose.ui.test.assertIsSelected
@@ -96,6 +99,8 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
     fun shouldInvokeOnCloseWhenTapOnTheBackButton() {
         val currentCity = City("pref2_city2", "City2-2")
         val targetCity = City("pref3_city2", "City3-2")
+
+        var selectedCity = mutableStateOf(currentCity)
         val onCloseCallback = mock(Callback::class.java)
 
         composeTestRule.apply {
@@ -103,7 +108,9 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
                 SelectCityScreen(
                     locations = prefectures,
                     currentCity = currentCity,
-                    onClose = onCloseCallback
+                    onClose = {
+                        selectedCity.value = it
+                    }
                 )
             }
             composeTestRule
@@ -111,12 +118,12 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
                 .performClick()
                 .assertIsSelected()
 
-
             composeTestRule
                 .onNodeWithContentDescription("Back")
                 .performClick()
 
-            verify(onCloseCallback, times(1))(any())
+            assert(selectedCity.value.id == targetCity.id)
+//            verify(onCloseCallback, times(2))
         }
     }
 }
