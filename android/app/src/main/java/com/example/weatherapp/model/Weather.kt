@@ -54,7 +54,7 @@ data class Prefecture(
 )
 
 @Serializable
-class City(
+data class City(
     val id: String,
     val name: String
 )
