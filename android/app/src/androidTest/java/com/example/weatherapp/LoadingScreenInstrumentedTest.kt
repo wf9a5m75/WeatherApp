@@ -12,7 +12,7 @@ import org.junit.Test
 class LoadingScreenInstrumentedTest : BaseActivityInstrumentedTest() {
 
     @Test
-    fun loadingScreenTest_shouldDisplayMessage() {
+    fun shouldDisplayMessage() {
         composeTestRule.apply {
             setContent {
                 LoadingScreen()

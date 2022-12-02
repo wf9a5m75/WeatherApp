@@ -86,13 +86,13 @@ fun SelectCityScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = (city == selectedCity),
+                                    selected = (city.id == selectedCity.id),
                                     onClick = { selectedCity = city }
                                 )
                                 .padding(horizontal = 16.dp)
                         ) {
                             RadioButton(
-                                selected = (city == selectedCity),
+                                selected = (city.id == selectedCity.id),
                                 onClick = { selectedCity = city }
                             )
                             Text(

@@ -8,7 +8,8 @@ import org.junit.Test
 class OfflineScreenInstrumentedTest: BaseActivityInstrumentedTest() {
 
     @Test
-    fun offlineScreenTest_shouldDisplayMessage() {
+    fun shouldDisplayMessage() {
+
         composeTestRule.apply {
             setContent {
                 OfflineScreen()
