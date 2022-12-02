@@ -11,5 +11,4 @@ abstract class BaseActivityInstrumentedTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     protected fun getString(@StringRes resId: Int) = composeTestRule.activity.getString(resId)
-
 }

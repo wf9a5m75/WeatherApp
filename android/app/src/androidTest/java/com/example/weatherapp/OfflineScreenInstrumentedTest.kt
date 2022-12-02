@@ -5,7 +5,7 @@ import androidx.compose.ui.test.onNodeWithText
 import com.example.weatherapp.ui.screens.OfflineScreen
 import org.junit.Test
 
-class OfflineScreenInstrumentedTest: BaseActivityInstrumentedTest() {
+class OfflineScreenInstrumentedTest : BaseActivityInstrumentedTest() {
 
     @Test
     fun shouldDisplayMessage() {
