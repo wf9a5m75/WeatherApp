@@ -1,6 +1,5 @@
 package com.example.weatherapp.model
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -35,7 +34,6 @@ class AppViewModel @Inject constructor(
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
         viewModelScope.launch {
-            Log.d(TAG, "----> ${this@AppViewModel.city}")
             if (this@AppViewModel.city.value.id != "") {
                 onFinished()
                 return@launch
