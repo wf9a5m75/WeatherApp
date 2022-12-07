@@ -24,53 +24,41 @@ object AppModule {
     @Singleton
     fun provideNetworkMonitor(
         connectivityManager: ConnectivityManager
-    ): NetworkMonitor {
-        return NetworkMonitor(connectivityManager)
-    }
+    ) = NetworkMonitor(connectivityManager)
 
     @Provides
     @Singleton
-    fun provideWeatherApi(retrofit: IWeatherApi): WeatherApi {
-        return WeatherApi(retrofit)
-    }
+    fun provideWeatherApi(retrofit: IWeatherApi) = WeatherApi(retrofit)
 
     @Provides
     @Singleton
-    fun provideRetrofit(cacheDB: CacheDB): IWeatherApi {
-        return RetrofitHelper.getInstance(cacheDB).create(IWeatherApi::class.java)
-    }
+    fun provideRetrofit(cacheDB: CacheDB): IWeatherApi = RetrofitHelper
+        .getInstance(cacheDB)
+        .create(IWeatherApi::class.java)
 
     @Provides
     @Singleton
     fun provideCacheDB(
         @ApplicationContext context: Context
-    ): CacheDB {
-        return Room.databaseBuilder(
+    ) = Room.databaseBuilder(
             context = context,
             klass = CacheDB::class.java,
             name = "etag-database"
         ).build()
-    }
 
     @Provides
     @Singleton
     fun provideAppDb(
         @ApplicationContext context: Context
-    ): AppDatabase {
-        return Room.databaseBuilder(
+    ) = Room.databaseBuilder(
             context = context,
             klass = AppDatabase::class.java,
             name = "app-database"
         ).build()
-    }
 
     @Provides
     @Singleton
     fun provideConnectivityManager(
         @ApplicationContext context: Context
-    ): ConnectivityManager {
-        return context.getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-    }
+    ) = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }
