@@ -11,7 +11,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.ExperimentalUnitApi
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -41,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     // modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    WeatherApp()
+                    WeatherApp(viewModel)
                 }
             }
         }
@@ -50,8 +49,7 @@ class MainActivity : ComponentActivity() {
 
 // @Preview(showBackground = true)
 @Composable
-fun WeatherApp() {
-    val viewModel = hiltViewModel<AppViewModel>()
+fun WeatherApp(viewModel: AppViewModel) {
 
     val navigationController = rememberNavController()
     WeatherAppTheme {

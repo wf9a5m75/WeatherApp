@@ -41,20 +41,20 @@ object AppModule {
     fun provideCacheDB(
         @ApplicationContext context: Context
     ) = Room.databaseBuilder(
-            context = context,
-            klass = CacheDB::class.java,
-            name = "etag-database"
-        ).build()
+        context = context,
+        klass = CacheDB::class.java,
+        name = "etag-database"
+    ).build()
 
     @Provides
     @Singleton
     fun provideAppDb(
         @ApplicationContext context: Context
     ) = Room.databaseBuilder(
-            context = context,
-            klass = AppDatabase::class.java,
-            name = "app-database"
-        ).build()
+        context = context,
+        klass = AppDatabase::class.java,
+        name = "app-database"
+    ).build()
 
     @Provides
     @Singleton

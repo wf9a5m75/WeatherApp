@@ -34,26 +34,21 @@ class AppViewModel @Inject constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
-        viewModelScope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch {
+            Log.d(TAG, "----> ${this@AppViewModel.city}")
             if (this@AppViewModel.city.value.id != "") {
-                viewModelScope.launch {
-                    onFinished()
-                }
+                onFinished()
                 return@launch
             }
 
             this@AppViewModel.readValue("selected_city") {
                 if (it == null) {
-                    viewModelScope.launch {
-                        onFinished()
-                    }
+                    onFinished()
                     return@readValue
                 }
 
                 this@AppViewModel.city.value = Json.decodeFromString<City>(it)
-                viewModelScope.launch {
-                    onFinished()
-                }
+                onFinished()
             }
         }
     }
@@ -82,7 +77,10 @@ class AppViewModel @Inject constructor(
         onFinished: (value: String?) -> Unit
     ) {
         viewModelScope.launch(context = Dispatchers.IO) {
-            onFinished(this@AppViewModel.appDb.keyValueDao().get(key)?.value)
+            val result = this@AppViewModel.appDb.keyValueDao().get(key)?.value
+            viewModelScope.launch {
+                onFinished(result)
+            }
         }
     }
 
