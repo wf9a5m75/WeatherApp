@@ -30,6 +30,7 @@ import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
+import javax.inject.Inject
 
 /**
  *  ref: Retrofit with Kotlin Coroutine in Android
@@ -234,7 +235,7 @@ enum class ForecastDay(val day: Int) {
     DAY8(7)
 }
 
-class WeatherApi(
+class WeatherApi @Inject constructor(
     instance: IWeatherApi
 ) {
     private val instance = instance

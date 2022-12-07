@@ -22,17 +22,16 @@ import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.*
 import com.example.weatherapp.ui.theme.WeatherAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.serialization.ExperimentalSerializationApi
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val viewModel: AppViewModel by viewModels()
-        Log.d("debug", "--------->track: before initialize")
-        viewModel.initialize(this)
 
         setContent {
             WeatherAppTheme {
@@ -49,7 +48,6 @@ class MainActivity : ComponentActivity() {
 }
 
 // @Preview(showBackground = true)
-@OptIn(ExperimentalSerializationApi::class)
 @Composable
 fun WeatherApp(viewModel: AppViewModel) {
 
