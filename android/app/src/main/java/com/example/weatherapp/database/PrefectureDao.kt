@@ -1,7 +1,11 @@
-package com.example.weatherapp.model
+package com.example.weatherapp.database
 
-import androidx.room.*
-import kotlinx.coroutines.flow.*
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.TypeConverter
+import androidx.room.Upsert
+import com.example.weatherapp.network.model.City
+import com.example.weatherapp.network.model.Prefecture
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -40,34 +44,4 @@ interface PrefectureDao {
 
     @Query("SELECT count(*) FROM Prefecture")
     suspend fun count(): Int
-}
-
-/**
- * General values
- */
-@Entity
-data class KeyValuePair(
-    @PrimaryKey val id: String,
-    @ColumnInfo val value: String
-)
-
-@Dao
-interface KeyValueDao {
-
-    @Query("SELECT * FROM KeyValuePair where id = :keyId limit 1")
-    suspend fun get(keyId: String): KeyValuePair?
-
-    @Upsert
-    suspend fun put(keyValue: KeyValuePair)
-
-    @Upsert
-    suspend fun putAll(vararg keyValue: KeyValuePair)
-}
-
-@Database(entities = [Prefecture::class, KeyValuePair::class], version = 1)
-@TypeConverters(Converters::class)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun prefectureDao(): PrefectureDao
-
-    abstract fun keyValueDao(): KeyValueDao
 }

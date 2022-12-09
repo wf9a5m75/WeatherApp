@@ -7,8 +7,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
-import com.example.weatherapp.model.City
-import com.example.weatherapp.model.Prefecture
+import com.example.weatherapp.database.City
+import com.example.weatherapp.database.Prefecture
 import com.example.weatherapp.ui.screens.SelectCityScreen
 import org.junit.Before
 import org.junit.Test

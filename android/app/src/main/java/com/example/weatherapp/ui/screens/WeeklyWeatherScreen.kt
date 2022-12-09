@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.*
-import com.example.weatherapp.model.AppViewModel
+import com.example.weatherapp.AppViewModel
 
 @Composable
 fun WeeklyWeatherScreen(viewModel: AppViewModel = viewModel()) {

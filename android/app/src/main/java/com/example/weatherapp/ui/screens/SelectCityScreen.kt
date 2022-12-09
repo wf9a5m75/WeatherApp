@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weatherapp.model.City
-import com.example.weatherapp.model.Prefecture
+import com.example.weatherapp.network.model.City
+import com.example.weatherapp.network.model.Prefecture
 
 @Preview(showBackground = true)
 @Composable

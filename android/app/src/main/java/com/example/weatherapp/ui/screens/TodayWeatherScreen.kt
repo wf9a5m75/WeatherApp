@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.*
 import com.example.weatherapp.R
-import com.example.weatherapp.model.AppViewModel
-import com.example.weatherapp.model.getCurrentHour
-import com.example.weatherapp.model.weatherIconResource
+import com.example.weatherapp.AppViewModel
+import com.example.weatherapp.network.utils.getCurrentHour
+import com.example.weatherapp.network.utils.weatherIconResource
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 

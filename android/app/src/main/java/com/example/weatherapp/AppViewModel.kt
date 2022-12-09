@@ -1,10 +1,17 @@
-package com.example.weatherapp.model
+package com.example.weatherapp
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapp.database.KeyValueDao
+import com.example.weatherapp.database.KeyValuePair
+import com.example.weatherapp.database.PrefectureDao
+import com.example.weatherapp.network.IWeatherApi
+import com.example.weatherapp.network.model.City
+import com.example.weatherapp.network.model.LocationResponse
+import com.example.weatherapp.network.model.Prefecture
 import com.example.weatherapp.utils.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

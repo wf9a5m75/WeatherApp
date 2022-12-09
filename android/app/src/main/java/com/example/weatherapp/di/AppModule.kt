@@ -3,10 +3,14 @@ package com.example.weatherapp.di
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.room.Room
-import com.example.weatherapp.model.AppDatabase
-import com.example.weatherapp.model.CacheDB
-import com.example.weatherapp.model.IWeatherApi
-import com.example.weatherapp.model.RetrofitHelper
+import com.example.weatherapp.database.AppDatabase
+import com.example.weatherapp.AppViewModel
+import com.example.weatherapp.database.KeyValueDao
+import com.example.weatherapp.database.PrefectureDao
+import com.example.weatherapp.network.IWeatherApi
+import com.example.weatherapp.network.RetrofitHelper
+import com.example.weatherapp.network.cache.CacheDB
+import com.example.weatherapp.network.cache.CacheDao
 import com.example.weatherapp.utils.NetworkMonitor
 import dagger.Module
 import dagger.Provides
@@ -21,25 +25,50 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideViewModel(
+        networkMonitor: NetworkMonitor,
+        weatherApi: IWeatherApi,
+        prefectureDao: PrefectureDao,
+        keyValueDao: KeyValueDao
+    ) = AppViewModel(
+        networkMonitor = networkMonitor,
+        weatherApi = weatherApi,
+        prefectureDao = prefectureDao,
+        keyValueDao = keyValueDao
+    )
+    @Provides
+    @Singleton
+    fun providePrefectureDao(
+        appDatabase: AppDatabase
+    ) = appDatabase.prefectureDao()
+
+    @Provides
+    @Singleton
+    fun provideKeyValueDao(
+        appDatabase: AppDatabase
+    ) = appDatabase.keyValueDao()
+
+    @Provides
+    @Singleton
     fun provideNetworkMonitor(
         connectivityManager: ConnectivityManager
     ) = NetworkMonitor(connectivityManager)
 
     @Provides
     @Singleton
-    fun provideWeatherApi(cacheDB: CacheDB): IWeatherApi = RetrofitHelper
-        .getInstance(cacheDB)
+    fun provideWeatherApi(cacheDao: CacheDao): IWeatherApi = RetrofitHelper
+        .getInstance(cacheDao)
         .create(IWeatherApi::class.java)
 
     @Provides
     @Singleton
-    fun provideCacheDB(
+    fun provideCacheDao(
         @ApplicationContext context: Context
     ) = Room.databaseBuilder(
         context = context,
         klass = CacheDB::class.java,
         name = "etag-database"
-    ).build()
+    ).build().cacheDao()
 
     @Provides
     @Singleton
@@ -56,4 +85,5 @@ object AppModule {
     fun provideConnectivityManager(
         @ApplicationContext context: Context
     ) = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
 }

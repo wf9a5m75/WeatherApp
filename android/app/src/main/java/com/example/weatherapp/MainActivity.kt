@@ -16,7 +16,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.weatherapp.model.AppViewModel
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.OptionMenuItem
