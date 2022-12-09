@@ -1,24 +1,29 @@
 package com.example.weatherapp.model
 
 import com.example.weatherapp.utils.INetworkMonitor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
-import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import retrofit2.Response
 
-@RunWith(MockitoJUnitRunner::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class AppViewModelTest {
 
     @Test
-    fun testA() {
-        val networkMonitor = mock<INetworkMonitor> { on { this.isOnline } doReturn false }
+    fun testA() = runTest {
+        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
+        Dispatchers.setMain(testDispatcher)
+
+        val networkMonitor = mock<INetworkMonitor> { on { this.isOnline } doReturn true }
         val weatherApi = mock<IWeatherApi> {
             onBlocking { this.getLocations() } doReturn Response.success(
                 LocationResponse(
@@ -56,7 +61,12 @@ class AppViewModelTest {
         val keyValueDao = mock<KeyValueDao> {
         }
 
-        val viewModel = AppViewModel(networkMonitor, weatherApi, prefectureDao, keyValueDao)
+        val viewModel = AppViewModel(
+            networkMonitor,
+            weatherApi,
+            prefectureDao,
+            keyValueDao,
+        )
 
         val expectedLocations = listOf(
             Prefecture(
@@ -69,7 +79,12 @@ class AppViewModelTest {
 
         assertEquals(0, viewModel.locations.size)
 
-        viewModel.getLocations { }
+        try {
+            viewModel.getLocations { }
+        } finally {
+            Dispatchers.resetMain()
+        }
+
         assertEquals(expectedLocations.size, viewModel.locations.size)
         assertEquals(expectedLocations[0], viewModel.locations[0])
     }
