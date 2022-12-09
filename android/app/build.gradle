@@ -111,9 +111,13 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
-    testImplementation "org.mockito:mockito-kotlin:$mockito_version"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
 
-    // hilt
+    // Mock Server
+    testImplementation "com.squareup.okhttp3:mockwebserver:$mock_server_version"
+
+
+    // hilt (Dependency Injection)
     implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"
     kapt "com.google.dagger:hilt-android-compiler:$rootProject.hilt_version"
     implementation "androidx.hilt:hilt-navigation-compose:$rootProject.hilt_navigaton_version"
