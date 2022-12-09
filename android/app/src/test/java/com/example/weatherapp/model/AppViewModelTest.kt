@@ -20,9 +20,6 @@ class AppViewModelTest {
 
     @Test
     fun testA() = runTest {
-        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
-        Dispatchers.setMain(testDispatcher)
-
         val networkMonitor = mock<INetworkMonitor> { on { this.isOnline } doReturn true }
         val weatherApi = mock<IWeatherApi> {
             onBlocking { this.getLocations() } doReturn Response.success(
@@ -61,7 +58,11 @@ class AppViewModelTest {
         val keyValueDao = mock<KeyValueDao> {
         }
 
+        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
+        Dispatchers.setMain(testDispatcher)
+
         val viewModel = AppViewModel(
+            Dispatchers.Main,
             networkMonitor,
             weatherApi,
             prefectureDao,

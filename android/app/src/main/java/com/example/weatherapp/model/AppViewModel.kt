@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.utils.INetworkMonitor
 import com.example.weatherapp.utils.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
+    private val dispatcher: CoroutineDispatcher,
     private val networkMonitor: INetworkMonitor,
     private val weatherApi: IWeatherApi,
     private val prefectureDao: PrefectureDao,
@@ -36,7 +37,7 @@ class AppViewModel @Inject constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             if (this@AppViewModel.city.value.id != "") {
                 onFinished()
                 return@launch
@@ -59,7 +60,7 @@ class AppViewModel @Inject constructor(
         city: City,
         onFinished: () -> Unit = {}
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             saveValue("selected_city", Json.encodeToString(city), onFinished)
         }
     }
@@ -77,7 +78,7 @@ class AppViewModel @Inject constructor(
         key: String,
         onFinished: (value: String?) -> Unit
     ) {
-        viewModelScope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             val result = keyValueDao.get(key)?.value
             viewModelScope.launch {
                 onFinished(result)
@@ -86,7 +87,7 @@ class AppViewModel @Inject constructor(
     }
 
     fun getLocations(onFinished: () -> Unit) {
-        viewModelScope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
 
             // Read locations from DB if offline
             if (!this@AppViewModel.networkMonitor.isOnline) {
@@ -136,7 +137,7 @@ class AppViewModel @Inject constructor(
         )
     }
 
-//    suspend fun getTodayWeather(day: ForecastDay) = viewModelScope.async(Dispatchers.IO) {
+//    suspend fun getTodayWeather(day: ForecastDay) = viewModelScope.async(dispatcher) {
 //
 //        val response = this@AppViewModel.weatherApi.getForecastFromServer(
 //            city = city.value,
