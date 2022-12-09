@@ -7,7 +7,6 @@ import com.example.weatherapp.model.AppDatabase
 import com.example.weatherapp.model.CacheDB
 import com.example.weatherapp.model.IWeatherApi
 import com.example.weatherapp.model.RetrofitHelper
-import com.example.weatherapp.model.WeatherApi
 import com.example.weatherapp.utils.NetworkMonitor
 import dagger.Module
 import dagger.Provides
@@ -28,11 +27,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideWeatherApi(retrofit: IWeatherApi) = WeatherApi(retrofit)
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(cacheDB: CacheDB): IWeatherApi = RetrofitHelper
+    fun provideWeatherApi(cacheDB: CacheDB): IWeatherApi = RetrofitHelper
         .getInstance(cacheDB)
         .create(IWeatherApi::class.java)
 

@@ -20,8 +20,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AppViewModel @Inject constructor(
     private val networkMonitor: NetworkMonitor,
-    private val weatherApi: WeatherApi,
-    private val appDb: AppDatabase
+    private val weatherApi: IWeatherApi,
+    private val prefectureDao: PrefectureDao,
+    private val keyValueDao: KeyValueDao
 ) : ViewModel() {
 
     private val TAG = "ViewModel"
@@ -67,7 +68,7 @@ class AppViewModel @Inject constructor(
         value: String,
         onFinished: () -> Unit = {}
     ) {
-        this@AppViewModel.appDb.keyValueDao().put(KeyValuePair(key, value))
+        keyValueDao.put(KeyValuePair(key, value))
         onFinished()
     }
 
@@ -76,7 +77,7 @@ class AppViewModel @Inject constructor(
         onFinished: (value: String?) -> Unit
     ) {
         viewModelScope.launch(context = Dispatchers.IO) {
-            val result = this@AppViewModel.appDb.keyValueDao().get(key)?.value
+            val result = keyValueDao.get(key)?.value
             viewModelScope.launch {
                 onFinished(result)
             }
@@ -89,7 +90,7 @@ class AppViewModel @Inject constructor(
             // Read locations from DB if offline
             if (!this@AppViewModel.networkMonitor.isOnline) {
                 this@AppViewModel.locations.clear()
-                this@AppViewModel.locations.addAll(appDb.prefectureDao().getAll())
+                this@AppViewModel.locations.addAll(prefectureDao.getAll())
                 viewModelScope.launch {
                     onFinished()
                 }
@@ -97,7 +98,7 @@ class AppViewModel @Inject constructor(
             }
 
             // Obtain the location list from the server if online
-            val response = this@AppViewModel.weatherApi.getLocationsFromServer()
+            val response = weatherApi.getLocations()
             when (response.code()) {
                 HttpURLConnection.HTTP_OK -> {
                     val body = response.body()
@@ -123,13 +124,13 @@ class AppViewModel @Inject constructor(
 
     private suspend fun readLocationsFromDB() {
         this@AppViewModel.locations.clear()
-        this@AppViewModel.locations.addAll(this@AppViewModel.appDb.prefectureDao().getAll())
+        this@AppViewModel.locations.addAll(prefectureDao.getAll())
     }
 
     private suspend fun saveLocationsToDB(locationResponse: LocationResponse) {
-        this.appDb.prefectureDao().clear()
-        this.appDb.prefectureDao().insertAll(*locationResponse.prefectures.toTypedArray())
-        this.appDb.keyValueDao().put(
+        prefectureDao.clear()
+        prefectureDao.insertAll(*locationResponse.prefectures.toTypedArray())
+        keyValueDao.put(
             KeyValuePair("location_lastupdate", locationResponse.last_update)
         )
     }

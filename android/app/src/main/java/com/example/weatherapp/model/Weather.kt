@@ -235,22 +235,6 @@ enum class ForecastDay(val day: Int) {
     DAY8(7)
 }
 
-class WeatherApi @Inject constructor(
-    instance: IWeatherApi
-) {
-    private val instance = instance
-
-    suspend fun getLocationsFromServer(): Response<LocationResponse> {
-        return instance.getLocations()
-    }
-    suspend fun getForecastFromServer(city: City, day: Int): Response<ForecastResponse> {
-        return this.instance.getForecast(
-            city_id = city.id,
-            day = day
-        )
-    }
-}
-
 @Composable
 fun weatherIconResource(weather: String, hour24: Int): Painter {
     val isDayTime = (hour24 >= 7) && (hour24 <= 17)
