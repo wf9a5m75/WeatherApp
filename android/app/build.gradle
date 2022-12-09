@@ -102,11 +102,9 @@ dependencies {
     // Unit test
     testImplementation "androidx.test:core:$androidX_test_version"
     testImplementation "junit:junit:$junit_version"
-    testImplementation "org.mockito:mockito-android:$mockito_version"
+    androidTestImplementation "org.mockito:mockito-android:$mockito_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
-// https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
-    testImplementation 'net.bytebuddy:byte-buddy:1.12.19'
 
     // Android test
     androidTestImplementation "androidx.test.ext:junit:$androidX_test_junit_version"

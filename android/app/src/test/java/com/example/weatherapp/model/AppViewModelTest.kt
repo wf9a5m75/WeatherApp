@@ -2,8 +2,10 @@ package com.example.weatherapp.model
 
 import com.example.weatherapp.utils.INetworkMonitor
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
@@ -11,6 +13,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import retrofit2.Response
 
+@RunWith(MockitoJUnitRunner::class)
 class AppViewModelTest {
 
     @Test
