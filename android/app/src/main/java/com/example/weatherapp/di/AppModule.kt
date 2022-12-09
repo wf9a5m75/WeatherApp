@@ -4,10 +4,12 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.room.Room
 import com.example.weatherapp.model.AppDatabase
+import com.example.weatherapp.model.AppViewModel
 import com.example.weatherapp.model.CacheDB
 import com.example.weatherapp.model.IWeatherApi
 import com.example.weatherapp.model.RetrofitHelper
 import com.example.weatherapp.model.WeatherApi
+import com.example.weatherapp.utils.INetworkMonitor
 import com.example.weatherapp.utils.NetworkMonitor
 import dagger.Module
 import dagger.Provides
@@ -22,13 +24,26 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideNetworkMonitor(
-        connectivityManager: ConnectivityManager
-    ) = NetworkMonitor(connectivityManager)
+    fun provideAppViewModel(
+        networkMonitor: INetworkMonitor,
+        weatherApi: IWeatherApi,
+        appDatabase: AppDatabase,
+    ): AppViewModel = AppViewModel(
+        networkMonitor,
+        weatherApi,
+        appDatabase.prefectureDao(),
+        appDatabase.keyValueDao(),
+    )
 
     @Provides
     @Singleton
-    fun provideWeatherApi(retrofit: IWeatherApi) = WeatherApi(retrofit)
+    fun provideNetworkMonitor(
+        connectivityManager: ConnectivityManager
+    ): INetworkMonitor = NetworkMonitor(connectivityManager)
+
+//    @Provides
+//    @Singleton
+//    fun provideWeatherApi(retrofit: IWeatherApi) = WeatherApi(retrofit)
 
     @Provides
     @Singleton
@@ -39,7 +54,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideCacheDB(
-        @ApplicationContext context: Context
+        @ApplicationContext
+        context: Context
     ) = Room.databaseBuilder(
         context = context,
         klass = CacheDB::class.java,
@@ -49,7 +65,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAppDb(
-        @ApplicationContext context: Context
+        @ApplicationContext
+        context: Context
     ) = Room.databaseBuilder(
         context = context,
         klass = AppDatabase::class.java,
@@ -59,6 +76,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideConnectivityManager(
-        @ApplicationContext context: Context
+        @ApplicationContext
+        context: Context
     ) = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }

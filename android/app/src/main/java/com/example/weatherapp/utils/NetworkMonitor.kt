@@ -8,11 +8,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import javax.inject.Inject
 
+interface INetworkMonitor {
+
+    var isOnline: Boolean
+}
+
 class NetworkMonitor @Inject constructor(
     connectivityManager: ConnectivityManager
-) : ConnectivityManager.NetworkCallback() {
+) : INetworkMonitor, ConnectivityManager.NetworkCallback() {
 
-    var isOnline = false
+    override var isOnline = false
+        get() {
+            return true
+        }
 
     override fun onAvailable(network: Network) {
         super.onAvailable(network)

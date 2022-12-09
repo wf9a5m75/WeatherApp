@@ -2,15 +2,13 @@ package com.example.weatherapp.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.NetworkRequest
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.Mockito.`when` as mockWhen
+import org.mockito.kotlin.mock
 
 @RunWith(MockitoJUnitRunner::class)
 class NetworkMonitorUnitTest() {
@@ -22,12 +20,13 @@ class NetworkMonitorUnitTest() {
     @Before
     fun setup() {
         // Create a mocked context instance
-        mockContext = mock(Context::class.java)
-
-        // Create a mocked connectivity manager instance
-        mockWhen(mockContext.getSystemService(Context.CONNECTIVITY_SERVICE))
-            .thenReturn(mockConnectivityManager)
-
+//        mockContext = mock {  }
+//        mockContext = mock(Context::class.java)
+//
+//        // Create a mocked connectivity manager instance
+//        org.mockito.kotlin.mock<> {  }(mockContext.getSystemService(Context.CONNECTIVITY_SERVICE))
+//            .thenReturn(mockConnectivityManager)
+//
     }
 
     @Test

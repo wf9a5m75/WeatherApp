@@ -49,9 +49,12 @@ data class LocationResponse(
 @Serializable
 @Entity
 data class Prefecture(
-    @PrimaryKey val id: String,
-    @ColumnInfo val name: String,
-    @ColumnInfo var cities: List<City> = listOf()
+    @PrimaryKey
+    val id: String,
+    @ColumnInfo
+    val name: String,
+    @ColumnInfo
+    var cities: List<City> = listOf()
 )
 
 @Serializable
@@ -75,17 +78,21 @@ data class Forecast(
 )
 
 interface IWeatherApi {
+
     @GET("/api/v1/locations")
     suspend fun getLocations(): Response<LocationResponse>
 
     @GET("/api/v1/forecast")
     suspend fun getForecast(
-        @Query("city_id") city_id: String,
-        @Query("day") day: Int
+        @Query("city_id")
+        city_id: String,
+        @Query("day")
+        day: Int
     ): Response<ForecastResponse>
 }
 
 class DateToLongConverter {
+
     @TypeConverter
     fun fromTimestamp(value: Long?): Date? {
         return value?.let { Date(it) }
@@ -124,6 +131,7 @@ interface CacheDao {
 @Database(entities = [CacheValue::class], version = 1)
 @TypeConverters(DateToLongConverter::class)
 abstract class CacheDB : RoomDatabase() {
+
     abstract fun cacheDao(): CacheDao
 }
 
@@ -174,7 +182,7 @@ class ETagInterceptor(db: CacheDB) : Interceptor {
         val month = arrayOf(
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
             "Aug", "Sep", "Oct", "Nov", "Dec"
-        ) [cal.get(Calendar.MONTH)]
+        )[cal.get(Calendar.MONTH)]
 
         val day = cal.get(Calendar.DAY_OF_MONTH)
 
@@ -188,7 +196,9 @@ class ETagInterceptor(db: CacheDB) : Interceptor {
         return "$weekday, $day $month $year $hour:$minute:$second GMT"
     }
 }
+
 object RetrofitHelper {
+
     private const val baseUrl = "https://weather-app-8a034.web.app"
 
     private var instance: Retrofit? = null
@@ -224,6 +234,7 @@ object RetrofitHelper {
         return this.instance!!
     }
 }
+
 enum class ForecastDay(val day: Int) {
     TODAY(0),
     TOMORROW(1),
@@ -236,13 +247,12 @@ enum class ForecastDay(val day: Int) {
 }
 
 class WeatherApi @Inject constructor(
-    instance: IWeatherApi
+    private val instance: IWeatherApi
 ) {
-    private val instance = instance
-
     suspend fun getLocationsFromServer(): Response<LocationResponse> {
         return instance.getLocations()
     }
+
     suspend fun getForecastFromServer(city: City, day: Int): Response<ForecastResponse> {
         return this.instance.getForecast(
             city_id = city.id,
