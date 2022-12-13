@@ -1,9 +1,14 @@
-package com.example.weatherapp.network.utils
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import com.example.weatherapp.R
+import java.util.Calendar
+
+@Composable
+fun getCurrentHour(): Int {
+    val now = Calendar.getInstance()
+    return now.get(Calendar.HOUR_OF_DAY)
+}
 
 @Composable
 fun weatherIconResource(weather: String, hour24: Int): Painter {
