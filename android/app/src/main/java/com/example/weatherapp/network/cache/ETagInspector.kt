@@ -1,9 +1,7 @@
 package com.example.weatherapp.network.cache
 
-import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.MediaType
-import okhttp3.Response
 import okhttp3.ResponseBody
 import java.net.HttpURLConnection
 import java.util.Calendar
@@ -35,9 +33,9 @@ class ETagInspector(
         // Process the HTTP request
         val response = chain.proceed(request)
         if ((response.code() == HttpURLConnection.HTTP_NOT_MODIFIED)) {
-//            Log.d("ETag(cached body)", String(cache.body))
             return response.newBuilder()
                 .code(HttpURLConnection.HTTP_OK)
+                .addHeader("x-etag-inspector", "HIT (304->200)")
                 .body(ResponseBody.create(MediaType.get("Application/Json"), String(cache.body)))
                 .build()
         }
