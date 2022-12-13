@@ -47,6 +47,7 @@ object AppModule {
         prefectureDao = prefectureDao,
         keyValueDao = keyValueDao
     )
+    
     @Provides
     @Singleton
     fun providePrefectureDao(
