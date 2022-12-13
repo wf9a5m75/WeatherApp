@@ -1,24 +1,7 @@
 package com.example.weatherapp
 
-import com.example.weatherapp.network.IWeatherApi
-import com.example.weatherapp.network.cache.CacheDao
-import com.example.weatherapp.network.cache.CacheValue
-import com.example.weatherapp.network.model.City
-import com.example.weatherapp.network.model.Forecast
-import com.example.weatherapp.network.model.ForecastResponse
-import com.example.weatherapp.network.model.LocationResponse
-import com.example.weatherapp.network.model.Prefecture
-import junit.framework.Assert
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
-import retrofit2.Response
-import java.net.HttpURLConnection
 
 @RunWith(MockitoJUnitRunner::class)
 class AppViewModelTest {
@@ -65,17 +48,17 @@ class AppViewModelTest {
 //
 //    }
 //
-////    @Before
-////    fun setupMockServer() {
-////        server= MockWebServer()
-////        server.start(SSL_PORT)
-////        server.dispatcher = MockDispatcher
-////    }
-////
-////    @After
-////    fun cleanup() {
-////        server.shutdown()
-////    }
+// //    @Before
+// //    fun setupMockServer() {
+// //        server= MockWebServer()
+// //        server.start(SSL_PORT)
+// //        server.dispatcher = MockDispatcher
+// //    }
+// //
+// //    @After
+// //    fun cleanup() {
+// //        server.shutdown()
+// //    }
 //
 //    @Test
 //    suspend fun `should obtain correct response`() {
@@ -95,4 +78,3 @@ class AppViewModelTest {
 //
 //    }
 }
-

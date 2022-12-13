@@ -2,7 +2,6 @@ package com.example.weatherapp.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.NetworkRequest
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -27,14 +26,11 @@ class NetworkMonitorUnitTest() {
         // Create a mocked connectivity manager instance
         mockWhen(mockContext.getSystemService(Context.CONNECTIVITY_SERVICE))
             .thenReturn(mockConnectivityManager)
-
     }
 
     @Test
     fun `isOnline should be true when connected to network`() {
         val monitor = NetworkMonitor(mockConnectivityManager)
-
-
 
         assertTrue(monitor.isOnline)
     }

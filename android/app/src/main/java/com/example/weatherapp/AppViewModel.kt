@@ -10,6 +10,8 @@ import com.example.weatherapp.database.KeyValuePair
 import com.example.weatherapp.database.PrefectureDao
 import com.example.weatherapp.network.IWeatherApi
 import com.example.weatherapp.network.model.City
+import com.example.weatherapp.network.model.ForecastDay
+import com.example.weatherapp.network.model.ForecastResponse
 import com.example.weatherapp.network.model.LocationResponse
 import com.example.weatherapp.network.model.Prefecture
 import com.example.weatherapp.utils.NetworkMonitor
@@ -39,6 +41,8 @@ class AppViewModel @Inject constructor(
     )
 
     val locations: MutableList<Prefecture> = mutableListOf()
+
+    val todayForecast: MutableState<ForecastResponse?> = mutableStateOf(null)
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -140,6 +144,42 @@ class AppViewModel @Inject constructor(
         keyValueDao.put(
             KeyValuePair("location_lastupdate", locationResponse.last_update)
         )
+    }
+
+    fun updateTodayForecast(onFinished: (isUpdated: Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getForecast(ForecastDay.TODAY) {
+                if (it == null) {
+                    onFinished(false)
+                    return@getForecast
+                }
+
+                todayForecast.value = it
+                onFinished(true)
+            }
+        }
+    }
+
+    private suspend fun getForecast(
+        day: ForecastDay,
+        onFinished: (forecast: ForecastResponse?) -> Unit
+    ) {
+        if (!networkMonitor.isOnline) {
+            viewModelScope.launch {
+                onFinished(null)
+            }
+            return
+        }
+
+        val response = weatherApi.getForecast(
+            city_id = city.value.id,
+            day = day.day
+        )
+        Log.d("AppViewModel", "isOnline = ${networkMonitor.isOnline}")
+
+        todayForecast.value = response.body()
+
+        onFinished(response.body())
     }
 
 //    suspend fun getTodayWeather(day: ForecastDay) = viewModelScope.async(Dispatchers.IO) {

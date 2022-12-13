@@ -1,11 +1,15 @@
 package com.example.weatherapp.network.cache
 
+import android.util.Log
 import okhttp3.Interceptor
+import okhttp3.MediaType
+import okhttp3.Response
+import okhttp3.ResponseBody
 import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.TimeZone
 
-class ETagInterceptor(
+class ETagInspector(
     private val cacheDao: CacheDao
 ) : Interceptor {
 
@@ -18,7 +22,8 @@ class ETagInterceptor(
             ?: CacheValue(
                 url = url,
                 eTag = "",
-                lastModified = ""
+                lastModified = "",
+                body = ByteArray(0)
             )
         if (cache.eTag != "") {
             request = request.newBuilder()
@@ -29,16 +34,24 @@ class ETagInterceptor(
 
         // Process the HTTP request
         val response = chain.proceed(request)
-        if ((response.code() != HttpURLConnection.HTTP_OK) ||
-            response.cacheControl().noCache()
-        ) {
-            return response
+        if ((response.code() == HttpURLConnection.HTTP_NOT_MODIFIED)) {
+//            Log.d("ETag(cached body)", String(cache.body))
+            return response.newBuilder()
+                .code(HttpURLConnection.HTTP_OK)
+                .body(ResponseBody.create(MediaType.get("Application/Json"), String(cache.body)))
+                .build()
         }
 
         // Save ETag and Last-Modified values to the Cache DB
         cache.eTag = response.header("ETag") ?: ""
         cache.lastModified = response.header("Last-Modified") ?: getCurrentTime()
+
+        // Since body().string() is able to call only once,
+        // we need to make a copy
+        val copyResponse = response.peekBody(Long.MAX_VALUE)
+        cache.body = copyResponse.string().toByteArray()
         cacheDao.put(cache)
+
         return response
     }
 

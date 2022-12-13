@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,61 +16,38 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.*
-import com.example.weatherapp.R
 import com.example.weatherapp.AppViewModel
+import com.example.weatherapp.R
 import com.example.weatherapp.network.utils.getCurrentHour
 import com.example.weatherapp.network.utils.weatherIconResource
 import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @Preview(showBackground = true)
 @Composable
-fun TodayWeatherScreen(viewModel: AppViewModel? = viewModel()) {
+fun TodayWeatherScreen(
+    viewModel: AppViewModel = viewModel()
+) {
     val refreshState = rememberSwipeRefreshState(isRefreshing = false)
     val scrollState = rememberScrollState()
 
-    var currentWeatherIcon by remember { mutableStateOf("sunny") }
-    var lastUpdateTime by remember { mutableStateOf("") }
+    val onRefresh: (refreshState: SwipeRefreshState) -> Unit = { state ->
+        state.isRefreshing = true
+        viewModel.updateTodayForecast {
+            state.isRefreshing = false
+        }
+    }
+    viewModel.updateTodayForecast { }
 
-//    val onRefresh: (refreshState: SwipeRefreshState) -> Unit = { state ->
-//        if ((context != null) &&
-//            (viewModel != null) &&
-//            (api != null) &&
-//            (NetworkUtil.isOnline(context))
-//        ) {
-//
-//            state.isRefreshing = true
-//
-//            runBlocking {
-//                val deferred = async {
-//                    api.getForecastFromServer(
-//                        city = viewModel.city,
-//                        day = 0
-//                    )
-//                }
-//                state.isRefreshing = false
-//
-//                val response = deferred.await()
-//                if (response.code() != 200) {
-//                    return@runBlocking
-//                }
-//
-//                val forecastRes = response.body()
-//                if (forecastRes == null) {
-//                    return@runBlocking
-//                }
-//                currentWeatherIcon = forecastRes.forecasts[0].status
-//                lastUpdateTime = forecastRes.last_update
-//                Log.d("debug", response.body().toString())
-//            }
-//        }
-//    }
-//    onRefresh(refreshState)
+    Log.d("TodayWeather", "---> TodayWeather : ${viewModel.todayForecast.value}")
+
+    val nowH = getCurrentHour()
 
     SwipeRefresh(
         state = refreshState,
         onRefresh = {
-//            onRefresh(refreshState)
+            onRefresh(refreshState)
         }
     ) {
         Image(
@@ -79,7 +57,7 @@ fun TodayWeatherScreen(viewModel: AppViewModel? = viewModel()) {
             modifier = Modifier.fillMaxSize()
         )
         Text(
-            text = "11/12/2022 14:31",
+            text = viewModel.todayForecast.value?.last_update ?: "(not available)",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -87,6 +65,8 @@ fun TodayWeatherScreen(viewModel: AppViewModel? = viewModel()) {
             color = MaterialTheme.colors.onBackground,
             style = MaterialTheme.typography.body2
         )
+
+        if (viewModel.todayForecast.value?.forecasts?.size != 24) return@SwipeRefresh
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -94,8 +74,13 @@ fun TodayWeatherScreen(viewModel: AppViewModel? = viewModel()) {
                 .verticalScroll(state = scrollState, enabled = true)
         ) {
 
+            val currentWeather = viewModel.todayForecast.value!!.forecasts[nowH]
+
             Image(
-                painter = weatherIconResource(currentWeatherIcon, getCurrentHour()),
+                painter = weatherIconResource(
+                    currentWeather.status,
+                    nowH
+                ),
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -104,7 +89,7 @@ fun TodayWeatherScreen(viewModel: AppViewModel? = viewModel()) {
                     .padding(all = 32.dp)
             )
             Text(
-                text = "18℃",
+                text = "${currentWeather.temperature.toInt()}℃",
                 fontSize = 64.sp,
                 modifier = Modifier
                     .padding(bottom = 16.dp)
@@ -115,24 +100,18 @@ fun TodayWeatherScreen(viewModel: AppViewModel? = viewModel()) {
                 modifier = Modifier.fillMaxSize()
             ) {
 
-                WeatherIcon(
-                    weather = "sunny",
-                    temperature = 18,
-                    hour24 = 12,
-                    modifier = Modifier.weight(1f)
-                )
-                WeatherIcon(
-                    weather = "sunny",
-                    temperature = 17,
-                    hour24 = 15,
-                    modifier = Modifier.weight(1f)
-                )
-                WeatherIcon(
-                    weather = "sunny",
-                    temperature = 15,
-                    hour24 = 18,
-                    modifier = Modifier.weight(1f)
-                )
+                var i = nowH + 1
+                while (i < 24) {
+                    val forecast = viewModel.todayForecast.value!!.forecasts[i]
+
+                    WeatherIcon(
+                        weather = forecast.status,
+                        temperature = forecast.temperature.toInt(),
+                        hour24 = i,
+                        modifier = Modifier.weight(1f)
+                    )
+                    i += 3
+                }
             }
         }
     }

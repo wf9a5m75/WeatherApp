@@ -26,7 +26,8 @@ object MockDispatcher : Dispatcher() {
             .addHeader("ETag: etag1")
             .setResponseCode(200)
             .addHeader("X-Test-Type", "Without ETag")
-            .setBody("""
+            .setBody(
+                """
                 {
                   "last_update": "2022-11-01T00:00",
                   "prefectures": [
@@ -73,7 +74,7 @@ object MockDispatcher : Dispatcher() {
                     }
                   ]
                 }
-            """.trimIndent())
-
+                """.trimIndent()
+            )
     }
 }
