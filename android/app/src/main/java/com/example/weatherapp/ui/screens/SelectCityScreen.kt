@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.screens
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,28 +19,32 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weatherapp.network.model.City
-import com.example.weatherapp.network.model.Prefecture
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.weatherapp.AppViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun SelectCityScreen(
-    locations: List<Prefecture> = arrayListOf(),
-    currentCity: City = City("", ""),
-    onClose: (city: City) -> Unit = {}
+    viewModel: AppViewModel = viewModel(),
+    onClose: () -> Unit = {}
 ) {
-    var selectedCity by remember { mutableStateOf(currentCity) }
+
+    // If no preference, move to the selectCity screen
+    viewModel.syncLocations {
+        if (viewModel.locations.size == 0) {
+            // TODO:
+            Log.e("WeatherApp", "サーバーからデータの取得に失敗しました")
+            return@syncLocations
+        }
+    }
+
     BackHandler(true) {
-        onClose(selectedCity)
+        onClose()
     }
 
     Column(
@@ -54,7 +59,7 @@ fun SelectCityScreen(
                 contentDescription = "Back",
                 modifier = Modifier
                     .padding(16.dp)
-                    .clickable { onClose(selectedCity) }
+                    .clickable { onClose() }
             )
             Text(
                 text = "場所を選択",
@@ -62,7 +67,7 @@ fun SelectCityScreen(
             )
         }
 
-        locations.forEach { prefecture ->
+        viewModel.locations.forEach { prefecture ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,14 +91,14 @@ fun SelectCityScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = (city == selectedCity),
-                                    onClick = { selectedCity = city }
+                                    selected = (city == viewModel.city.value),
+                                    onClick = { viewModel.city.value = city }
                                 )
                                 .padding(horizontal = 16.dp)
                         ) {
                             RadioButton(
-                                selected = (city == selectedCity),
-                                onClick = { selectedCity = city }
+                                selected = (city == viewModel.city.value),
+                                onClick = { viewModel.city.value = city }
                             )
                             Text(
                                 text = city.name,

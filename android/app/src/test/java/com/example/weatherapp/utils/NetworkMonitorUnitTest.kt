@@ -15,6 +15,7 @@ import org.mockito.Mockito.`when` as mockWhen
 class NetworkMonitorUnitTest() {
     @Mock
     lateinit var mockConnectivityManager: ConnectivityManager
+
     @Mock
     lateinit var mockContext: Context
 

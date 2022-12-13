@@ -16,7 +16,7 @@ import com.example.weatherapp.network.model.LocationResponse
 import com.example.weatherapp.network.model.Prefecture
 import com.example.weatherapp.utils.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
@@ -28,6 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
+    private val dispatcher: CoroutineDispatcher,
     private val networkMonitor: NetworkMonitor,
     private val weatherApi: IWeatherApi,
     private val prefectureDao: PrefectureDao,
@@ -46,20 +47,23 @@ class AppViewModel @Inject constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
-        viewModelScope.launch {
-            if (this@AppViewModel.city.value.id != "") {
-                onFinished()
-                return@launch
-            }
-
+        if (this@AppViewModel.city.value.id != "") {
+            onFinished()
+            return
+        }
+        viewModelScope.launch(dispatcher) {
             this@AppViewModel.readValue("selected_city") {
                 if (it == null) {
-                    onFinished()
+                    viewModelScope.launch {
+                        onFinished()
+                    }
                     return@readValue
                 }
 
                 this@AppViewModel.city.value = Json.decodeFromString<City>(it)
-                onFinished()
+                viewModelScope.launch {
+                    onFinished()
+                }
             }
         }
     }
@@ -69,8 +73,12 @@ class AppViewModel @Inject constructor(
         city: City,
         onFinished: () -> Unit = {}
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            saveValue("selected_city", Json.encodeToString(city), onFinished)
+        viewModelScope.launch(dispatcher) {
+            saveValue("selected_city", Json.encodeToString(city)) {
+                viewModelScope.launch {
+                    onFinished()
+                }
+            }
         }
     }
 
@@ -87,16 +95,14 @@ class AppViewModel @Inject constructor(
         key: String,
         onFinished: (value: String?) -> Unit
     ) {
-        viewModelScope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             val result = keyValueDao.get(key)?.value
-            viewModelScope.launch {
-                onFinished(result)
-            }
+            onFinished(result)
         }
     }
 
-    fun getLocations(onFinished: () -> Unit) {
-        viewModelScope.launch(context = Dispatchers.IO) {
+    fun syncLocations(onFinished: () -> Unit) {
+        viewModelScope.launch(dispatcher) {
 
             // Read locations from DB if offline
             if (!this@AppViewModel.networkMonitor.isOnline) {
@@ -147,15 +153,19 @@ class AppViewModel @Inject constructor(
     }
 
     fun updateTodayForecast(onFinished: (isUpdated: Boolean) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             getForecast(ForecastDay.TODAY) {
                 if (it == null) {
-                    onFinished(false)
+                    viewModelScope.launch {
+                        onFinished(false)
+                    }
                     return@getForecast
                 }
 
                 todayForecast.value = it
-                onFinished(true)
+                viewModelScope.launch {
+                    onFinished(true)
+                }
             }
         }
     }
@@ -165,9 +175,7 @@ class AppViewModel @Inject constructor(
         onFinished: (forecast: ForecastResponse?) -> Unit
     ) {
         if (!networkMonitor.isOnline) {
-            viewModelScope.launch {
-                onFinished(null)
-            }
+            onFinished(null)
             return
         }
 
@@ -175,8 +183,6 @@ class AppViewModel @Inject constructor(
             city_id = city.value.id,
             day = day.day
         )
-        Log.d("AppViewModel", "isOnline = ${networkMonitor.isOnline}")
-
         todayForecast.value = response.body()
 
         onFinished(response.body())

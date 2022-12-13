@@ -19,6 +19,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType
@@ -40,6 +41,7 @@ object AppModule {
         prefectureDao: PrefectureDao,
         keyValueDao: KeyValueDao
     ) = AppViewModel(
+        dispatcher = Dispatchers.IO,
         networkMonitor = networkMonitor,
         weatherApi = weatherApi,
         prefectureDao = prefectureDao,

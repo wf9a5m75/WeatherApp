@@ -1,7 +1,6 @@
 package com.example.weatherapp
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -66,12 +65,8 @@ fun WeatherApp(viewModel: AppViewModel) {
             }
             composable(route = "settings") {
                 SelectCityScreen(
-                    locations = viewModel.locations,
-                    currentCity = viewModel.city.value
-                ) { selectedCity ->
-                    Log.d("MainActivity", "----------->onClose: $selectedCity")
-                    viewModel.city.value = selectedCity
-                    viewModel.saveSelectedCity(selectedCity)
+                    viewModel = viewModel
+                ) {
                     navigationController.popupToInclusive("main")
                 }
             }
@@ -89,16 +84,8 @@ fun WeatherApp(viewModel: AppViewModel) {
             return@loadSelectedCity
         }
 
-        // If no preference, move to the selectCity screen
-        viewModel.getLocations {
-            if (viewModel.locations.size == 0) {
-                // TODO:
-                Log.e("WeatherApp", "サーバーからデータの取得に失敗しました")
-                return@getLocations
-            }
-
-            navigationController.popupToInclusive("settings")
-        }
+        // Open the settings view
+        navigationController.popupToInclusive("settings")
     }
 }
 
