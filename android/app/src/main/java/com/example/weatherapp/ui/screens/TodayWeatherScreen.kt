@@ -1,6 +1,5 @@
 package com.example.weatherapp.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,8 +23,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.R
+import com.example.weatherapp.ui.components.WeatherIcon
 import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import getCurrentHour
 import weatherIconResource
@@ -39,23 +37,19 @@ fun TodayWeatherScreen(
     val refreshState = rememberSwipeRefreshState(isRefreshing = false)
     val scrollState = rememberScrollState()
 
-    val onRefresh: (refreshState: SwipeRefreshState) -> Unit = { state ->
-        state.isRefreshing = true
+    val onRefresh: () -> Unit = {
+        refreshState.isRefreshing = true
         viewModel.updateTodayForecast {
-            state.isRefreshing = false
+            refreshState.isRefreshing = false
         }
     }
-    viewModel.updateTodayForecast { }
-
-    Log.d("TodayWeather", "---> TodayWeather : ${viewModel.todayForecast.value}")
+    onRefresh()
 
     val nowH = getCurrentHour()
 
     SwipeRefresh(
         state = refreshState,
-        onRefresh = {
-            onRefresh(refreshState)
-        }
+        onRefresh = onRefresh
     ) {
         Image(
             painter = painterResource(id = R.drawable.bg_sunny),
@@ -121,59 +115,5 @@ fun TodayWeatherScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun WeatherIcon(
-    weather: String,
-    temperature: Int,
-    hour24: Int,
-    modifier: Modifier = Modifier
-) {
-
-    val time = "${hour24 % 12} ${
-    when (hour24 < 12) {
-        true -> "am"
-        else -> "pm"
-    }
-    }"
-    Column(
-        modifier = modifier
-            .size(
-                width = 100.dp,
-                height = 130.dp
-            )
-            .wrapContentSize(Alignment.Center)
-    ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentSize(Alignment.Center),
-            text = time,
-            fontSize = 14.sp,
-            color = MaterialTheme.colors.onSecondary,
-            style = MaterialTheme.typography.body2
-        )
-
-        Image(
-            painter = weatherIconResource(weather, hour24),
-            contentDescription = "",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .align(Alignment.CenterHorizontally)
-                .padding(all = 3.dp)
-        )
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentSize(Alignment.Center),
-            text = "$temperature℃",
-            fontSize = 14.sp,
-            color = MaterialTheme.colors.onSecondary,
-            style = MaterialTheme.typography.body2
-        )
     }
 }
