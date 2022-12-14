@@ -101,7 +101,7 @@ fun TodayWeatherScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
 
-                var i = nowH + 1
+                var i = nowH
                 while (i < 24) {
                     val forecast = viewModel.todayForecast.value!!.forecasts[i]
 
@@ -111,7 +111,7 @@ fun TodayWeatherScreen(
                         hour24 = i,
                         modifier = Modifier.weight(1f)
                     )
-                    i += 3
+                    i += 1
                 }
             }
         }

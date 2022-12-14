@@ -44,6 +44,7 @@ class AppViewModel @Inject constructor(
     val locations: MutableList<Prefecture> = mutableListOf()
 
     val todayForecast: MutableState<ForecastResponse?> = mutableStateOf(null)
+    val tomorrowForecast: MutableState<ForecastResponse?> = mutableStateOf(null)
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -150,6 +151,24 @@ class AppViewModel @Inject constructor(
         keyValueDao.put(
             KeyValuePair("location_lastupdate", locationResponse.last_update)
         )
+    }
+
+    fun updateTomorrowForecast(onFinished: (isUpdated: Boolean) -> Unit) {
+        viewModelScope.launch(dispatcher) {
+            getForecast(ForecastDay.TODAY) {
+                if (it == null) {
+                    viewModelScope.launch {
+                        onFinished(false)
+                    }
+                    return@getForecast
+                }
+
+                tomorrowForecast.value = it
+                viewModelScope.launch {
+                    onFinished(true)
+                }
+            }
+        }
     }
 
     fun updateTodayForecast(onFinished: (isUpdated: Boolean) -> Unit) {
