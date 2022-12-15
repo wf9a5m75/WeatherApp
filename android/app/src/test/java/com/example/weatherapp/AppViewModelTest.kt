@@ -34,15 +34,35 @@ class AppViewModelTest {
     private lateinit var keyValueDao: KeyValueDao
 
     private val prefectures = listOf<Prefecture>(
-        Prefecture("dummyPref1", "Pref1", listOf(
-            City("city1", "City1"),
-            City("city2", "City2")
-        )),
+        Prefecture(
+            "dummyPref1",
+            "Pref1",
+            listOf(
+                City(
+                    "city1",
+                    "City1"
+                ),
+                City(
+                    "city2",
+                    "City2"
+                )
+            )
+        ),
 
-        Prefecture("dummyPref2", "Pref2", listOf(
-            City("cityA", "CityA"),
-            City("cityB", "CityB")
-        ))
+        Prefecture(
+            "dummyPref2",
+            "Pref2",
+            listOf(
+                City(
+                    "cityA",
+                    "CityA"
+                ),
+                City(
+                    "cityB",
+                    "CityB"
+                )
+            )
+        )
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -72,7 +92,6 @@ class AppViewModelTest {
                 )
             )
         }
-
 
 //        prefectureDao = spy {
 //            onBlocking { this.findByKey("dummyPref1") } doReturn prefectures[0]
@@ -108,7 +127,7 @@ class AppViewModelTest {
 
         val memo2 = mutableMapOf<String, KeyValuePair>()
         keyValueDao = mock {
-            onBlocking { this.put(any<KeyValuePair>()) } doAnswer  {
+            onBlocking { this.put(any<KeyValuePair>()) } doAnswer {
                 val keyValue = it.arguments[0] as KeyValuePair
                 memo2[keyValue.id] = keyValue
             }

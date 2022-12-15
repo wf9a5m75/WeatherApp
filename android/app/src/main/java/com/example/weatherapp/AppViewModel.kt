@@ -210,5 +210,4 @@ class AppViewModel @Inject constructor(
 
         onFinished(response.body())
     }
-
 }
