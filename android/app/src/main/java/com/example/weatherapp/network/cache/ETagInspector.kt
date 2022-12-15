@@ -1,8 +1,6 @@
 package com.example.weatherapp.network.cache
 
 import okhttp3.Interceptor
-import okhttp3.MediaType
-import okhttp3.ResponseBody
 import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.TimeZone
@@ -20,8 +18,7 @@ class ETagInspector(
             ?: CacheValue(
                 url = url,
                 eTag = "",
-                lastModified = "",
-                body = ByteArray(0)
+                lastModified = ""
             )
         if (cache.eTag != "") {
             request = request.newBuilder()
@@ -33,21 +30,13 @@ class ETagInspector(
         // Process the HTTP request
         val response = chain.proceed(request)
         if ((response.code() == HttpURLConnection.HTTP_NOT_MODIFIED)) {
-            return response.newBuilder()
-                .code(HttpURLConnection.HTTP_OK)
-                .addHeader("x-etag-inspector", "HIT (304->200)")
-                .body(ResponseBody.create(MediaType.get("Application/Json"), String(cache.body)))
-                .build()
+            return response
         }
 
         // Save ETag and Last-Modified values to the Cache DB
         cache.eTag = response.header("ETag") ?: ""
         cache.lastModified = response.header("Last-Modified") ?: getCurrentTime()
 
-        // Since body().string() is able to call only once,
-        // we need to make a copy
-        val copyResponse = response.peekBody(Long.MAX_VALUE)
-        cache.body = copyResponse.string().toByteArray()
         cacheDao.put(cache)
 
         return response

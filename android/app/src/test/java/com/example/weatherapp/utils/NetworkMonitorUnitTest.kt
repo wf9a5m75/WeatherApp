@@ -2,11 +2,12 @@ package com.example.weatherapp.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
-import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.Mockito.`when` as mockWhen
@@ -33,6 +34,6 @@ class NetworkMonitorUnitTest() {
     fun `isOnline should be true when connected to network`() {
         val monitor = NetworkMonitor(mockConnectivityManager)
 
-        assertTrue(monitor.isOnline)
+        assert(ArgumentMatchers.eq(monitor.isOnline))
     }
 }

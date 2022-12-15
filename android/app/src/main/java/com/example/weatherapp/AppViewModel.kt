@@ -1,6 +1,5 @@
 package com.example.weatherapp
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -14,7 +13,7 @@ import com.example.weatherapp.network.model.ForecastDay
 import com.example.weatherapp.network.model.ForecastResponse
 import com.example.weatherapp.network.model.LocationResponse
 import com.example.weatherapp.network.model.Prefecture
-import com.example.weatherapp.utils.NetworkMonitor
+import com.example.weatherapp.utils.INetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
@@ -29,14 +28,11 @@ import javax.inject.Inject
 @HiltViewModel
 class AppViewModel @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
-    private val networkMonitor: NetworkMonitor,
+    private val networkMonitor: INetworkMonitor,
     private val weatherApi: IWeatherApi,
     private val prefectureDao: PrefectureDao,
     private val keyValueDao: KeyValueDao
 ) : ViewModel() {
-
-    private val TAG = "ViewModel"
-
     var city: MutableState<City> = mutableStateOf(
         City("", "")
     )
@@ -105,10 +101,12 @@ class AppViewModel @Inject constructor(
     fun syncLocations(onFinished: () -> Unit) {
         viewModelScope.launch(dispatcher) {
 
-            // Read locations from DB if offline
             if (!this@AppViewModel.networkMonitor.isOnline) {
-                this@AppViewModel.locations.clear()
-                this@AppViewModel.locations.addAll(prefectureDao.getAll())
+
+                // If the list is empty, read values from our database
+                if (locations.size == 0) {
+                    readLocationsFromDB()
+                }
                 viewModelScope.launch {
                     onFinished()
                 }
@@ -126,12 +124,16 @@ class AppViewModel @Inject constructor(
                 }
 
                 HttpURLConnection.HTTP_NOT_MODIFIED -> {
-                    readLocationsFromDB()
+                    // If the list is empty, read values from our database
+                    if (locations.size == 0) {
+                        readLocationsFromDB()
+                    }
                 }
 
                 else -> {
-                    // TODO: install preset list from JSON file
-                    Log.e(TAG, "getLocationsFromServer returns something $response")
+                    // We don't know what was occurred.
+                    // Just update the list using our DB.
+                    readLocationsFromDB()
                 }
             }
             viewModelScope.launch {
@@ -142,12 +144,14 @@ class AppViewModel @Inject constructor(
 
     private suspend fun readLocationsFromDB() {
         this@AppViewModel.locations.clear()
-        this@AppViewModel.locations.addAll(prefectureDao.getAll())
+        val results = prefectureDao.getAll()
+        this@AppViewModel.locations.addAll(results)
     }
 
     private suspend fun saveLocationsToDB(locationResponse: LocationResponse) {
         prefectureDao.clear()
-        prefectureDao.insertAll(*locationResponse.prefectures.toTypedArray())
+        val prefectures = locationResponse.prefectures.toTypedArray()
+        prefectureDao.insertAll(*prefectures)
         keyValueDao.put(
             KeyValuePair("location_lastupdate", locationResponse.last_update)
         )
@@ -207,12 +211,4 @@ class AppViewModel @Inject constructor(
         onFinished(response.body())
     }
 
-//    suspend fun getTodayWeather(day: ForecastDay) = viewModelScope.async(Dispatchers.IO) {
-//
-//        val response = this@AppViewModel.weatherApi.getForecastFromServer(
-//            city = city.value,
-//            day = day.day
-//        )
-//        return@async response.body()
-//    }.await()
 }
