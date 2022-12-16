@@ -50,11 +50,12 @@ class MainActivity : ComponentActivity() {
 fun WeatherApp(viewModel: AppViewModel) {
 
     val navigationController = rememberNavController()
+
     WeatherAppTheme {
-        NavHost(navController = navigationController, startDestination = "loading") {
-            composable(route = "loading") {
-                LoadingScreen()
-            }
+        NavHost(navController = navigationController, startDestination = "main") {
+//            composable(route = "loading") {
+//                LoadingScreen()
+//            }
             composable(route = "main") {
                 MainScreen(
                     viewModel = viewModel,
@@ -67,7 +68,9 @@ fun WeatherApp(viewModel: AppViewModel) {
                 SelectCityScreen(
                     viewModel = viewModel
                 ) {
-                    navigationController.popupToInclusive("main")
+                    viewModel.saveSelectedCity {
+                        navigationController.popupToInclusive("main")
+                    }
                 }
             }
 
@@ -80,11 +83,8 @@ fun WeatherApp(viewModel: AppViewModel) {
     // Load the last selected city
     viewModel.loadSelectedCity {
         if (viewModel.city.value.id != "") {
-            navigationController.popupToInclusive("main")
             return@loadSelectedCity
         }
-
-        // Open the settings view
         navigationController.popupToInclusive("settings")
     }
 }
@@ -126,26 +126,6 @@ fun MainScreen(
         )
     }
 }
-
-fun NavHostController.navigateSingleTopTo(route: String) = this.navigate(route) {
-
-    // Pop up to the start destination of the graph
-    // to avoid building up a large stack of destinations
-    // on the back stack as users select items
-    popUpTo(
-        this@navigateSingleTopTo.graph.findStartDestination().id
-    ) {
-        saveState = true
-    }
-
-    // Avoid multiple copies of the same destination
-    // when reselecting the same item
-    launchSingleTop = true
-
-    // Restore state when reselecting a previously selected item
-    restoreState = true
-}
-
 fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
 
     // Pop up to the start destination of the graph

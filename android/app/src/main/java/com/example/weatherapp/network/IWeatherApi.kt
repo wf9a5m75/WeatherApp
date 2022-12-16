@@ -13,6 +13,7 @@ interface IWeatherApi {
     @GET("/api/v1/forecast")
     suspend fun getForecast(
         @Query("city_id") city_id: String,
-        @Query("day") day: Int
+        @Query("day") day: Int,
+        @Query("_cache") cache: Boolean
     ): Response<ForecastResponse>
 }

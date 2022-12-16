@@ -67,11 +67,10 @@ class AppViewModel @Inject constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     fun saveSelectedCity(
-        city: City,
         onFinished: () -> Unit = {}
     ) {
         viewModelScope.launch(dispatcher) {
-            saveValue("selected_city", Json.encodeToString(city)) {
+            saveValue("selected_city", Json.encodeToString(city.value)) {
                 viewModelScope.launch {
                     onFinished()
                 }
@@ -100,13 +99,15 @@ class AppViewModel @Inject constructor(
 
     fun syncLocations(onFinished: () -> Unit) {
         viewModelScope.launch(dispatcher) {
+            if (locations.size > 0) {
+                viewModelScope.launch {
+                    onFinished()
+                }
+                return@launch
+            }
 
             if (!this@AppViewModel.networkMonitor.isOnline) {
-
-                // If the list is empty, read values from our database
-                if (locations.size == 0) {
-                    readLocationsFromDB()
-                }
+                readLocationsFromDB()
                 viewModelScope.launch {
                     onFinished()
                 }
@@ -124,10 +125,8 @@ class AppViewModel @Inject constructor(
                 }
 
                 HttpURLConnection.HTTP_NOT_MODIFIED -> {
-                    // If the list is empty, read values from our database
-                    if (locations.size == 0) {
-                        readLocationsFromDB()
-                    }
+                    // Read values from our database
+                    readLocationsFromDB()
                 }
 
                 else -> {
@@ -204,7 +203,8 @@ class AppViewModel @Inject constructor(
 
         val response = weatherApi.getForecast(
             city_id = city.value.id,
-            day = day.day
+            day = day.day,
+            cache = false
         )
         todayForecast.value = response.body()
 

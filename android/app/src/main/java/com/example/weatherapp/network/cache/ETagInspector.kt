@@ -20,7 +20,9 @@ class ETagInspector(
                 eTag = "",
                 lastModified = ""
             )
-        if (cache.eTag != "") {
+        if (!request.url().queryParameter("_cache").equals("false") &&
+            cache.eTag != ""
+        ) {
             request = request.newBuilder()
                 .addHeader("If-None-Match", cache.eTag)
                 .addHeader("If-Modified-Since", cache.lastModified)
@@ -52,7 +54,7 @@ class ETagInspector(
         val month = arrayOf(
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
             "Aug", "Sep", "Oct", "Nov", "Dec"
-        ) [cal.get(Calendar.MONTH)]
+        )[cal.get(Calendar.MONTH)]
 
         val day = cal.get(Calendar.DAY_OF_MONTH)
 

@@ -43,7 +43,9 @@ fun TodayWeatherScreen(
             refreshState.isRefreshing = false
         }
     }
-    onRefresh()
+    if (viewModel.todayForecast.value == null) {
+        onRefresh()
+    }
 
     val nowH = getCurrentHour()
 
