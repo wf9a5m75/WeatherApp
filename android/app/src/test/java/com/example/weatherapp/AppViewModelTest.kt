@@ -4,11 +4,7 @@ import com.example.weatherapp.database.KeyValueDao
 import com.example.weatherapp.database.KeyValuePair
 import com.example.weatherapp.database.PrefectureDao
 import com.example.weatherapp.network.IWeatherApi
-import com.example.weatherapp.network.model.City
-import com.example.weatherapp.network.model.Forecast
-import com.example.weatherapp.network.model.ForecastResponse
-import com.example.weatherapp.network.model.LocationResponse
-import com.example.weatherapp.network.model.Prefecture
+import com.example.weatherapp.network.model.*
 import com.example.weatherapp.utils.INetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,16 +13,14 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyVararg
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
+import org.mockito.kotlin.*
 import retrofit2.Response
 import java.net.HttpURLConnection
 
 class AppViewModelTest {
+
     private lateinit var viewModel: AppViewModel
     private lateinit var networkMonitor: INetworkMonitor
     private lateinit var weatherApi: IWeatherApi
@@ -78,27 +72,49 @@ class AppViewModelTest {
                 LocationResponse("dummy_last_updated", prefectures)
             )
 
-            onBlocking { getForecast("city_a", 0, true) } doReturn Response.success(
-                HttpURLConnection.HTTP_OK,
-                ForecastResponse(
-                    "sometime",
-                    "sunny",
-                    listOf(
-                        Forecast("00:00", 13.0, "sunny"),
-                        Forecast("01:00", 12.0, "sunny"),
-                        Forecast("02:00", 11.0, "sunny"),
-                        Forecast("03:00", 10.0, "sunny")
+            onBlocking {
+                getForecast(
+                    eq("city_a"),
+                    eq(ForecastDay.TODAY.day),
+                    anyBoolean()
+                )
+            } doReturn
+                Response.success(
+                    HttpURLConnection.HTTP_OK,
+                    ForecastResponse(
+                        "sometime_today",
+                        "sunny",
+                        listOf(
+                            Forecast("00:00", 13.0, "sunny"),
+                            Forecast("01:00", 12.0, "sunny"),
+                            Forecast("02:00", 11.0, "sunny"),
+                            Forecast("03:00", 10.0, "sunny")
+                        )
                     )
                 )
-            )
+
+            onBlocking {
+                getForecast(
+                    eq("city_b"),
+                    eq(ForecastDay.TOMORROW.day),
+                    anyBoolean()
+                )
+            } doReturn
+                Response.success(
+                    HttpURLConnection.HTTP_OK,
+                    ForecastResponse(
+                        "sometime_tomorrow",
+                        "cloudy",
+                        listOf(
+                            Forecast("00:00", 8.0, "cloudy"),
+                            Forecast("01:00", 7.0, "cloudy"),
+                            Forecast("02:00", 7.0, "cloudy"),
+                            Forecast("03:00", 6.0, "cloudy")
+                        )
+                    )
+                )
         }
 
-//        prefectureDao = spy {
-//            onBlocking { this.findByKey("dummyPref1") } doReturn prefectures[0]
-//            onBlocking { this.findByKey("dummyPref2") } doReturn prefectures[1]
-//            onBlocking { this.count() } doReturn prefectures.size
-//            onBlocking { this.getAll() } doReturn prefectures
-//        }
         val memo = mutableMapOf<String, Prefecture>()
         prefectureDao = mock {
             onBlocking { this.findByKey(anyString()) } doAnswer {
@@ -158,13 +174,28 @@ class AppViewModelTest {
     }
 
     @Test
-    fun `updateTodayForecast() should update the todayForecast property`() {
+    fun `updateForecast(today) should obtain the today forecast`() {
         viewModel.city.value = City("city_a", "somewhere")
-        viewModel.updateTodayForecast {
+        viewModel.updateForecast(
+            ForecastDay.TODAY
+        ) {
             assertEquals(true, it)
-            assertEquals("sometime", viewModel.todayForecast.value?.last_update)
-            assertEquals(4, viewModel.todayForecast.value?.forecasts?.size)
-            assertEquals("03:00", viewModel.todayForecast.value?.forecasts?.get(3)?.time)
+            assertEquals("sometime_today", viewModel.forecasts[0]?.last_update)
+            assertEquals(4, viewModel.forecasts[0]?.forecasts?.size)
+            assertEquals(10.0, viewModel.forecasts[0]?.forecasts?.get(3)?.temperature)
+        }
+    }
+
+    @Test
+    fun `updateForecast(tomorrow) should obtain the tomorrow forecast`() {
+        viewModel.city.value = City("city_b", "somewhere")
+        viewModel.updateForecast(
+            ForecastDay.TOMORROW
+        ) {
+            assertEquals(true, it)
+            assertEquals("sometime_tomorrow", viewModel.forecasts[1]?.last_update)
+            assertEquals(4, viewModel.forecasts[1]?.forecasts?.size)
+            assertEquals(6.0, viewModel.forecasts[1]?.forecasts?.get(3)?.temperature)
         }
     }
 }
