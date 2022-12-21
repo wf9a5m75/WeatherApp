@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.weatherapp.network.model.ForecastDay
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.OptionMenuItem
@@ -116,9 +117,9 @@ fun MainScreen(
         AppTabs(
             onTabChanged = { tabIndex ->
                 when (tabIndex) {
-                    0 -> TodayWeatherScreen(viewModel)
+                    0 -> DailyWeatherScreen(ForecastDay.TODAY, viewModel)
 
-                    1 -> TomorrowWeatherScreen(viewModel)
+                    1 -> DailyWeatherScreen(ForecastDay.TOMORROW, viewModel)
 
                     2 -> WeeklyWeatherScreen(viewModel)
                 }

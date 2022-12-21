@@ -26,14 +26,17 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.R
+import com.example.weatherapp.network.model.ForecastDay
 import com.example.weatherapp.ui.components.WeatherIcon
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import weatherIconResource
+import java.util.Calendar
 
 @Preview()
 @Composable
-fun TomorrowWeatherScreen(
+fun DailyWeatherScreen(
+    day: ForecastDay = ForecastDay.TODAY,
     viewModel: AppViewModel = viewModel()
 ) {
 
@@ -43,11 +46,11 @@ fun TomorrowWeatherScreen(
 
     val onRefresh: () -> Unit = {
         refreshState.isRefreshing = true
-        viewModel.updateTomorrowForecast {
+        viewModel.updateForecast(day) {
             refreshState.isRefreshing = false
         }
     }
-    if (viewModel.tomorrowForecast.value == null) {
+    if (viewModel.forecasts[day.day] == null) {
         onRefresh()
     }
 
@@ -62,7 +65,7 @@ fun TomorrowWeatherScreen(
             modifier = Modifier.fillMaxSize()
         )
         Text(
-            text = viewModel.tomorrowForecast.value?.last_update ?: "(not available)",
+            text = viewModel.forecasts[day.day]?.last_update ?: "(not available)",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -71,7 +74,7 @@ fun TomorrowWeatherScreen(
             style = MaterialTheme.typography.body2
         )
 
-        if (viewModel.tomorrowForecast.value?.forecasts?.size != 24) return@SwipeRefresh
+        if (viewModel.forecasts[day.day]?.forecasts?.size != 24) return@SwipeRefresh
 
         Column(
             modifier = Modifier
@@ -82,7 +85,7 @@ fun TomorrowWeatherScreen(
 
             Image(
                 painter = weatherIconResource(
-                    viewModel.tomorrowForecast.value?.overall ?: "unknown",
+                    viewModel.forecasts[day.day]?.overall ?: "unknown",
                     12
                 ),
                 contentDescription = "",
@@ -100,10 +103,15 @@ fun TomorrowWeatherScreen(
                         orientation = Orientation.Horizontal
                     )
             ) {
-                var i = 0
+                var i = when(day) {
+                    ForecastDay.TODAY -> {
+                        val now = Calendar.getInstance()
+                        now.get(Calendar.HOUR_OF_DAY)
+                    }
+                    else -> 0
+                }
                 items(
-                    items = viewModel.tomorrowForecast.value!!.forecasts,
-                    itemContent = {
+                    items = viewModel.forecasts[day.day]!!.forecasts,                    itemContent = {
                         WeatherIcon(
                             weather = it.status,
                             temperature = it.temperature.toInt(),

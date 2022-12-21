@@ -5,12 +5,6 @@ import com.example.weatherapp.R
 import java.util.Calendar
 
 @Composable
-fun getCurrentHour(): Int {
-    val now = Calendar.getInstance()
-    return now.get(Calendar.HOUR_OF_DAY)
-}
-
-@Composable
 fun weatherIconResource(weather: String, hour24: Int): Painter {
     val isDayTime = (hour24 >= 7) && (hour24 <= 17)
 

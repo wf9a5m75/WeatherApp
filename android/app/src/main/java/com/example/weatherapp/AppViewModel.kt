@@ -1,6 +1,7 @@
 package com.example.weatherapp
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,10 +38,9 @@ class AppViewModel @Inject constructor(
         City("", "")
     )
 
-    val locations: MutableList<Prefecture> = mutableListOf()
+    val locations = mutableStateListOf<Prefecture>()
 
-    val todayForecast: MutableState<ForecastResponse?> = mutableStateOf(null)
-    val tomorrowForecast: MutableState<ForecastResponse?> = mutableStateOf(null)
+    val forecasts = mutableStateListOf<ForecastResponse?>(null,null,null,null,null,null,null)
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -156,9 +156,12 @@ class AppViewModel @Inject constructor(
         )
     }
 
-    fun updateTomorrowForecast(onFinished: (isUpdated: Boolean) -> Unit) {
+    fun updateForecast(
+        day: ForecastDay,
+        onFinished: (isUpdated: Boolean) -> Unit
+    ) {
         viewModelScope.launch(dispatcher) {
-            getForecast(ForecastDay.TODAY) {
+            getForecast(day) {
                 if (it == null) {
                     viewModelScope.launch {
                         onFinished(false)
@@ -166,25 +169,7 @@ class AppViewModel @Inject constructor(
                     return@getForecast
                 }
 
-                tomorrowForecast.value = it
-                viewModelScope.launch {
-                    onFinished(true)
-                }
-            }
-        }
-    }
-
-    fun updateTodayForecast(onFinished: (isUpdated: Boolean) -> Unit) {
-        viewModelScope.launch(dispatcher) {
-            getForecast(ForecastDay.TODAY) {
-                if (it == null) {
-                    viewModelScope.launch {
-                        onFinished(false)
-                    }
-                    return@getForecast
-                }
-
-                todayForecast.value = it
+                forecasts[day.day] = it
                 viewModelScope.launch {
                     onFinished(true)
                 }
@@ -206,8 +191,6 @@ class AppViewModel @Inject constructor(
             day = day.day,
             cache = false
         )
-        todayForecast.value = response.body()
-
         onFinished(response.body())
     }
 }

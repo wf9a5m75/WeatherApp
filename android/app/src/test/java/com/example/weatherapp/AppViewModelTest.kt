@@ -78,7 +78,7 @@ class AppViewModelTest {
                 LocationResponse("dummy_last_updated", prefectures)
             )
 
-            onBlocking { getForecast("city_a", 0) } doReturn Response.success(
+            onBlocking { getForecast("city_a", 0, true) } doReturn Response.success(
                 HttpURLConnection.HTTP_OK,
                 ForecastResponse(
                     "sometime",
