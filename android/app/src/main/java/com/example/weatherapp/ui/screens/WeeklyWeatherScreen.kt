@@ -17,7 +17,7 @@ fun WeeklyWeatherScreen(viewModel: AppViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color.LightGray)
+            .background(color = Color.LightGray),
     ) {
         Button(onClick = {
             Log.d("Weekly", "--->clicked")

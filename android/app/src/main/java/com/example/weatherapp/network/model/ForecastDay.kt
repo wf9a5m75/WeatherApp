@@ -8,5 +8,5 @@ enum class ForecastDay(val day: Int) {
     DAY5(4),
     DAY6(5),
     DAY7(6),
-    DAY8(7)
+    DAY8(7),
 }

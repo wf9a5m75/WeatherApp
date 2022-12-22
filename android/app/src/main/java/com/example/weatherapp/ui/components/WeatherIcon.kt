@@ -15,29 +15,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import weatherIconResource
+import com.example.weatherapp.utils.weatherIconResource
 
 @Composable
 fun WeatherIcon(
     weather: String,
     temperature: Int,
     hour24: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-
     val time = "${hour24 % 12} ${
-    when (hour24 < 12) {
-        true -> "am"
-        else -> "pm"
-    }
+        when (hour24 < 12) {
+            true -> "am"
+            else -> "pm"
+        }
     }"
     Column(
         modifier = modifier
             .size(
                 width = 100.dp,
-                height = 130.dp
+                height = 130.dp,
             )
-            .wrapContentSize(Alignment.Center)
+            .wrapContentSize(Alignment.Center),
     ) {
         Text(
             modifier = Modifier
@@ -46,7 +45,7 @@ fun WeatherIcon(
             text = time,
             fontSize = 14.sp,
             color = MaterialTheme.colors.onSecondary,
-            style = MaterialTheme.typography.body2
+            style = MaterialTheme.typography.body2,
         )
 
         Image(
@@ -57,7 +56,7 @@ fun WeatherIcon(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .align(Alignment.CenterHorizontally)
-                .padding(all = 3.dp)
+                .padding(all = 3.dp),
         )
         Text(
             modifier = Modifier
@@ -66,7 +65,7 @@ fun WeatherIcon(
             text = "$temperature℃",
             fontSize = 14.sp,
             color = MaterialTheme.colors.onSecondary,
-            style = MaterialTheme.typography.body2
+            style = MaterialTheme.typography.body2,
         )
     }
 }

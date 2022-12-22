@@ -6,7 +6,7 @@ import java.util.Calendar
 import java.util.TimeZone
 
 class ETagInspector(
-    private val cacheDao: CacheDao
+    private val cacheDao: CacheDao,
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
@@ -18,7 +18,7 @@ class ETagInspector(
             ?: CacheValue(
                 url = url,
                 eTag = "",
-                lastModified = ""
+                lastModified = "",
             )
         if (!request.url().queryParameter("_cache").equals("false") &&
             cache.eTag != ""
@@ -48,12 +48,28 @@ class ETagInspector(
         val cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"))
 
         val weekday = arrayOf(
-            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
         )[cal.get(Calendar.DAY_OF_WEEK) - 1]
 
         val month = arrayOf(
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
-            "Aug", "Sep", "Oct", "Nov", "Dec"
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
         )[cal.get(Calendar.MONTH)]
 
         val day = cal.get(Calendar.DAY_OF_MONTH)

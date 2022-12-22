@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class Forecast(
     val time: String,
     val temperature: Double,
-    val status: String
+    val status: String,
 )

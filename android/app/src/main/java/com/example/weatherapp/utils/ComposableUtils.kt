@@ -1,8 +1,9 @@
+package com.example.weatherapp.utils
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import com.example.weatherapp.R
-import java.util.Calendar
 
 @Composable
 fun weatherIconResource(weather: String, hour24: Int): Painter {
@@ -28,6 +29,6 @@ fun weatherIconResource(weather: String, hour24: Int): Painter {
             }
 
             else -> R.drawable.wt_unknown
-        }
+        },
     )
 }

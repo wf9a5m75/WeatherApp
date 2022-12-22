@@ -1,5 +1,6 @@
 package com.example.weatherapp
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +24,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
@@ -32,15 +34,15 @@ class AppViewModel @Inject constructor(
     private val networkMonitor: INetworkMonitor,
     private val weatherApi: IWeatherApi,
     private val prefectureDao: PrefectureDao,
-    private val keyValueDao: KeyValueDao
+    private val keyValueDao: KeyValueDao,
 ) : ViewModel() {
     var city: MutableState<City> = mutableStateOf(
-        City("", "")
+        City("", ""),
     )
 
     val locations = mutableStateListOf<Prefecture>()
 
-    val forecasts = mutableStateListOf<ForecastResponse?>(null,null,null,null,null,null,null)
+    val forecasts = mutableStateListOf<ForecastResponse?>(null, null, null, null, null, null, null)
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -67,7 +69,7 @@ class AppViewModel @Inject constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     fun saveSelectedCity(
-        onFinished: () -> Unit = {}
+        onFinished: () -> Unit = {},
     ) {
         viewModelScope.launch(dispatcher) {
             saveValue("selected_city", Json.encodeToString(city.value)) {
@@ -78,10 +80,27 @@ class AppViewModel @Inject constructor(
         }
     }
 
+    @SuppressLint("SimpleDateFormat")
+    fun sprintDateFormat(day: ForecastDay): String {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DATE, day.day)
+        return when(day) {
+            ForecastDay.TODAY -> {
+                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm")
+                formatter.format(calendar.time)
+            }
+
+            else -> {
+                val formatter = SimpleDateFormat("yyyy-MM-dd")
+                formatter.format(calendar.time)
+            }
+        }
+    }
+
     private suspend fun saveValue(
         key: String,
         value: String,
-        onFinished: () -> Unit = {}
+        onFinished: () -> Unit = {},
     ) {
         keyValueDao.put(KeyValuePair(key, value))
         onFinished()
@@ -89,7 +108,7 @@ class AppViewModel @Inject constructor(
 
     private fun readValue(
         key: String,
-        onFinished: (value: String?) -> Unit
+        onFinished: (value: String?) -> Unit,
     ) {
         viewModelScope.launch(dispatcher) {
             val result = keyValueDao.get(key)?.value
@@ -152,13 +171,16 @@ class AppViewModel @Inject constructor(
         val prefectures = locationResponse.prefectures.toTypedArray()
         prefectureDao.insertAll(*prefectures)
         keyValueDao.put(
-            KeyValuePair("location_lastupdate", locationResponse.last_update)
+            KeyValuePair(
+                "location_lastupdate",
+                locationResponse.last_update,
+            ),
         )
     }
 
     fun updateForecast(
         day: ForecastDay,
-        onFinished: (isUpdated: Boolean) -> Unit
+        onFinished: (isUpdated: Boolean) -> Unit,
     ) {
         viewModelScope.launch(dispatcher) {
             getForecast(day) {
@@ -179,7 +201,7 @@ class AppViewModel @Inject constructor(
 
     private suspend fun getForecast(
         day: ForecastDay,
-        onFinished: (forecast: ForecastResponse?) -> Unit
+        onFinished: (forecast: ForecastResponse?) -> Unit,
     ) {
         if (!networkMonitor.isOnline) {
             onFinished(null)
@@ -189,7 +211,7 @@ class AppViewModel @Inject constructor(
         val response = weatherApi.getForecast(
             city_id = city.value.id,
             day = day.day,
-            cache = false
+            cache = false,
         )
         onFinished(response.body())
     }

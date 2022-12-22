@@ -14,18 +14,16 @@ import com.example.weatherapp.R
 
 @Composable
 fun LoadingScreen() {
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .wrapContentSize()
+            .wrapContentSize(),
     ) {
-
         Text(
             text = stringResource(id = R.string.loading_message),
             fontSize = 18.sp,
-            color = MaterialTheme.colors.onBackground
+            color = MaterialTheme.colors.onBackground,
         )
     }
 }

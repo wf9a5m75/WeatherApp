@@ -13,5 +13,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LocationResponse(
     val last_update: String,
-    val prefectures: List<Prefecture>
+    val prefectures: List<Prefecture>,
 )

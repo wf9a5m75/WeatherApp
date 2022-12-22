@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class ForecastResponse(
     val last_update: String,
     val overall: String,
-    val forecasts: List<Forecast>
+    val forecasts: List<Forecast>,
 )

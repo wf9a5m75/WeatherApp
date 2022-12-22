@@ -62,8 +62,11 @@ ij_java_layout_static_imports_separately = true
 ij_java_packages_to_use_import_on_demand = unset
 
 [*.kt]
-ktlint_disabled_rules=no-wildcard-imports,import-ordering,no-empty-first-line-in-method-block,argument-list-wrapping
-ij_kotlin_packages_to_use_import_on_demand = androidx.**, kotlinx.**, com.example.weatherapp.**, java.**
+ktlint_standard_no-wildcard-import=disabled
+ktlint_standard_import-ordering=disabled
+ktlint_standard_no-empty-first-line-in-method-block=disabled
+ktlint_standard_argument-list-wrapping=disabled
+ij_kotlin_packages_to_use_import_on_demand = androidx.**, kotlinx.**, com.example.weatherapp.**, java.**, androidx.compose.material.**, androidx.compose.runtime.**
 ij_kotlin_code_style_defaults = android
 ij_kotlin_keep_blank_lines_in_declarations = 1
 ij_kotlin_keep_blank_lines_in_code = 1

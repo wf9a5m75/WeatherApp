@@ -28,18 +28,17 @@ import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.R
 import com.example.weatherapp.network.model.ForecastDay
 import com.example.weatherapp.ui.components.WeatherIcon
+import com.example.weatherapp.utils.weatherIconResource
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import weatherIconResource
 import java.util.Calendar
 
 @Preview()
 @Composable
 fun DailyWeatherScreen(
     day: ForecastDay = ForecastDay.TODAY,
-    viewModel: AppViewModel = viewModel()
+    viewModel: AppViewModel = viewModel(),
 ) {
-
     val refreshState = rememberSwipeRefreshState(isRefreshing = false)
     val scrollState = rememberScrollState()
     val scrollStateForRow = rememberScrollState()
@@ -56,22 +55,22 @@ fun DailyWeatherScreen(
 
     SwipeRefresh(
         state = refreshState,
-        onRefresh = onRefresh
+        onRefresh = onRefresh,
     ) {
         Image(
             painter = painterResource(id = R.drawable.bg_sunny),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
         Text(
-            text = viewModel.forecasts[day.day]?.last_update ?: "(not available)",
+            text = viewModel.sprintDateFormat(day),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            fontSize = 32.sp,
+            fontSize = 24.sp,
             color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.body2
+            style = MaterialTheme.typography.body2,
         )
 
         if (viewModel.forecasts[day.day]?.forecasts?.size != 24) return@SwipeRefresh
@@ -80,30 +79,29 @@ fun DailyWeatherScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentSize(Alignment.Center)
-                .verticalScroll(state = scrollState, enabled = true)
+                .verticalScroll(state = scrollState, enabled = true),
         ) {
-
             Image(
                 painter = weatherIconResource(
                     viewModel.forecasts[day.day]?.overall ?: "unknown",
-                    12
+                    12,
                 ),
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(400.dp)
                     .align(Alignment.CenterHorizontally)
-                    .padding(all = 32.dp)
+                    .padding(all = 32.dp),
             )
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .scrollable(
                         scrollStateForRow,
-                        orientation = Orientation.Horizontal
-                    )
+                        orientation = Orientation.Horizontal,
+                    ),
             ) {
-                var i = when(day) {
+                var i = when (day) {
                     ForecastDay.TODAY -> {
                         val now = Calendar.getInstance()
                         now.get(Calendar.HOUR_OF_DAY)
@@ -111,14 +109,15 @@ fun DailyWeatherScreen(
                     else -> 0
                 }
                 items(
-                    items = viewModel.forecasts[day.day]!!.forecasts,                    itemContent = {
+                    items = viewModel.forecasts[day.day]!!.forecasts,
+                    itemContent = {
                         WeatherIcon(
                             weather = it.status,
                             temperature = it.temperature.toInt(),
                             hour24 = i++,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
-                    }
+                    },
                 )
             }
         }

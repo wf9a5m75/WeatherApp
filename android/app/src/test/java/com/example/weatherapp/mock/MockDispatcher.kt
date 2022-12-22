@@ -74,7 +74,7 @@ object MockDispatcher : Dispatcher() {
                     }
                   ]
                 }
-                """.trimIndent()
+                """.trimIndent(),
             )
     }
 }

@@ -34,7 +34,6 @@ class CacheDbTest {
             "urlSomewhere",
             "eTagSomething",
             "lastModifiedSomething",
-            "Hello World".toByteArray()
         )
         dao.put(expectVal)
 
@@ -42,7 +41,6 @@ class CacheDbTest {
         assertEquals("urlSomewhere", readValue?.url)
         assertEquals("eTagSomething", readValue?.eTag)
         assertEquals("lastModifiedSomething", readValue?.lastModified)
-        assertEquals("Hello World", String(readValue?.body ?: ByteArray(0)))
 
         dao.remove("urlSomething")
         val afterReadValue = dao.get("urlSomething")

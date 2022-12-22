@@ -6,7 +6,6 @@ import com.example.weatherapp.ui.screens.OfflineScreen
 import org.junit.Test
 
 class OfflineScreenInstrumentedTest : BaseActivityInstrumentedTest() {
-
     @Test
     fun shouldDisplayMessage() {
 

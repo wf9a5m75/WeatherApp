@@ -25,9 +25,8 @@ fun OfflineScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
+            .wrapContentSize(Alignment.Center),
     ) {
-
         Icon(
             tint = colors.onBackground,
             painter = painterResource(id = R.drawable.ic_baseline_wifi_off_24),
@@ -36,12 +35,12 @@ fun OfflineScreen() {
                 .align(Alignment.CenterHorizontally)
                 .padding(16.dp)
                 .width(75.dp)
-                .height(75.dp)
+                .height(75.dp),
         )
         Text(
             text = stringResource(id = R.string.offline_message),
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            fontSize = 17.sp
+            fontSize = 17.sp,
         )
     }
 }

@@ -14,12 +14,12 @@ import kotlinx.serialization.json.Json
 class Converters {
     @OptIn(ExperimentalSerializationApi::class)
     @TypeConverter
-    public fun fromList(cities: List<City>): String {
+    fun fromList(cities: List<City>): String {
         return Json.encodeToString(cities)
     }
 
     @TypeConverter
-    public fun toList(citiesJson: String): List<City> {
+    fun toList(citiesJson: String): List<City> {
         return Json.decodeFromString(citiesJson)
     }
 }

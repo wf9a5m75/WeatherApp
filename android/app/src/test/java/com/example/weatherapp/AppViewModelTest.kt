@@ -4,7 +4,12 @@ import com.example.weatherapp.database.KeyValueDao
 import com.example.weatherapp.database.KeyValuePair
 import com.example.weatherapp.database.PrefectureDao
 import com.example.weatherapp.network.IWeatherApi
-import com.example.weatherapp.network.model.*
+import com.example.weatherapp.network.model.City
+import com.example.weatherapp.network.model.Forecast
+import com.example.weatherapp.network.model.ForecastDay
+import com.example.weatherapp.network.model.ForecastResponse
+import com.example.weatherapp.network.model.LocationResponse
+import com.example.weatherapp.network.model.Prefecture
 import com.example.weatherapp.utils.INetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,12 +20,16 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.kotlin.*
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyVararg
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import retrofit2.Response
 import java.net.HttpURLConnection
 
 class AppViewModelTest {
-
     private lateinit var viewModel: AppViewModel
     private lateinit var networkMonitor: INetworkMonitor
     private lateinit var weatherApi: IWeatherApi
@@ -34,13 +43,13 @@ class AppViewModelTest {
             listOf(
                 City(
                     "city1",
-                    "City1"
+                    "City1",
                 ),
                 City(
                     "city2",
-                    "City2"
-                )
-            )
+                    "City2",
+                ),
+            ),
         ),
 
         Prefecture(
@@ -49,14 +58,14 @@ class AppViewModelTest {
             listOf(
                 City(
                     "cityA",
-                    "CityA"
+                    "CityA",
                 ),
                 City(
                     "cityB",
-                    "CityB"
-                )
-            )
-        )
+                    "CityB",
+                ),
+            ),
+        ),
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,14 +78,14 @@ class AppViewModelTest {
         weatherApi = mock<IWeatherApi> {
             onBlocking { getLocations() } doReturn Response.success(
                 HttpURLConnection.HTTP_OK,
-                LocationResponse("dummy_last_updated", prefectures)
+                LocationResponse("dummy_last_updated", prefectures),
             )
 
             onBlocking {
                 getForecast(
                     eq("city_a"),
                     eq(ForecastDay.TODAY.day),
-                    anyBoolean()
+                    anyBoolean(),
                 )
             } doReturn
                 Response.success(
@@ -88,16 +97,16 @@ class AppViewModelTest {
                             Forecast("00:00", 13.0, "sunny"),
                             Forecast("01:00", 12.0, "sunny"),
                             Forecast("02:00", 11.0, "sunny"),
-                            Forecast("03:00", 10.0, "sunny")
-                        )
-                    )
+                            Forecast("03:00", 10.0, "sunny"),
+                        ),
+                    ),
                 )
 
             onBlocking {
                 getForecast(
                     eq("city_b"),
                     eq(ForecastDay.TOMORROW.day),
-                    anyBoolean()
+                    anyBoolean(),
                 )
             } doReturn
                 Response.success(
@@ -109,9 +118,9 @@ class AppViewModelTest {
                             Forecast("00:00", 8.0, "cloudy"),
                             Forecast("01:00", 7.0, "cloudy"),
                             Forecast("02:00", 7.0, "cloudy"),
-                            Forecast("03:00", 6.0, "cloudy")
-                        )
-                    )
+                            Forecast("03:00", 6.0, "cloudy"),
+                        ),
+                    ),
                 )
         }
 
@@ -161,7 +170,7 @@ class AppViewModelTest {
             networkMonitor = networkMonitor,
             weatherApi = weatherApi,
             prefectureDao = prefectureDao,
-            keyValueDao = keyValueDao
+            keyValueDao = keyValueDao,
         )
     }
 
@@ -177,7 +186,7 @@ class AppViewModelTest {
     fun `updateForecast(today) should obtain the today forecast`() {
         viewModel.city.value = City("city_a", "somewhere")
         viewModel.updateForecast(
-            ForecastDay.TODAY
+            ForecastDay.TODAY,
         ) {
             assertEquals(true, it)
             assertEquals("sometime_today", viewModel.forecasts[0]?.last_update)
@@ -190,7 +199,7 @@ class AppViewModelTest {
     fun `updateForecast(tomorrow) should obtain the tomorrow forecast`() {
         viewModel.city.value = City("city_b", "somewhere")
         viewModel.updateForecast(
-            ForecastDay.TOMORROW
+            ForecastDay.TOMORROW,
         ) {
             assertEquals(true, it)
             assertEquals("sometime_tomorrow", viewModel.forecasts[1]?.last_update)

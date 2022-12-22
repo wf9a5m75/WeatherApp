@@ -11,5 +11,5 @@ data class CacheValue(
     @ColumnInfo
     var eTag: String,
     @ColumnInfo
-    var lastModified: String
+    var lastModified: String,
 )

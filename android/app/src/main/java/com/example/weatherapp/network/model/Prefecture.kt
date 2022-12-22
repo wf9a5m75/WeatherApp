@@ -13,5 +13,5 @@ data class Prefecture(
     @ColumnInfo
     val name: String,
     @ColumnInfo
-    var cities: List<City> = listOf()
+    var cities: List<City> = listOf(),
 )

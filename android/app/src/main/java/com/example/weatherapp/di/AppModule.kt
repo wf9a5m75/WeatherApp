@@ -26,7 +26,6 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.create
 import javax.inject.Singleton
 
 @Module
@@ -39,38 +38,38 @@ object AppModule {
         networkMonitor: NetworkMonitor,
         weatherApi: IWeatherApi,
         prefectureDao: PrefectureDao,
-        keyValueDao: KeyValueDao
+        keyValueDao: KeyValueDao,
     ) = AppViewModel(
         dispatcher = Dispatchers.IO,
         networkMonitor = networkMonitor,
         weatherApi = weatherApi,
         prefectureDao = prefectureDao,
-        keyValueDao = keyValueDao
+        keyValueDao = keyValueDao,
     )
 
     @Provides
     @Singleton
     fun providePrefectureDao(
-        appDatabase: AppDatabase
+        appDatabase: AppDatabase,
     ) = appDatabase.prefectureDao()
 
     @Provides
     @Singleton
     fun provideKeyValueDao(
-        appDatabase: AppDatabase
+        appDatabase: AppDatabase,
     ) = appDatabase.keyValueDao()
 
     @Provides
     @Singleton
     fun provideNetworkMonitor(
-        connectivityManager: ConnectivityManager
+        connectivityManager: ConnectivityManager,
     ) = NetworkMonitor(connectivityManager)
 
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
     fun provideWeatherApi(
-        httpClient: OkHttpClient
+        httpClient: OkHttpClient,
     ): IWeatherApi = Retrofit.Builder().baseUrl("https://weather-app-8a034.web.app")
         .client(httpClient)
         .addConverterFactory(Json.asConverterFactory(MediaType.get("application/json")))
@@ -81,7 +80,7 @@ object AppModule {
     @Singleton
     fun provideHttpClient(
         httpLoggerInspector: HttpLoggingInterceptor,
-        eTagInspector: ETagInspector
+        eTagInspector: ETagInspector,
     ): OkHttpClient = OkHttpClient.Builder()
         .followRedirects(true)
         .followSslRedirects(true)
@@ -92,7 +91,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideETagInspector(
-        cacheDao: CacheDao
+        cacheDao: CacheDao,
     ) = ETagInspector(cacheDao)
 
     @Provides
@@ -109,26 +108,26 @@ object AppModule {
     @Provides
     @Singleton
     fun provideCacheDao(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ) = Room.databaseBuilder(
         context = context,
         klass = CacheDB::class.java,
-        name = "http-cache.db"
+        name = "http-cache.db",
     ).build().cacheDao()
 
     @Provides
     @Singleton
     fun provideAppDb(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ) = Room.databaseBuilder(
         context = context,
         klass = AppDatabase::class.java,
-        name = "app-database.db"
+        name = "app-database.db",
     ).build()
 
     @Provides
     @Singleton
     fun provideConnectivityManager(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ) = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }

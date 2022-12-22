@@ -6,8 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -19,14 +20,15 @@ import com.example.weatherapp.network.model.ForecastDay
 import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.OptionMenuItem
-import com.example.weatherapp.ui.screens.*
+import com.example.weatherapp.ui.screens.DailyWeatherScreen
+import com.example.weatherapp.ui.screens.OfflineScreen
+import com.example.weatherapp.ui.screens.SelectCityScreen
+import com.example.weatherapp.ui.screens.WeeklyWeatherScreen
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     // modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = MaterialTheme.colors.background,
                 ) {
                     WeatherApp(viewModel)
                 }
@@ -49,7 +51,6 @@ class MainActivity : ComponentActivity() {
 // @Preview(showBackground = true)
 @Composable
 fun WeatherApp(viewModel: AppViewModel) {
-
     val navigationController = rememberNavController()
 
     WeatherAppTheme {
@@ -62,12 +63,12 @@ fun WeatherApp(viewModel: AppViewModel) {
                     viewModel = viewModel,
                     onChangeCity = {
                         navigationController.navigate("settings")
-                    }
+                    },
                 )
             }
             composable(route = "settings") {
                 SelectCityScreen(
-                    viewModel = viewModel
+                    viewModel = viewModel,
                 ) {
                     viewModel.saveSelectedCity {
                         navigationController.popupToInclusive("main")
@@ -94,16 +95,15 @@ fun WeatherApp(viewModel: AppViewModel) {
 @Composable
 fun MainScreen(
     viewModel: AppViewModel,
-    onChangeCity: () -> Unit
+    onChangeCity: () -> Unit,
 ) {
-
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         AppGlobalNav(
             viewModel = viewModel,
             menuItems = listOf(
-                OptionMenuItem("change_city", "場所の変更")
+                OptionMenuItem("change_city", "場所の変更"),
             ),
             onMenuItemClicked = { menuId ->
                 when (menuId) {
@@ -111,7 +111,7 @@ fun MainScreen(
 
                     else -> { /* stub */ }
                 }
-            }
+            },
         )
 
         AppTabs(
@@ -123,17 +123,16 @@ fun MainScreen(
 
                     2 -> WeeklyWeatherScreen(viewModel)
                 }
-            }
+            },
         )
     }
 }
 fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
-
     // Pop up to the start destination of the graph
     // to avoid building up a large stack of destinations
     // on the back stack as users select items
     popUpTo(
-        this@popupToInclusive.graph.findStartDestination().id
+        this@popupToInclusive.graph.findStartDestination().id,
     ) {
         saveState = false
         inclusive = true

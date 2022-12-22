@@ -15,7 +15,7 @@ data class KeyValuePair(
     @PrimaryKey
     val id: String,
     @ColumnInfo
-    val value: String
+    val value: String,
 )
 
 @Dao
