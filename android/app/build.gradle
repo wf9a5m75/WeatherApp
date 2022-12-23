@@ -106,6 +106,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
 
     // Android test
+    androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
     androidTestImplementation "org.mockito:mockito-android:$mockito_version"
     androidTestImplementation "androidx.test.ext:junit:$androidX_test_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
