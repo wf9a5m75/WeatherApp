@@ -99,7 +99,7 @@ object AppModule {
     fun provideHttpLoggerInspector(): HttpLoggingInterceptor {
         val loggerInterceptor = HttpLoggingInterceptor()
         loggerInterceptor.level = when (BuildConfig.DEBUG) {
-            true -> HttpLoggingInterceptor.Level.HEADERS
+            true -> HttpLoggingInterceptor.Level.BASIC
             else -> HttpLoggingInterceptor.Level.NONE
         }
         return loggerInterceptor

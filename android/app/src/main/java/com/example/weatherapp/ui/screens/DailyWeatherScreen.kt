@@ -101,20 +101,13 @@ fun DailyWeatherScreen(
                         orientation = Orientation.Horizontal,
                     ),
             ) {
-                var i = when (day) {
-                    ForecastDay.TODAY -> {
-                        val now = Calendar.getInstance()
-                        now.get(Calendar.HOUR_OF_DAY)
-                    }
-                    else -> 0
-                }
                 items(
                     items = viewModel.forecasts[day.day]!!.forecasts,
                     itemContent = {
                         WeatherIcon(
                             weather = it.status,
                             temperature = it.temperature.toInt(),
-                            hour24 = i++,
+                            hour24 = it.hours24,
                             modifier = Modifier.weight(1f),
                         )
                     },
