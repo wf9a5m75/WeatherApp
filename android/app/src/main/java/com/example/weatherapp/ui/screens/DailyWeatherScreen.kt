@@ -102,7 +102,16 @@ fun DailyWeatherScreen(
                     ),
             ) {
                 items(
-                    items = viewModel.forecasts[day.day]!!.forecasts,
+                    items = when(day) {
+                        ForecastDay.TODAY -> {
+                            val nowH = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                            viewModel.forecasts[day.day]!!.forecasts.filter {
+                                it.hours24 >= nowH
+                            }
+                        }
+                        else -> viewModel.forecasts[day.day]!!.forecasts
+                    },
+
                     itemContent = {
                         WeatherIcon(
                             weather = it.status,
