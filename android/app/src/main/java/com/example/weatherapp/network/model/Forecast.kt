@@ -11,6 +11,10 @@ data class Forecast(
 
     private val mem = mutableMapOf<String, Int>()
 
+    /*
+     * timeにはISO8601形式で日時データが与えられる。
+     * これをパースして、時間だけを取り出し、hour24で返す。
+     */
     init {
         val validFormat = "yyyy-MM-dd\'T\'hh:mm"
         var i = 0
