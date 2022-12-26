@@ -1,32 +1,30 @@
 package com.example.weatherapp
 
-import androidx.activity.viewModels
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelectable
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.Espresso
 import com.example.weatherapp.database.KeyValueDao
 import com.example.weatherapp.database.PrefectureDao
-import com.example.weatherapp.di.AppModule
 import com.example.weatherapp.network.IWeatherApi
 import com.example.weatherapp.network.model.City
+import com.example.weatherapp.network.model.LocationResponse
 import com.example.weatherapp.network.model.Prefecture
 import com.example.weatherapp.ui.screens.SelectCityScreen
-import com.example.weatherapp.utils.NetworkMonitor
+import com.example.weatherapp.utils.INetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import javax.inject.Inject
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.spy
+import retrofit2.Response
 
 class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
 
@@ -62,28 +60,43 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
         "City1-1", "City1-2", "City1-3", "City2-1", "City2-2", "City3-1", "City3-2",
     )
 
-    lateinit var viewModel: AppViewModel
 
     @Before
     fun setup() {
-//        val networkMonitor = spy(NetworkMonitor::class.java)
-//        val weatherAPI = spy(IWeatherApi::class.java)
-//        val prefectureDao = spy(PrefectureDao::class.java)
-//        val keyValueDao = spy(KeyValueDao::class.java)
-//
-//        viewModel = AppViewModel(
-//            Dispatchers.IO,
-//            networkMonitor,
-//            weatherAPI,
-//            prefectureDao,
-//            keyValueDao
-//        )
-        viewModel = mock(AppViewModel::class.java)
         MockitoAnnotations.openMocks(this)
+    }
+
+    private fun createViewModel(): AppViewModel {
+        val networkMonitor = spy<INetworkMonitor> {
+            on { isOnline } doReturn true
+        }
+
+        val weatherAPI = spy<IWeatherApi> {
+            onBlocking { this.getLocations() } doReturn Response.success(
+                LocationResponse(
+                    "2022-11-15T22:33",
+                    prefectures,
+                )
+            )
+        }
+        val prefectureDao = spy<PrefectureDao> {
+            onBlocking { this.getAll() } doReturn prefectures
+        }
+        val keyValueDao = spy<KeyValueDao> { }
+
+        return AppViewModel(
+            Dispatchers.IO,
+            networkMonitor,
+            weatherAPI,
+            prefectureDao,
+            keyValueDao
+        )
     }
 
     @Test
     fun shouldDisplayAllCities() {
+        val viewModel = this.createViewModel()
+
         viewModel.locations.addAll(prefectures)
         composeTestRule.apply {
             setContent {
@@ -103,6 +116,7 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
 
     @Test
     fun currentCityShouldSelected() {
+        val viewModel = this.createViewModel()
         val currentCity = City("pref2_city2", "City2-2")
         viewModel.city.value = currentCity
         composeTestRule.apply {
@@ -124,7 +138,8 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
         val currentCity = City("pref2_city2", "City2-2")
         val targetCity = City("pref3_city2", "City3-2")
 
-        val onCloseCallback = spy(Callback::class.java)
+        val viewModel = this.createViewModel()
+        val onCloseCallback = spy<Callback> {}
         viewModel.city.value = currentCity
         viewModel.locations.addAll(prefectures)
 
@@ -155,7 +170,8 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
         val currentCity = City("pref1_city1", "City1-1")
         val targetCity = City("pref3_city1", "City3-1")
 
-        val onCloseCallback = spy(Callback::class.java)
+        val viewModel = this.createViewModel()
+        val onCloseCallback = spy<Callback> {}
         viewModel.city.value = currentCity
         viewModel.locations.addAll(prefectures)
 
