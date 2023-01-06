@@ -15,8 +15,11 @@ data class Forecast(
     val status: String,
 ) {
 
-    private val mem = mutableMapOf<String, Int>()
-    private var hour: Int = -1
+    private var _hour: Int = -1
+    private var _year: Int = -1
+    private var _month: Int = -1
+    private var _date: Int = -1
+
 
     /*
      * timeにはISO8601形式で日時データが与えられる。
@@ -29,7 +32,10 @@ data class Forecast(
                 val calendar = Calendar.getInstance().also {
                     it.time = date
                 }
-                this.hour = calendar.get(Calendar.HOUR_OF_DAY)
+                this._year = calendar.get(Calendar.YEAR)
+                this._month = calendar.get(Calendar.MONTH) + 1
+                this._date = calendar.get(Calendar.DATE)
+                this._hour = calendar.get(Calendar.HOUR_OF_DAY)
             }
         } catch (exception: ParseException) {
             // Do nothing
@@ -37,5 +43,15 @@ data class Forecast(
     }
 
     val hours24
-        get(): Int = this.hour
+        get(): Int = this._hour
+
+    val year
+        get(): Int = this._year
+
+    val month
+        get(): Int = this._month
+
+    val date
+        get(): Int = this._date
+
 }

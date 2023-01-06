@@ -1,28 +1,47 @@
 package com.example.weatherapp.ui.screens
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.viewmodel.compose.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherapp.AppViewModel
+import com.example.weatherapp.ui.components.DailyRow
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @Composable
 fun WeeklyWeatherScreen(viewModel: AppViewModel = viewModel()) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.LightGray),
+    val refreshState = rememberSwipeRefreshState(isRefreshing = false)
+
+    val onRefresh: () -> Unit = {
+        refreshState.isRefreshing = true
+        viewModel.updateWeeklyForecast {
+            refreshState.isRefreshing = false
+        }
+    }
+
+    if (viewModel.weeklyForecast.isEmpty()) {
+        onRefresh()
+    }
+
+    SwipeRefresh(
+        state = refreshState,
+        onRefresh = onRefresh
     ) {
-        Button(onClick = {
-            Log.d("Weekly", "--->clicked")
-        }) {
-            Text("Weekly weather!!")
+        LazyColumn(modifier = Modifier
+            .fillMaxSize()) {
+            items(
+                items = viewModel.weeklyForecast,
+
+                itemContent = {
+                    DailyRow(it!!)
+                }
+            )
         }
     }
 }

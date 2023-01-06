@@ -4,7 +4,12 @@ export interface IForecast {
   status: string;
 };
 
+export interface IDailyForecast {
+  date: string;
+  forecasts: IForecast[];
+}
+
 export interface IWeeklyForecastsResult {
   last_update: string;
-  forecasts: IForecast[];
+  dailyForecasts: IDailyForecast[];
 };

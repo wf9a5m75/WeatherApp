@@ -4,11 +4,12 @@ import {
   IApiResult,
 } from '../openmetro';
 import {
+  IDailyForecast,
   IForecast,
   IWeeklyForecastsResult,
 } from '../api_interface';
 
-export const weeklyForcasts = onRequest(async (req, res) => {
+export const weeklyForcast = onRequest(async (req, res) => {
 
   const rawData = await getRawForecastData(
     35.654451866025134,
@@ -22,19 +23,44 @@ export const weeklyForcasts = onRequest(async (req, res) => {
     });
     return;
   }
-  const forecasts = generateWeeklyForecasts(rawData);
-
+  const forecasts = convertToIForecasts(rawData);
+  const dailyForecasts = reduceToDailyForecasts(forecasts);
 
   const now = new Date();
   const last_update = getISO8601(now);
 
   const result: IWeeklyForecastsResult = {
     last_update,
-    forecasts,
+    dailyForecasts: dailyForecasts,
   };
 
   res.json(result);
 });
+
+const reduceToDailyForecasts = (
+  forecasts: IForecast[]
+): IDailyForecast[] => {
+  const results: IDailyForecast[] = [];
+  const N = forecasts.length;
+  if (N === 0) {
+    return results;
+  }
+
+  let i = 0;
+  while (i < N) {
+    const datePrefix = forecasts[i].time.replace(/T.*$/, '');
+    const oneDay: IDailyForecast = {
+      date: datePrefix,
+      forecasts: [],
+    };
+    while ((i < N) && (forecasts[i].time.startsWith(datePrefix))) {
+      oneDay.forecasts.push(forecasts[i]);
+      i += 1;
+    }
+    results.push(oneDay);
+  }
+  return results;
+};
 
 const getRawForecastData = async (
   latitude: number,
@@ -56,21 +82,15 @@ const getRawForecastData = async (
   }
 }
 
-const generateWeeklyForecasts = (
+const convertToIForecasts = (
   data: IApiResult,
 ): IForecast[] => {
-  const forecasts: IForecast[] = [];
+  const results: IForecast[] = [];
 
   data.hourly!!.time.forEach((
     time: string,
     idx: number,
   ): void => {
-    const dTime = new Date(time);
-    const hour = dTime.getHours();
-    if (hour % 3 !== 0) {
-      return;
-    }
-
     let status = 'sunny';
     const cloudcover = data.hourly!!.cloudcover!![idx];
     const rain = data.hourly!!.rain!![idx];
@@ -86,14 +106,14 @@ const generateWeeklyForecasts = (
       }
     }
 
-    forecasts.push({
+    results.push({
       time,
       'temperature': data.hourly!!.temperature_2m!![idx],
       status,
     });
   });
 
-  return forecasts;
+  return results;
 };
 
 const getISO8601 = (date: Date) => {

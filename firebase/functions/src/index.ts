@@ -1,2 +1,2 @@
 export * from './api/locations';
-export { weeklyForcasts as weekly } from './api/weeklyForecasts';
+export { weeklyForcast as weekly } from './api/weeklyForecast';

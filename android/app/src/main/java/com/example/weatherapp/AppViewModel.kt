@@ -11,10 +11,12 @@ import com.example.weatherapp.database.KeyValuePair
 import com.example.weatherapp.database.PrefectureDao
 import com.example.weatherapp.network.IWeatherApi
 import com.example.weatherapp.network.model.City
+import com.example.weatherapp.network.model.DailyForecast
 import com.example.weatherapp.network.model.ForecastDay
 import com.example.weatherapp.network.model.ForecastResponse
 import com.example.weatherapp.network.model.LocationResponse
 import com.example.weatherapp.network.model.Prefecture
+import com.example.weatherapp.network.model.WeeklyForecastResponse
 import com.example.weatherapp.utils.INetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -42,7 +44,10 @@ class AppViewModel @Inject constructor(
 
     val locations = mutableStateListOf<Prefecture>()
 
-    val forecasts = mutableStateListOf<ForecastResponse?>(null, null, null, null, null, null, null)
+    val forecasts = mutableStateListOf<ForecastResponse?>(null, null)
+
+    val weeklyForecast = mutableStateListOf<DailyForecast?>()
+
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -183,6 +188,13 @@ class AppViewModel @Inject constructor(
         onFinished: (isUpdated: Boolean) -> Unit,
     ) {
         viewModelScope.launch(dispatcher) {
+            if (day.day > ForecastDay.TOMORROW.day) {
+                viewModelScope.launch {
+                    onFinished(false)
+                }
+                return@launch
+            }
+
             getForecast(day) {
                 if (it == null) {
                     viewModelScope.launch {
@@ -212,6 +224,39 @@ class AppViewModel @Inject constructor(
             city_id = city.value.id,
             day = day.day,
             cache = false,
+        )
+        onFinished(response.body())
+    }
+
+
+    fun updateWeeklyForecast(
+        onFinished: () -> Unit
+    ) {
+        viewModelScope.launch {
+            getWeeklyForecast {
+                if (it == null) {
+                    onFinished()
+                    return@getWeeklyForecast
+                }
+
+                weeklyForecast.clear()
+                weeklyForecast.addAll(it.dailyForecasts)
+                onFinished()
+            }
+        }
+    }
+
+    private suspend fun getWeeklyForecast(
+        onFinished: (response: WeeklyForecastResponse?) -> Unit,
+    ) {
+        if (!networkMonitor.isOnline) {
+            onFinished(null)
+            return
+        }
+
+        val response = weatherApi.getWeeklyForecast(
+            city_id = city.value.id,
+            cache = false
         )
         onFinished(response.body())
     }
