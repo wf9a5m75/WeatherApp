@@ -12,15 +12,30 @@
         "destination": "/locations.json"
       },
       {
+        "source": "/api/v1/locations/",
+        "destination": "/locations.json"
+      },
+      {
         "source": "/api/v1/forecast",
         "destination": "/forecast.json"
+      },
+      {
+        "source": "/api/v1/forecast/",
+        "destination": "/forecast.json"
+      },
+      {
+        "source": "/api/v1/weekly",
+        "function": "weekly"
+      },
+      {
+        "source": "/api/v1/weekly",
+        "function": "weekly"
       }
     ]
   },
   "functions": [
     {
       "source": "functions",
-      "codebase": "default",
       "ignore": [
         "node_modules",
         ".git",
@@ -43,7 +58,7 @@
       "port": 5000
     },
     "ui": {
-      "enabled": true
+      "port": 4000
     },
     "singleProjectMode": true
   }

@@ -7,9 +7,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito.eq
-import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.mock
 import org.mockito.Mockito.`when` as mockWhen
 
 @RunWith(MockitoJUnitRunner::class)
@@ -23,7 +22,7 @@ class NetworkMonitorUnitTest() {
     @Before
     fun setup() {
         // Create a mocked context instance
-        mockContext = mock(Context::class.java)
+        mockContext = mock<Context> {}
 
         // Create a mocked connectivity manager instance
         mockWhen(mockContext.getSystemService(Context.CONNECTIVITY_SERVICE))

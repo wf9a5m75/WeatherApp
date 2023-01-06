@@ -1,6 +1,12 @@
 package com.example.weatherapp.network.model
 
 import kotlinx.serialization.Serializable
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+
+private const val ISO8601_FORMAT = "yyyy-MM-dd\'T\'hh:mm"
 
 @Serializable
 data class Forecast(
@@ -10,43 +16,26 @@ data class Forecast(
 ) {
 
     private val mem = mutableMapOf<String, Int>()
+    private var hour: Int = -1
 
     /*
      * timeにはISO8601形式で日時データが与えられる。
      * これをパースして、時間だけを取り出し、hour24で返す。
      */
     init {
-        val validFormat = "yyyy-MM-dd\'T\'hh:mm"
-        var i = 0
-        var j = 0
-        val N = validFormat.length
-        var isValid = true
-        while ((i < N) && (isValid)) {
-            val fChar = validFormat[i]
-            if (fChar == '\'') {
-                i += 1
-                while ((i < N) && (validFormat[i] != '\'') && isValid) {
-                    isValid = validFormat[i] == time[j]
-                    i++
-                    j++
+        try {
+            val date = SimpleDateFormat(ISO8601_FORMAT, Locale.getDefault()).parse(this.time)
+            if (date != null) {
+                val calendar = Calendar.getInstance().also {
+                    it.time = date
                 }
-                j -= 1
-
-            } else if ((fChar in 'a'..'z') || (fChar in 'A'..'Z')) {
-                isValid = time[j].isDigit()
-                if (isValid) {
-                    val key = fChar.toString()
-                    this.mem[key] = (this.mem[key] ?: 0) * 10 + time[j].digitToInt()
-                }
+                this.hour = calendar.get(Calendar.HOUR_OF_DAY)
             }
-            i += 1
-            j += 1
-        }
-        if (!isValid) {
-            this.mem.clear()
+        } catch (exception: ParseException) {
+            // Do nothing
         }
     }
 
     val hours24
-        get(): Int = this.mem["h"] ?: -1
+        get(): Int = this.hour
 }

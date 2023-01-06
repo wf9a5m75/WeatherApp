@@ -26,6 +26,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -52,6 +55,13 @@ android {
     kapt {
         correctErrorTypes = true
     }
+
+//    testOptions {
+//        animationDisabled true
+//        unitTests {
+//            includeAndroidResources = true
+//        }
+//    }
 }
 
 dependencies {
@@ -101,7 +111,7 @@ dependencies {
     // Unit test
 //    testImplementation "androidx.test:core:$androidX_test_version"
     testImplementation "junit:junit:$junit_version"
-    testImplementation "org.mockito:mockito-core:$mockito_version"
+    // testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
 

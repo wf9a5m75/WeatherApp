@@ -16,7 +16,7 @@ class ForecastTest {
     }
 
     @Test
-    fun `Should return 0 if given date is invalid`() {
+    fun `Should return -1 if given date is invalid`() {
         val data = Forecast(
             time = "2022-11-15 22:33",
             temperature = 3.0,
