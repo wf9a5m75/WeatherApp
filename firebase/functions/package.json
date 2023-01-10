@@ -3,7 +3,7 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch --preserveWatchOutput",
-    "serve": "firebase emulators:start --only functions,hosting",
+    "serve": "firebase emulators:start --only functions,hosting,firestore",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy:functions": "firebase deploy --only functions",

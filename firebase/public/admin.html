@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="./js/admin_map.js" defer></script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_FePCCLRQoa24HR0TR2_5pDVzXn1336A&callback=initMap&v=weekly"
+      defer
+    ></script>
+    <!-- <script
+      src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&v=weekly"
+      defer
+    ></script> -->
+  </head>
+  <body>
+    <div id="map">
+      <div id="panel">
+        <ul>
+          <li>
+            <button id="saveBtn">save</button>
+          </li>
+          <li>
+            <button id="exportLocationsBtn">export locations.json</button>
+          </li>
+          <li>
+            <button id="exportCitiesBtn">export cities.json</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

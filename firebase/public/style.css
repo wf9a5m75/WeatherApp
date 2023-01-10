@@ -1,0 +1,17 @@
+html,body {
+  width: 100%;
+  height: 100%;
+}
+#map {
+  width: 90%;
+  height: 90%;
+}
+
+#panel {
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  background-color: #FFFA;
+  position: absolute;
+  z-index: 10;
+}
