@@ -1,12 +1,12 @@
-import { MyFirestore } from './my-firestore.js';
+import { DataDoc, MyFirestore } from './my-firestore.js';
 import { GeocoderProcessor } from './geocoder.js';
 
 export class Factory {
   static _redIcon;
-  static _blueIcon;
+  static _yellowIcon;
   static {
     this._redIcon = this.generateIcon([255, 0, 0, 255]);
-    this._blueIcon = this.generateIcon([0, 0, 255, 255]);
+    this._greenIcon = this.generateIcon([0, 255, 0, 255]);
   }
 
   static createMap(mapDiv, options) {
@@ -18,7 +18,7 @@ export class Factory {
   static createMarker(options) {
     const marker = new google.maps.Marker(options);
     if (options.city) {
-      marker.setIcon(Factory._blueIcon);
+      marker.setIcon(Factory._greenIcon);
     } else {
       marker.setIcon(Factory._redIcon);
     }
@@ -26,7 +26,7 @@ export class Factory {
     marker.addListener('city_changed', (...params) => {
       const city = marker.get('city');
       if (city) {
-        marker.setIcon(Factory._blueIcon);
+        marker.setIcon(Factory._greenIcon);
       } else {
         marker.setIcon(Factory._redIcon);
       }
@@ -34,11 +34,8 @@ export class Factory {
     return marker;
   }
 
-  // static async createDB(dbName, objectName) {
-  //   return new MyIndexedDB(dbName, objectName);
-  // }
   static createDB(firebaseApp, collectionName) {
-    return new MyFirestore(firebaseApp, collectionName)
+    return new MyFirestore(firebaseApp, collectionName);
   }
 
   static createGeocoder() {
@@ -52,7 +49,7 @@ export class Factory {
       'fillOpacity': rgba[3] / 255,
       'scale': 1.3,
       'strokeWeight': 1,
-      'strokeColor': 'rgb(255, 255, 255)',
+      'strokeColor': 'rgb(0, 0, 0)',
       'strokeOpacity': 0.65,
       'anchor': {
         x: 12,

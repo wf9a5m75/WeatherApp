@@ -28,9 +28,6 @@ const initMap = async () => {
   const db = Factory.createDB(firebaseApp, 'cities');
   const createMarker = Factory.createMarker;
   const geocoder = Factory.createGeocoder();
-  const saveBtn = document.getElementById('saveBtn');
-  const exportLocationsBtn = document.getElementById('exportLocationsBtn');
-  const exportCitiesBtn = document.getElementById('exportCitiesBtn');
 
   // Create the application view model
   const app = new App(
@@ -45,21 +42,6 @@ const initMap = async () => {
 
   // Restore all markers
   app.restoreMarkers();
-
-  // Export the locations.json in the console.
-  saveBtn.addEventListener('click', async () => {
-    await app.saveMarkers();
-  });
-
-  exportLocationsBtn.addEventListener('click', async () => {
-    const allData = await app.loadAllData();
-    const locationsJSON = app.generateLocationsJSON(allData);
-    console.log(JSON.stringify(locationsJSON, null, 2));
-  });
-
-  exportCitiesBtn.addEventListener('click', async () => {
-    await app.firestoreTest();
-  });
 };
 window.initMap = initMap;
 if (document.readyState === 'loading') {
