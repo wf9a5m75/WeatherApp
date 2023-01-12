@@ -1,0 +1,57 @@
+version: '3.5'
+services:
+  blog-amefun:
+    build:
+      context: ./wp
+    links:
+      - mysql
+    image: cloud.canister.io:5000/111capitalusa/blog-americanfunding
+    container_name: "blog-amefun"
+    volumes:
+      - ./wp:/home/wadmin/www.blog-americanfunding.jp/user/public_html
+      - ./vhosts:/etc/apache2/sites-enabled
+      - ./logs/apache2:/home/wadmin/www.blog-americanfunding.jp/user/logs
+      - ./logs/apache2:/var/log/apache2
+    tty: true
+    ports:
+      - 3200:80
+    restart: ${DOCKER_RESTART:-always}
+    networks:
+      - proxynet
+
+  mysql:
+    ports:
+      - 3206:3306
+    tty: true
+    image: mysql:5.7
+    container_name: 'blog-amefun-mysql'
+    restart: ${DOCKER_RESTART:-always}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./logs/mysql:/var/log/mysql
+    environment:
+      MYSQL_DATABASE: wp_blog_americanfunding_jp
+      MYSQL_ROOT_PASSWORD: 2e1i2ekl3nr2
+      MYSQL_USER: blog-amefun
+      MYSQL_PASSWORD: d32eo32nrn4998
+    networks:
+      - proxynet
+
+  #phpmyadmin:
+  #  image: phpmyadmin/phpmyadmin
+  #  container_name: 'i2664623_wp2-phpmyadmin'
+  #  depends_on:
+  #    - mysql
+  #  environment:
+  #    PMA_HOST: mysql
+  #    PMA_PORT: 3306
+  #  ports:
+  #    - '3201:80'
+  #  volumes:
+  #    - ./sessions:/sessions
+  #  networks:
+  #    - proxynet
+
+networks:
+  proxynet:
+    name: custom_network2

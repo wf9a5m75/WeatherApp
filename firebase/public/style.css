@@ -4,3 +4,13 @@ html,body, #map {
   margin: 0px;
   padding: 0px;
 }
+
+#panel {
+  position: absolute;
+  z-index: 100;
+  border: 1px solid #888;
+  background-color: #FFFA;
+  padding: 0.5em;
+  margin: 1em;
+  display: inline-block;
+}

@@ -3,15 +3,19 @@ export class App {
   _reverseQ = [];
 
   constructor(
+    authentication,
     map,
     db,
     geocoder,
     createMarker,
+    infoWnd,
     getPrefecture,
     getDatetime,
     PREFECTURE,
   ) {
+    this.auth = authentication;
     this.createMarker = createMarker;
+    this.infoWnd = infoWnd;
     this.map = map;
     this.db = db;
     this.geocoder = geocoder;
@@ -19,6 +23,7 @@ export class App {
     this.getDatetime = getDatetime;
     this.PREFECTURE = PREFECTURE;
     this.map.addListener('click', evt => this.onMapClicked(evt));
+    this.map.set('editable', false);
   }
 
   async restoreMarkers() {
@@ -26,6 +31,7 @@ export class App {
     const self = this;
     const dataDocs = await this.db.readAll();
     this._markers.forEach((marker) => {
+      marker.unbindAll();
       marker.clearInstanceListeners();
       marker.put('city', undefined);
       marker.put('pref', undefined);
@@ -41,7 +47,6 @@ export class App {
 
       const properties = {
         'position': data.position,
-        'draggable': true,
         'doc': dataDoc,
         'map': self.map,
         'city': data.city,
@@ -51,8 +56,28 @@ export class App {
       const marker = self.createMarker(properties);
       self._markers.push(marker);
 
+      marker.addListener('click', () => self.onMarkerClicked(marker));
       marker.addListener('dragend', () => self.onMarkerDragEed(marker));
     });
+
+    self.map.addListener('editable_changed', () => {
+      const isEditable = self.map.get('editable');
+      self._markers.forEach((marker) => {
+        marker.setDraggable(isEditable);
+      });
+
+    });
+
+  }
+
+  onMarkerClicked(marker) {
+    console.log(marker);
+    this.infoWnd.setContent(JSON.stringify({
+      id: marker.get('id'),
+      city: marker.get('city'),
+      pref: marker.get('pref'),
+    }, null, 2));
+    this.infoWnd.open(marker);
   }
 
   async onMarkerDragEed(marker) {
@@ -67,13 +92,16 @@ export class App {
     const city = await this.reverseGeocoding(position);
     const pref = this.getPrefecture(city);
     marker.set('city', city);
-    marker.set('pref', );
+    marker.set('pref', pref);
     dataDoc.set('city', city);
-    dataDoc.set('pref', '');
-
+    dataDoc.set('pref', pref);
+    await this.db.put(dataDoc);
   }
 
   async onMapClicked(event) {
+    if (!this.map.get('editable')) {
+      return;
+    }
     const position = event.latLng.toJSON();
     const city = await this.reverseGeocoding(position);
     const pref = this.getPrefecture(city);
@@ -101,80 +129,15 @@ export class App {
     this.db.put(dataDoc);
   }
 
-  // async saveMarkers() {
-  //   const self = this;
-  //
-  //   // Convert markers to DB values
-  //   const dataPromises = await this._markers.map(async (marker) => {
-  //
-  //     // Obtain administrative address from latLng
-  //     if (!marker.get('city')) {
-  //       const city = await self.reverseGeocoding(marker.position);
-  //       marker.set('city', city);
-  //     }
-  //
-  //     // Get prefecture
-  //     if (!marker.get('pref')) {
-  //       const city = marker.get('city');
-  //       const pref = this.getPrefecture(city);
-  //       marker.set('pref', pref);
-  //     }
-  //
-  //     // Generate hash ID
-  //     const id = marker.get('id') || this.getHash(marker.position.toUrlValue());
-  //
-  //     // Create DB value
-  //     return {
-  //       position: marker.getPosition().toJSON(),
-  //       id,
-  //       city: marker.get('city'),
-  //       pref: marker.get('pref'),
-  //     };
-  //   });
-  //
-  //   // Wait all promises
-  //   const data = await Promise.all(dataPromises);
-  //
-  //   // Store to the DB
-  //   console.log(data);
-  //   await this.db.putAll(data);
-  //   return data;
-  // }
-
-  // generateLocationsJSON(dataSet) {
-  //   const self = this;
-  //   const prefEng = Object.values(this.PREFECTURE);
-  //   const prefTable = {};
-  //   prefEng.forEach((pref) => {
-  //     prefTable[pref] = [];
-  //   });
-  //   dataSet.forEach((data) => {
-  //     prefTable[data.pref].push({
-  //       'name': data.city,
-  //       'id': data.id,
-  //     });
-  //   });
-  //
-  //   const prefectures = Object.keys(prefTable).map((prefId) => {
-  //     return {
-  //       'id': prefId,
-  //       'name': self.PREFECTURE[prefId],
-  //       'cities': prefTable[prefId],
-  //     };
-  //   });
-  //
-  //   const last_update = this.getDatetime(new Date());
-  //
-  //   return {
-  //     last_update,
-  //     prefectures,
-  //   };
-  // }
+  async signIn() {
+    await this.auth.signIn();
+    this.map.set('editable', this.auth.user !== undefined);
+  }
 
   getHash(str) {
     let hash = 0;
     if (str.length === 0) {
-      return 0;
+      return '0';
     }
 
     for (let i = 0; i < str.length; i++) {
@@ -224,9 +187,4 @@ export class App {
     return `${mem['prefecture']}${mem['city']}`;
   }
 
-  async firestoreTest() {
-    await this.db.update([
-      {"id": "something", "data": "hello"}
-    ]);
-  }
 }

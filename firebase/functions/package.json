@@ -16,8 +16,9 @@
   "main": "lib/index.js",
   "dependencies": {
     "axios": "^1.2.2",
-    "firebase-admin": "^10.2.0",
-    "firebase-functions": "^3.21.0"
+    "firebase-admin": "^10.3.0",
+    "firebase-functions": "^3.21.0",
+    "http-status-codes": "^2.2.0"
   },
   "devDependencies": {
     "typescript": "^4.6.4"

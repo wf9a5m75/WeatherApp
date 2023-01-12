@@ -9,11 +9,11 @@
     "rewrites": [
       {
         "source": "/api/v1/locations",
-        "destination": "/locations.json"
+        "function": "locations"
       },
       {
         "source": "/api/v1/locations/",
-        "destination": "/locations.json"
+        "function": "locations"
       },
       {
         "source": "/api/v1/forecast",

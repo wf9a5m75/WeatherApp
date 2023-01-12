@@ -1,0 +1,4 @@
+logs/*
+sessions/*
+wp/wp-content/plugins/siteguard/really-simple-captcha/*
+wp/wp-content/wflogs/*

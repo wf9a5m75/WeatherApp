@@ -1,5 +1,7 @@
 import { DataDoc, MyFirestore } from './my-firestore.js';
 import { GeocoderProcessor } from './geocoder.js';
+import { Authentication, GoogleAuthProvider, getAuth } from './authentication.js';
+import { User } from './user.js';
 
 export class Factory {
   static _redIcon;
@@ -7,6 +9,7 @@ export class Factory {
   static {
     this._redIcon = this.generateIcon([255, 0, 0, 255]);
     this._greenIcon = this.generateIcon([0, 255, 0, 255]);
+    this._yewllowIcon = this.generateIcon([255, 255, 0, 255]);
   }
 
   static createMap(mapDiv, options) {
@@ -14,28 +17,54 @@ export class Factory {
     return new google.maps.Map(mapDiv, options);
   }
 
-  // static _onCityPropertyOfMarkerIsChanged = ()
-  static createMarker(options) {
-    const marker = new google.maps.Marker(options);
-    if (options.city) {
+  static _onRefresh(marker) {
+    if (!marker.getDraggable()) {
+      marker.setIcon(Factory._redIcon);
+      return;
+    }
+    const city = marker.get('city');
+    const pref = marker.get('pref');
+    if (city && pref) {
       marker.setIcon(Factory._greenIcon);
     } else {
-      marker.setIcon(Factory._redIcon);
+      marker.setIcon(Factory._yellowIcon);
     }
-
-    marker.addListener('city_changed', (...params) => {
-      const city = marker.get('city');
-      if (city) {
-        marker.setIcon(Factory._greenIcon);
-      } else {
-        marker.setIcon(Factory._redIcon);
-      }
-    });
+  }
+  static createMarker(options) {
+    const marker = new google.maps.Marker(options);
+    marker.addListener('draggable_changed', () => Factory._onRefresh(marker));
+    marker.addListener('city_changed', () => Factory._onRefresh(marker));
+    marker.addListener('pref_changed', () => Factory._onRefresh(marker));
+    Factory._onRefresh(marker);
     return marker;
+  }
+
+  static createInfoWnd(options) {
+    options = options || {};
+    return new google.maps.InfoWindow(options);
   }
 
   static createDB(firebaseApp, collectionName) {
     return new MyFirestore(firebaseApp, collectionName);
+  }
+
+  static createAuthentication(
+    firebaseApp,
+    createUser,
+  ) {
+    const firebaseAuth = getAuth(firebaseApp);
+    const provider = new GoogleAuthProvider();
+    const auth = new Authentication(
+      firebaseAuth,
+      provider,
+      GoogleAuthProvider.credentialFromResult,
+      createUser,
+    );
+    return auth;
+  }
+
+  static createUser(userData, credential) {
+    return new User(userData, credential);
   }
 
   static createGeocoder() {

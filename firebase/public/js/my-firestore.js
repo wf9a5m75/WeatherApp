@@ -79,30 +79,42 @@ export class MyFirestore {
     } else {
       await setDoc(dataDoc.doc, dataDoc.data)
     }
-  }
-  async putAll(dataDocs) {
 
-    const collRef = collection(this.db, this.collectionName);
-    const targets = dataDocs.filter((item) => item.updated || item.isNew);
-    if (targets.lenght === 0) {
-      return;
-    }
-
-    const promises = targets.forEach((item) => {
-      const updated = item.updated;
-      item.resetStates();
-      if (item.updated) {
-        return updateDoc(item.doc, item.data);
-      } else {
-        return setDoc(item.doc, item.data)
-      }
-    });
-    await Promise.all(promises);
+    console.log('data saved');
+    await this.recordLastUpdate('cities');
+    console.log('last update is saved');
   }
 
-  async update(data) {
-    await updateDoc(doc(this.db, "cities", "something"), {
-      'hello': 'world'
+  async recordLastUpdate(collectionName) {
+    const docRef = doc(this.db, 'last_updates', collectionName);
+    await setDoc(docRef, {
+      'last_update': new Date(),
+      'timestamp': Date.now(),
     });
   }
+  // async putAll(dataDocs) {
+  //
+  //   const collRef = collection(this.db, this.collectionName);
+  //   const targets = dataDocs.filter((item) => item.updated || item.isNew);
+  //   if (targets.lenght === 0) {
+  //     return;
+  //   }
+  //
+  //   const promises = targets.forEach((item) => {
+  //     const updated = item.updated;
+  //     item.resetStates();
+  //     if (item.updated) {
+  //       return updateDoc(item.doc, item.data);
+  //     } else {
+  //       return setDoc(item.doc, item.data)
+  //     }
+  //   });
+  //   await Promise.all(promises);
+  // }
+
+  // async update(data) {
+  //   await updateDoc(doc(this.db, "cities", "something"), {
+  //     'hello': 'world'
+  //   });
+  // }
 }
