@@ -26,8 +26,10 @@ export class FirestoreManager {
     return this.db.doc(resourcePath);
   }
 
-  async getDocsSet(collectionName: string): Promise<DocsSet> {
-  // const last_update = await getLastUpdate('cities');
+  async getDocsSet(
+    collectionName: string,
+    whereCause?: string
+  ): Promise<DocsSet> {
     const collRef: CollectionReference = this.db.collection(collectionName);
     const snapshot: QuerySnapshot<DocumentData> = await collRef.get();
     const results: QueryDocumentSnapshot<DocumentData>[]  = [];
@@ -40,6 +42,12 @@ export class FirestoreManager {
 
 export class DocsSet {
   constructor(private docs: QueryDocumentSnapshot<DocumentData>[]) { }
+
+  forEach(callback:
+    (doc: QueryDocumentSnapshot<DocumentData>, index: number) => void
+  ): void {
+    this.docs.forEach(callback);
+  }
 
   toData(): any[] {
     const results: any[] = [];

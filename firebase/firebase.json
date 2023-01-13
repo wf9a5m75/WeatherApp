@@ -62,6 +62,12 @@
     "ui": {
       "port": 4000
     },
-    "singleProjectMode": true
+    "pubsub": {
+      "port": 8085
+    },
+    "singleProjectMode": true,
+    "auth": {
+      "port": 9099
+    }
   }
 }

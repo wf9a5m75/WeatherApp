@@ -26,3 +26,7 @@ export const getHash = (contents: string) : string => {
   const hash: string = crypto.createHash('sha256').update(contents).digest('base64');
   return `"${hash}"`;
 }
+
+export const asyncWait = async (milli_seconds: number) => {
+  await new Promise((resolve) => setTimeout(resolve, milli_seconds));
+};

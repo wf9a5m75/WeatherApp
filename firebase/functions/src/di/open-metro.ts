@@ -1,43 +1,47 @@
-import { onRequest } from 'firebase-functions/v2/https';
-import axios from 'axios';
-import {
-  IApiResult,
-} from '../openmetro';
 import {
   IDailyForecast,
   IForecast,
   IWeeklyForecastsResult,
 } from '../api_interface';
+export * from '../api_interface';
+import axios from 'axios';
 
-export const weeklyForcast = onRequest(async (req, res) => {
+export interface IHourlyUnits {
+  time: string;
+  temperature_2m: string;
+  cloudcover: string;
+  rain: string;
+  snowfall: string;
+};
 
-  const rawData = await getRawForecastData(
-    35.654451866025134,
-    139.75333904900143
-  );
-  if (!rawData) {
+export interface IHourlyResult {
+  time: string[];
+  temperature_2m?: number[];
+  relativehumidity_2m?: number[];
+  windspeed_10m?: number[];
+  cloudcover?: number[];
+  rain?: number[];
+  snowfall?: number[];
 
-    res.json({
-      'error': true,
-      'message': 'no data',
-    });
-    return;
-  }
-  const forecasts = convertToIForecasts(rawData);
-  const dailyForecasts = reduceToDailyForecasts(forecasts);
+  [key: string]: any;
+};
+export interface IApiResult {
+  latitude: number;
+  longitude: number;
+  generationtime_ms: number;
+  utc_offset_seconds: number;
+  timezone: string;
+  timezone_abbreviation: string;
+  elevation: number;
+  hourly_units?: IHourlyUnits;
 
-  const now = new Date();
-  const last_update = getISO8601(now);
+  hourly?: IHourlyResult;
 
-  const result: IWeeklyForecastsResult = {
-    last_update,
-    dailyForecasts: dailyForecasts,
-  };
+  [key: string]: any;
+};
 
-  res.json(result);
-});
 
-const reduceToDailyForecasts = (
+export const reduceToDailyForecasts = (
   forecasts: IForecast[]
 ): IDailyForecast[] => {
   const results: IDailyForecast[] = [];
@@ -62,7 +66,7 @@ const reduceToDailyForecasts = (
   return results;
 };
 
-const getRawForecastData = async (
+export const getRawForecastData = async (
   latitude: number,
   longitude: number,
 ): Promise<IApiResult | null> => {
@@ -82,7 +86,7 @@ const getRawForecastData = async (
   }
 }
 
-const convertToIForecasts = (
+export const convertToIForecasts = (
   data: IApiResult,
 ): IForecast[] => {
   const results: IForecast[] = [];
@@ -115,12 +119,3 @@ const convertToIForecasts = (
 
   return results;
 };
-
-const getISO8601 = (date: Date) => {
-  const YYYY = date.getFullYear();
-  const MM = (date.getMonth() + 1).toString().padStart(2, '0');
-  const DD = date.getDate().toString().padStart(2, '0');
-  const hh = date.getHours().toString().padStart(2, '0');
-  const mm = date.getMinutes().toString().padStart(2, '0');
-  return `${YYYY}-${MM}-${DD}T${hh}:${mm}`;
-}
