@@ -34,9 +34,9 @@ exports.locations = onRequest(async (req, res) => {
   // If they are the same, the contents are not changed.
   // So, returns the cached data
   const lastUpdate  = await db.getDocData('last_updates/cities');
-  const updated = await cacheMgr.validateLastUpdate(lastUpdate.timestamp);
+  const hasDataNotChanged = await cacheMgr.validateLastUpdate(lastUpdate.timestamp);
 
-  if (!updated) {
+  if (hasDataNotChanged) {
     const contents = await cacheMgr.getContents();
     const etag = await cacheMgr.getETag();
     if (contents && etag) {

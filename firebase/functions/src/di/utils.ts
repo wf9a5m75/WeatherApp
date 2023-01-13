@@ -23,5 +23,6 @@ export const dateISO8601 = (date: Date): string => {
 }
 
 export const getHash = (contents: string) : string => {
-  return crypto.createHash('sha256').update(contents).digest('base64');
+  const hash: string = crypto.createHash('sha256').update(contents).digest('base64');
+  return `"${hash}"`;
 }

@@ -29,6 +29,7 @@ import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
@@ -47,6 +48,8 @@ class AppViewModel @Inject constructor(
     val forecasts = mutableStateListOf<ForecastResponse?>(null, null)
 
     val weeklyForecast = mutableStateListOf<DailyForecast?>()
+
+    val singletonFlags = kotlin.collections.HashSet<String>()
 
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -123,16 +126,18 @@ class AppViewModel @Inject constructor(
 
     fun syncLocations(onFinished: () -> Unit) {
         viewModelScope.launch(dispatcher) {
-            if (locations.size > 0) {
+            if ((locations.size > 0) || (singletonFlags.contains("syncLocations"))) {
                 viewModelScope.launch {
                     onFinished()
                 }
                 return@launch
             }
+            singletonFlags.add("syncLocations");
 
             if (!this@AppViewModel.networkMonitor.isOnline) {
                 readLocationsFromDB()
                 viewModelScope.launch {
+                    singletonFlags.remove("syncLocations");
                     onFinished()
                 }
                 return@launch
@@ -159,7 +164,9 @@ class AppViewModel @Inject constructor(
                     readLocationsFromDB()
                 }
             }
+
             viewModelScope.launch {
+                singletonFlags.remove("syncLocations");
                 onFinished()
             }
         }

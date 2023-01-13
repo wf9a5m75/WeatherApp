@@ -16,6 +16,7 @@ import com.example.weatherapp.utils.NetworkMonitor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
@@ -26,6 +27,8 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -70,11 +73,22 @@ object AppModule {
     @Singleton
     fun provideWeatherApi(
         httpClient: OkHttpClient,
-    ): IWeatherApi = Retrofit.Builder().baseUrl("https://weather-app-8a034.web.app")
-        .client(httpClient)
-        .addConverterFactory(Json.asConverterFactory(MediaType.get("application/json")))
-        .build()
-        .create(IWeatherApi::class.java)
+//
+//        @Named(provideApiEntryPoint)
+//        apiEntryPoint: String,
+    ): IWeatherApi {
+//        val apiEntryPoint = "http://192.168.86.31:5000/"
+        val apiEntryPoint = "https://weather-app-8a034.web.app"
+        return Retrofit.Builder().baseUrl(apiEntryPoint)
+            .client(httpClient)
+            .addConverterFactory(Json.asConverterFactory(MediaType.get("application/json")))
+            .build()
+            .create(IWeatherApi::class.java)
+    }
+
+//    @Provides
+//    @Singleton
+//    fun provideApiEntryPoint(): String = "http://192.168.86.31:5000/"
 
     @Provides
     @Singleton

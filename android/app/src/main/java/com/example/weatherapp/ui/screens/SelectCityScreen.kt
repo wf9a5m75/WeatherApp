@@ -40,11 +40,12 @@ fun SelectCityScreen(
 ) {
     val rememberScrollState = rememberScrollState()
 
+
     // If no preference, move to the selectCity screen
     viewModel.syncLocations {
         if (viewModel.locations.size == 0) {
             // TODO:
-            Log.e("WeatherApp", "サーバーからデータの取得に失敗しました")
+//            Log.e("WeatherApp", "サーバーからデータの取得に失敗しました")
             return@syncLocations
         }
     }
