@@ -73,11 +73,7 @@ object AppModule {
     @Singleton
     fun provideWeatherApi(
         httpClient: OkHttpClient,
-//
-//        @Named(provideApiEntryPoint)
-//        apiEntryPoint: String,
     ): IWeatherApi {
-//        val apiEntryPoint = "http://192.168.86.31:5000/"
         val apiEntryPoint = "https://weather-app-8a034.web.app"
         return Retrofit.Builder().baseUrl(apiEntryPoint)
             .client(httpClient)
@@ -85,10 +81,6 @@ object AppModule {
             .build()
             .create(IWeatherApi::class.java)
     }
-
-//    @Provides
-//    @Singleton
-//    fun provideApiEntryPoint(): String = "http://192.168.86.31:5000/"
 
     @Provides
     @Singleton
