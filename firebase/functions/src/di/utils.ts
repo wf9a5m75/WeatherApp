@@ -11,14 +11,11 @@ export const streamToString = async (stream: Readable): Promise<string> => {
 };
 
 export const dateISO8601 = (date: Date): string => {
-  if (!(date instanceof Date)) {
-    throw 'date parameter is not Date class';
-  }
-  const YYYY = date.getFullYear();
-  const MM = (date.getMonth() + 1).toString().padStart(2, '0');
-  const DD = date.getDate().toString().padStart(2, '0');
-  const hh = date.getHours().toString().padStart(2, '0');
-  const mm = date.getMinutes().toString().padStart(2, '0');
+  const YYYY = date.getUTCFullYear();
+  const MM = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const DD = date.getUTCDate().toString().padStart(2, '0');
+  const hh = date.getUTCHours().toString().padStart(2, '0');
+  const mm = date.getUTCMinutes().toString().padStart(2, '0');
   return `${YYYY}-${MM}-${DD}T${hh}:${mm}`;
 }
 
