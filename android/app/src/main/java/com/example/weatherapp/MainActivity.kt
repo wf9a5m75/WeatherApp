@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -21,6 +25,7 @@ import com.example.weatherapp.ui.components.AppGlobalNav
 import com.example.weatherapp.ui.components.AppTabs
 import com.example.weatherapp.ui.components.OptionMenuItem
 import com.example.weatherapp.ui.screens.DailyWeatherScreen
+import com.example.weatherapp.ui.screens.LoadingScreen
 import com.example.weatherapp.ui.screens.OfflineScreen
 import com.example.weatherapp.ui.screens.SelectCityScreen
 import com.example.weatherapp.ui.screens.WeeklyWeatherScreen
@@ -33,8 +38,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val viewModel: AppViewModel by viewModels()
-
         setContent {
+
             WeatherAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -54,10 +59,10 @@ fun WeatherApp(viewModel: AppViewModel) {
     val navigationController = rememberNavController()
 
     WeatherAppTheme {
-        NavHost(navController = navigationController, startDestination = "main") {
-//            composable(route = "loading") {
-//                LoadingScreen()
-//            }
+        NavHost(navController = navigationController, startDestination = "loading") {
+            composable(route = "loading") {
+                LoadingScreen()
+            }
             composable(route = "main") {
                 MainScreen(
                     viewModel = viewModel,
@@ -67,9 +72,12 @@ fun WeatherApp(viewModel: AppViewModel) {
                 )
             }
             composable(route = "settings") {
+
                 SelectCityScreen(
                     viewModel = viewModel,
                 ) {
+
+                    // If no preference, move to the selectCity screen
                     viewModel.saveSelectedCity {
                         navigationController.popupToInclusive("main")
                     }
@@ -83,11 +91,17 @@ fun WeatherApp(viewModel: AppViewModel) {
     }
 
     // Load the last selected city
-    viewModel.loadSelectedCity {
-        if (viewModel.city.value.id != "") {
-            return@loadSelectedCity
+    var initTask by remember { mutableStateOf<Boolean>(false) }
+    if (!initTask) {
+        initTask = true
+        viewModel.loadSelectedCity {
+            viewModel.syncLocations {
+                navigationController.popupToInclusive(when(viewModel.city.value.id.isEmpty()) {
+                    true -> "settings"
+                    false -> "main"
+                })
+            }
         }
-        navigationController.popupToInclusive("settings")
     }
 }
 

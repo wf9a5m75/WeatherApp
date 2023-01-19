@@ -15,12 +15,10 @@ interface IWeatherApi {
     suspend fun getForecast(
         @Query("city_id") city_id: String,
         @Query("day") day: Int,
-        @Query("_cache") cache: Boolean,
     ): Response<ForecastResponse>
 
     @GET("/api/v1/weekly/")
     suspend fun getWeeklyForecast(
         @Query("city_id") city_id: String,
-        @Query("_cache") cache: Boolean,
     ): Response<WeeklyForecastResponse>
 }

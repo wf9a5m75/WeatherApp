@@ -49,8 +49,6 @@ class AppViewModel @Inject constructor(
 
     val weeklyForecast = mutableStateListOf<DailyForecast?>()
 
-    val singletonFlags = kotlin.collections.HashSet<String>()
-
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -126,18 +124,16 @@ class AppViewModel @Inject constructor(
 
     fun syncLocations(onFinished: () -> Unit) {
         viewModelScope.launch(dispatcher) {
-            if ((locations.size > 0) || (singletonFlags.contains("syncLocations"))) {
+            if ((locations.size > 0)) {
                 viewModelScope.launch {
                     onFinished()
                 }
                 return@launch
             }
-            singletonFlags.add("syncLocations");
 
             if (!this@AppViewModel.networkMonitor.isOnline) {
                 readLocationsFromDB()
                 viewModelScope.launch {
-                    singletonFlags.remove("syncLocations");
                     onFinished()
                 }
                 return@launch
@@ -166,7 +162,6 @@ class AppViewModel @Inject constructor(
             }
 
             viewModelScope.launch {
-                singletonFlags.remove("syncLocations");
                 onFinished()
             }
         }
@@ -230,7 +225,6 @@ class AppViewModel @Inject constructor(
         val response = weatherApi.getForecast(
             city_id = city.value.id,
             day = day.day,
-            cache = false,
         )
         onFinished(response.body())
     }
@@ -261,10 +255,7 @@ class AppViewModel @Inject constructor(
             return
         }
 
-        val response = weatherApi.getWeeklyForecast(
-            city_id = city.value.id,
-            cache = false
-        )
+        val response = weatherApi.getWeeklyForecast(city.value.id)
         onFinished(response.body())
     }
 }
