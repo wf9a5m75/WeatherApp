@@ -7,7 +7,10 @@ import { CacheManager } from './cache-manager';
 import { Firestore } from 'firebase-admin/firestore';
 import { Storage } from 'firebase-admin/storage';
 import { Bucket } from '@google-cloud/storage';
-import { getHash } from './utils';
+import {
+  getHash,
+  streamToString,
+} from './utils';
 
 // Needs to set environment
 // <Windows powert shell>
@@ -29,7 +32,10 @@ const admin: App = firebase.initializeApp({
 // Storage
 const storage: Storage = (admin as any).storage();
 const bucket: Bucket = storage.bucket();
-const storageMgr: StorageManager = new StorageManager(bucket);
+const storageMgr: StorageManager = new StorageManager(
+  bucket,
+  streamToString,
+);
 
 // Firestore
 const db: Firestore = (admin as any).firestore();
