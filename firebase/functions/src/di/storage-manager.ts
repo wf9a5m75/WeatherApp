@@ -4,11 +4,12 @@ import {
   GetFilesOptions,
   GetFilesResponse,
 } from '@google-cloud/storage';
-import { streamToString } from './utils';
+import { Readable } from 'node:stream';
 
 export class StorageManager {
   constructor(
     private bucket: Bucket,
+    private streamToStr: (stream: Readable) => Promise<string>
   ) { }
 
   async getContents(filePath: string): Promise<string | null> {
@@ -18,7 +19,7 @@ export class StorageManager {
       return Promise.resolve(null);
     }
 
-    return await streamToString(file.createReadStream({
+    return await this.streamToStr(file.createReadStream({
       decompress: true,
     }));
   }
