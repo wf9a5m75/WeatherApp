@@ -36,7 +36,10 @@ export class ViewModel {
 
     // Compare the `If-None-Match` value and the cache ETag values.
     // If they are the same, the cache of the client side is valid.
-    const isValidETag = await this.cacheMgr.validateETag(req.get('If-None-Match'));
+    const isValidETag = await this.cacheMgr.validateETag(
+      "cities",
+      req.get('If-None-Match')
+    );
     if (isValidETag) {
       // HTTP 304: Not Modified
       res.status(StatusCodes.NOT_MODIFIED).end();
@@ -48,11 +51,14 @@ export class ViewModel {
     // If they are the same, the contents are not changed.
     // So, returns the cached data
     const lastUpdate  = await this.db.getDocData('last_updates/cities');
-    const hasDataNotChanged = await this.cacheMgr.validateLastUpdate(lastUpdate.timestamp);
+    const hasDataNotChanged = await this.cacheMgr.validateLastUpdate(
+      "cities",
+      lastUpdate.timestamp
+    );
 
     if (hasDataNotChanged) {
-      const contents = await this.cacheMgr.getContents();
-      const etag = await this.cacheMgr.getETag();
+      const contents = await this.cacheMgr.getContents("cities");
+      const etag = await this.cacheMgr.getETag("cities");
       if (contents && etag) {
         res.setHeader('ETag', etag);
         res.setHeader('Content-Type', 'Application/json');
@@ -109,6 +115,7 @@ export class ViewModel {
     // Save cache data, then obtain the ETag
     const txt = JSON.stringify(result);
     const etag = await this.cacheMgr.saveCache(
+      "cities",
       lastUpdate.timestamp,
       txt,
     );
@@ -122,7 +129,7 @@ export class ViewModel {
 
 exports.locations = onRequest(async (req, res) => {
   const db = getFirestoreManager();
-  const cacheMgr = getCacheManager("cities");
+  const cacheMgr = getCacheManager();
 
   const app = new ViewModel(
     db,

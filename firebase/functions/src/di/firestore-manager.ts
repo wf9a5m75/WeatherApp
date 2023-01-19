@@ -32,4 +32,12 @@ export class FirestoreManager {
   ): CollectionReference {
     return this.db.collection(collectionName);
   }
+
+  async setContents(
+    docRef: DocumentReference,
+    data: any,
+    options: { merge: boolean } = { merge: false }
+  ): Promise<void> {
+    await docRef.set(data, options);
+  }
 }

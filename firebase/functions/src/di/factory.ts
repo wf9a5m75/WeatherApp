@@ -48,9 +48,8 @@ const dbMgr: FirestoreManager = new FirestoreManager(db);
 export const getFirestoreManager = () => dbMgr;
 export const getStorageManager = () => storageMgr;
 
-export const getCacheManager = (contentsFileName: string): CacheManager => {
+export const getCacheManager = (): CacheManager => {
   return new CacheManager(
-    contentsFileName,
     getFirestoreManager(),
     getStorageManager(),
     getHash,

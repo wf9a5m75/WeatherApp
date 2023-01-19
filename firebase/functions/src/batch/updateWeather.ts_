@@ -1,0 +1,25 @@
+import { onTaskDispatched } from 'firebase-functions/v2/tasks';
+import {
+  getCacheManager,
+  getFirestoreManager,
+} from '../di/factory';
+import { FirestoreUtils } from '../di/firestore-utils';
+
+export const updateTask = async ({ data: { someParam } }) => {
+  const db = getFirestoreManager();
+
+  const query = db.getCollectionRef('cities').where('id', '==', '-400c750d');
+  const cities = await FirestoreUtils.toData(query);
+
+  console.log(cities);
+
+};
+
+const updateWeatherForecasts = onTaskDispatched(
+  {
+    rateLimits: { maxConcurrentDispatches: 5 },
+    retryConfig: { maxAttempts: 5, minBackoffSeconds: 60 },
+  },
+  updateTask
+);
+export default updateWeatherForecasts;

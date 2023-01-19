@@ -91,7 +91,7 @@ fun WeatherApp(viewModel: AppViewModel) {
     }
 
     // Load the last selected city
-    var initTask by remember { mutableStateOf<Boolean>(false) }
+    var initTask by remember { mutableStateOf(false) }
     if (!initTask) {
         initTask = true
         viewModel.loadSelectedCity {

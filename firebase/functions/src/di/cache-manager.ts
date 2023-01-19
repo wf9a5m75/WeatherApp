@@ -5,16 +5,16 @@ export class CacheManager {
   cacheInfo: any = undefined;
 
   constructor(
-    private cacheFileName: string,
     private db: FirestoreManager,
     private storage: StorageManager,
     private calcHash: (contents: string) => string,
   ) {}
 
   async validateETag(
+    cacheFileName: string,
     requestETag: string,
   ): Promise<boolean> {
-    await this.loadMetaFile();
+    await this.loadMetaFile(cacheFileName);
     return Promise.resolve(
       this.cacheInfo &&
       this.cacheInfo.etag === requestETag
@@ -22,26 +22,28 @@ export class CacheManager {
   }
 
   async validateLastUpdate(
+    cacheFileName: string,
     last_update_time: number,
   ): Promise<boolean> {
-    await this.loadMetaFile();
+    await this.loadMetaFile(cacheFileName);
     return Promise.resolve(
       this.cacheInfo &&
       this.cacheInfo.timestamp === last_update_time
     );
   }
 
-  async getContents(): Promise<any> {
-    const filePath = `cache/${this.cacheFileName}.data.txt`;
+  async getContents(cacheFileName: string): Promise<any> {
+    const filePath = `cache/${cacheFileName}.data.txt`;
     return await this.storage.getContents(filePath);
   }
 
   async saveCache(
+    cacheFileName: string,
     timestamp: number,
     contents: string,
   ): Promise<string> {
-    const metaFilePath = `cache/${this.cacheFileName}.meta.json`;
-    const dataFilePath = `cache/${this.cacheFileName}.data.txt`;
+    const metaFilePath = `cache/${cacheFileName}.meta.json`;
+    const dataFilePath = `cache/${cacheFileName}.data.txt`;
 
     const etag = this.calcHash(contents);
 
@@ -60,19 +62,19 @@ export class CacheManager {
     return Promise.resolve(etag);
   }
 
-  async getETag(): Promise<string | null> {
-    await this.loadMetaFile();
+  async getETag(cacheFileName: string): Promise<string | null> {
+    await this.loadMetaFile(cacheFileName);
     if (!this.cacheInfo) {
       return Promise.resolve(null);
     }
     return Promise.resolve(this.cacheInfo.etag);
   }
 
-  private async loadMetaFile() {
+  private async loadMetaFile(cacheFileName: string) {
     if (this.cacheInfo) {
       return;
     }
-    const filePath = `cache/${this.cacheFileName}.meta.json`;
+    const filePath = `cache/${cacheFileName}.meta.json`;
     const cacheInfoTxt = await this.storage.getContents(filePath);
     try {
       if (cacheInfoTxt) {

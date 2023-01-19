@@ -33,6 +33,6 @@ describe("di/utils/getHash", () => {
   it ("should return correct hash string", () => {
     const result = getHash("hello world");
     expect(result)
-      .toBe(`"uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek="`);
+      .toBe("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
   });
 });
