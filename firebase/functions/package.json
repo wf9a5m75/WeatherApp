@@ -11,7 +11,7 @@
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
     "test:fancy": "jasmine --reporter=jasmine-console-reporter --config=jasmine.json",
-    "coverage": "nyc npm run test && nyc report --reporter=html"
+    "coverage": "npm run test && nyc report --nycrc-path=.nycrc"
   },
   "engines": {
     "node": "18"

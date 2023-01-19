@@ -11,6 +11,8 @@ import {
   getHash,
   streamToString,
 } from './utils';
+export { FirestoreManager } from './firestore-manager';
+export { CacheManager } from './cache-manager';
 
 // Needs to set environment
 // <Windows powert shell>
