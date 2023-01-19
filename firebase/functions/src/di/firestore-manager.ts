@@ -27,7 +27,7 @@ export class FirestoreManager {
     return this.db.doc(resourcePath);
   }
 
-  getCollection(
+  getCollectionRef(
     collectionName: string
   ): CollectionReference {
     return this.db.collection(collectionName);
