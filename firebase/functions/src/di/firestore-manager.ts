@@ -4,6 +4,7 @@ import {
   DocumentSnapshot,
   DocumentReference,
   Firestore,
+  Query,
   QuerySnapshot,
   QueryDocumentSnapshot,
 } from 'firebase-admin/firestore';
@@ -26,24 +27,9 @@ export class FirestoreManager {
     return this.db.doc(resourcePath);
   }
 
-  async getDocsSet(collectionName: string): Promise<DocsSet> {
-  // const last_update = await getLastUpdate('cities');
-    const collRef: CollectionReference = this.db.collection(collectionName);
-    const snapshot: QuerySnapshot<DocumentData> = await collRef.get();
-    const results: QueryDocumentSnapshot<DocumentData>[]  = [];
-    snapshot.forEach(doc => {
-      results.push(doc);
-    });
-    return new DocsSet(results);
-  }
-}
-
-export class DocsSet {
-  constructor(private docs: QueryDocumentSnapshot<DocumentData>[]) { }
-
-  toData(): any[] {
-    const results: any[] = [];
-    this.docs.forEach((doc) => results.push(doc.data()));
-    return results;
+  getCollection(
+    collectionName: string
+  ): CollectionReference {
+    return this.db.collection(collectionName);
   }
 }

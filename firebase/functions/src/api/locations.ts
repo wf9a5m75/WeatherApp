@@ -6,6 +6,7 @@ import {
 import { PREFECTURE } from '../const/';
 import { dateISO8601 } from '../di/utils';
 import { StatusCodes } from 'http-status-codes';
+import { FirestoreUtils } from '../di/firestore-utils';
 
 type ICity = {
   id: string;
@@ -49,8 +50,8 @@ exports.locations = onRequest(async (req, res) => {
   }
 
   // If there is no cache data, we need to create it.
-  const citySet = await db.getDocsSet('cities');
-  const cities = citySet.toData();
+  const citiesRef = db.getCollection('cities');
+  const cities = await FirestoreUtils.toData(citiesRef);
 
   const pref_cities: {
     [key: string]: IPrefecture;
