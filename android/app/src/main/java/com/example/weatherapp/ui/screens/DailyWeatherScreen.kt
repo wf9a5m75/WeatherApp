@@ -45,11 +45,11 @@ fun DailyWeatherScreen(
 
     val onRefresh: () -> Unit = {
         refreshState.isRefreshing = true
-        viewModel.updateForecast(day) {
+        viewModel.updateForecasts {
             refreshState.isRefreshing = false
         }
     }
-    if (viewModel.forecasts[day.day] == null) {
+    if (viewModel.forecasts.isEmpty()) {
         onRefresh()
     }
 
@@ -83,7 +83,7 @@ fun DailyWeatherScreen(
         ) {
             Image(
                 painter = weatherIconResource(
-                    viewModel.forecasts[day.day]?.overall ?: "unknown",
+                    "sunny", // TODO
                     12,
                 ),
                 contentDescription = "",

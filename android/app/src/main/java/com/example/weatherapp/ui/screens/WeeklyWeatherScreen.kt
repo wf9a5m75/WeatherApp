@@ -1,11 +1,8 @@
 package com.example.weatherapp.ui.screens
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,12 +17,12 @@ fun WeeklyWeatherScreen(viewModel: AppViewModel = viewModel()) {
 
     val onRefresh: () -> Unit = {
         refreshState.isRefreshing = true
-        viewModel.updateWeeklyForecast {
+        viewModel.updateForecasts {
             refreshState.isRefreshing = false
         }
     }
 
-    if (viewModel.weeklyForecast.isEmpty()) {
+    if (viewModel.forecasts.isEmpty()) {
         onRefresh()
     }
 
@@ -36,7 +33,7 @@ fun WeeklyWeatherScreen(viewModel: AppViewModel = viewModel()) {
         LazyColumn(modifier = Modifier
             .fillMaxSize()) {
             items(
-                items = viewModel.weeklyForecast,
+                items = viewModel.forecasts,
 
                 itemContent = {
                     DailyRow(it!!)

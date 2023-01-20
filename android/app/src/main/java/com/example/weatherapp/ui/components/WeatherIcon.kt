@@ -30,6 +30,7 @@ fun WeatherIcon(
     hour24: Int = 14,
     modifier: Modifier = Modifier,
 ) {
+
     val time = "${hour24 % 12} ${
         when (hour24 < 12) {
             true -> "am"
@@ -69,7 +70,7 @@ fun WeatherIcon(
                 .wrapContentSize(Alignment.Center),
             text = time,
             fontSize = 14.sp,
-            color = androidx.compose.ui.graphics.Color.Gray,
+            color = androidx.compose.ui.graphics.Color.Black,
             style = MaterialTheme.typography.body2,
         )
     }

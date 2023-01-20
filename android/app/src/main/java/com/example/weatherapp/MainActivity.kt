@@ -79,7 +79,9 @@ fun WeatherApp(viewModel: AppViewModel) {
 
                     // If no preference, move to the selectCity screen
                     viewModel.saveSelectedCity {
-                        navigationController.popupToInclusive("main")
+                        viewModel.updateForecasts {
+                            navigationController.popupToInclusive("main")
+                        }
                     }
                 }
             }
@@ -96,10 +98,14 @@ fun WeatherApp(viewModel: AppViewModel) {
         initTask = true
         viewModel.loadSelectedCity {
             viewModel.syncLocations {
-                navigationController.popupToInclusive(when(viewModel.city.value.id.isEmpty()) {
-                    true -> "settings"
-                    false -> "main"
-                })
+                if (viewModel.city.value.id.isEmpty()) {
+                    navigationController.popupToInclusive("settings")
+                    return@syncLocations
+                }
+
+                viewModel.updateForecasts {
+                    navigationController.popupToInclusive("main")
+                }
             }
         }
     }

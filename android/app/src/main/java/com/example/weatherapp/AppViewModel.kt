@@ -13,7 +13,6 @@ import com.example.weatherapp.network.IWeatherApi
 import com.example.weatherapp.network.model.City
 import com.example.weatherapp.network.model.DailyForecast
 import com.example.weatherapp.network.model.ForecastDay
-import com.example.weatherapp.network.model.ForecastResponse
 import com.example.weatherapp.network.model.LocationResponse
 import com.example.weatherapp.network.model.Prefecture
 import com.example.weatherapp.network.model.WeeklyForecastResponse
@@ -29,7 +28,6 @@ import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
@@ -45,10 +43,7 @@ class AppViewModel @Inject constructor(
 
     val locations = mutableStateListOf<Prefecture>()
 
-    val forecasts = mutableStateListOf<ForecastResponse?>(null, null)
-
-    val weeklyForecast = mutableStateListOf<DailyForecast?>()
-
+    val forecasts = mutableStateListOf<DailyForecast?>()
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -185,52 +180,7 @@ class AppViewModel @Inject constructor(
         )
     }
 
-    fun updateForecast(
-        day: ForecastDay,
-        onFinished: (isUpdated: Boolean) -> Unit,
-    ) {
-        viewModelScope.launch(dispatcher) {
-            if (day.day > ForecastDay.TOMORROW.day) {
-                viewModelScope.launch {
-                    onFinished(false)
-                }
-                return@launch
-            }
-
-            getForecast(day) {
-                if (it == null) {
-                    viewModelScope.launch {
-                        onFinished(false)
-                    }
-                    return@getForecast
-                }
-
-                forecasts[day.day] = it
-                viewModelScope.launch {
-                    onFinished(true)
-                }
-            }
-        }
-    }
-
-    private suspend fun getForecast(
-        day: ForecastDay,
-        onFinished: (forecast: ForecastResponse?) -> Unit,
-    ) {
-        if (!networkMonitor.isOnline) {
-            onFinished(null)
-            return
-        }
-
-        val response = weatherApi.getForecast(
-            city_id = city.value.id,
-            day = day.day,
-        )
-        onFinished(response.body())
-    }
-
-
-    fun updateWeeklyForecast(
+    fun updateForecasts(
         onFinished: () -> Unit
     ) {
         viewModelScope.launch {
@@ -240,8 +190,8 @@ class AppViewModel @Inject constructor(
                     return@getWeeklyForecast
                 }
 
-                weeklyForecast.clear()
-                weeklyForecast.addAll(it.dailyForecasts)
+                forecasts.clear()
+                forecasts.addAll(it.forecasts)
                 onFinished()
             }
         }
