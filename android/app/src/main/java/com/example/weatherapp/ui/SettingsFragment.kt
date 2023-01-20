@@ -7,17 +7,13 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.ui.screens.SelectCityScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
-
-    companion object {
-
-        val Tag: String = SettingsFragment::class.java.simpleName
-    }
 
     val viewModel by activityViewModels<AppViewModel>()
 
@@ -39,7 +35,7 @@ class SettingsFragment : Fragment() {
                 // If no preference, move to the selectCity screen
                 viewModel.saveSelectedCity {
                     viewModel.updateForecasts {
-                        parentFragmentManager.popBackStack()
+                        findNavController().popBackStack()
                     }
                 }
             }
