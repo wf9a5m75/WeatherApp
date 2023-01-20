@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-private const val ISO8601_FORMAT = "yyyy-MM-dd\'T\'hh:mm"
+private const val ISO8601_FORMAT = "yyyy-MM-dd\'T\'HH:mm"
 
 @Serializable
 data class Forecast(

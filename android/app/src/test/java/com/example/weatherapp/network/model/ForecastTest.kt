@@ -8,11 +8,11 @@ class ForecastTest {
     @Test
     fun `Should parse the valid ISO8601 date correctly`() {
         val data = Forecast(
-            time = "2022-11-15T22:33",
+            time = "2022-11-15T12:33",
             temperature = 3.0,
             status = "something",
         )
-        assertEquals(22, data.hours24)
+        assertEquals(12, data.hours24)
     }
 
     @Test
