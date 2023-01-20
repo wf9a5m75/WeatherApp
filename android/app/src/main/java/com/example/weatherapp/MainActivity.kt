@@ -1,152 +1,45 @@
 package com.example.weatherapp
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.ExperimentalUnitApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.weatherapp.network.model.ForecastDay
-import com.example.weatherapp.ui.components.AppGlobalNav
-import com.example.weatherapp.ui.components.AppTabs
-import com.example.weatherapp.ui.components.OptionMenuItem
-import com.example.weatherapp.ui.screens.DailyWeatherScreen
-import com.example.weatherapp.ui.screens.LoadingScreen
-import com.example.weatherapp.ui.screens.OfflineScreen
-import com.example.weatherapp.ui.screens.SelectCityScreen
-import com.example.weatherapp.ui.screens.WeeklyWeatherScreen
-import com.example.weatherapp.ui.theme.WeatherAppTheme
+import com.example.weatherapp.ui.MainFragment
+import com.example.weatherapp.ui.SettingsFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    var mainFragment: MainFragment? = null
+    var settingsFragment: SettingsFragment? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        val viewModel: AppViewModel by viewModels()
-        setContent {
-
-            WeatherAppTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    // modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background,
-                ) {
-                    WeatherApp(viewModel)
+        if (savedInstanceState == null) {
+            val fragment = MainFragment().also {
+                mainFragment = it
+            }
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container_view, fragment, MainFragment.Tag)
+                .commit()
+        } else {
+            supportFragmentManager.findFragmentByTag(MainFragment.Tag).also {
+                if (it is MainFragment) {
+                    mainFragment = it
+                }
+            }
+            supportFragmentManager.findFragmentByTag(SettingsFragment.Tag).also {
+                if (it is SettingsFragment) {
+                    settingsFragment = it
                 }
             }
         }
     }
 }
 
-// @Preview(showBackground = true)
-@Composable
-fun WeatherApp(viewModel: AppViewModel) {
-    val navigationController = rememberNavController()
-
-    WeatherAppTheme {
-        NavHost(navController = navigationController, startDestination = "loading") {
-            composable(route = "loading") {
-                LoadingScreen()
-            }
-            composable(route = "main") {
-                MainScreen(
-                    viewModel = viewModel,
-                    onChangeCity = {
-                        navigationController.navigate("settings")
-                    },
-                )
-            }
-            composable(route = "settings") {
-
-                SelectCityScreen(
-                    viewModel = viewModel,
-                ) {
-
-                    // If no preference, move to the selectCity screen
-                    viewModel.saveSelectedCity {
-                        viewModel.updateForecasts {
-                            navigationController.popupToInclusive("main")
-                        }
-                    }
-                }
-            }
-
-            composable(route = "no_internet_error") {
-                OfflineScreen()
-            }
-        }
-    }
-
-    // Load the last selected city
-    var initTask by remember { mutableStateOf(false) }
-    if (!initTask) {
-        initTask = true
-        viewModel.loadSelectedCity {
-            viewModel.syncLocations {
-                if (viewModel.city.value.id.isEmpty()) {
-                    navigationController.popupToInclusive("settings")
-                    return@syncLocations
-                }
-
-                viewModel.updateForecasts {
-                    navigationController.popupToInclusive("main")
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalUnitApi::class)
-@Composable
-fun MainScreen(
-    viewModel: AppViewModel,
-    onChangeCity: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        AppGlobalNav(
-            viewModel = viewModel,
-            menuItems = listOf(
-                OptionMenuItem("change_city", "場所の変更"),
-            ),
-            onMenuItemClicked = { menuId ->
-                when (menuId) {
-                    "change_city" -> onChangeCity()
-
-                    else -> { /* stub */ }
-                }
-            },
-        )
-
-        AppTabs(
-            onTabChanged = { tabIndex ->
-                when (tabIndex) {
-                    0 -> DailyWeatherScreen(ForecastDay.TODAY, viewModel)
-
-                    1 -> DailyWeatherScreen(ForecastDay.TOMORROW, viewModel)
-
-                    2 -> WeeklyWeatherScreen(viewModel)
-                }
-            },
-        )
-    }
-}
 fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
     // Pop up to the start destination of the graph
     // to avoid building up a large stack of destinations
