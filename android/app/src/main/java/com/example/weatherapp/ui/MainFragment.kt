@@ -7,7 +7,10 @@ import android.view.ViewGroup
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -69,7 +72,7 @@ fun WeatherApp(
     onEmptyLocations: () -> Unit,
 ) {
     val navigationController = rememberNavController()
-    var isInit by remember { mutableStateOf(false) }
+    var hasBeenInitialized by remember { mutableStateOf(false) }
 
     NavHost(navController = navigationController, startDestination = "loading") {
         composable(route = "loading") {
@@ -88,15 +91,18 @@ fun WeatherApp(
 
 
     // Load the last selected city
-    viewModel.loadSelectedCity {
-        viewModel.syncLocations {
-            if (viewModel.city.value.id.isEmpty()) {
-                onEmptyLocations()
-                return@syncLocations
-            }
+    if (!hasBeenInitialized) {
+        hasBeenInitialized = true
+        viewModel.loadSelectedCity {
+            viewModel.syncLocations {
+                if (viewModel.city.value.id.isEmpty()) {
+                    onEmptyLocations()
+                    return@syncLocations
+                }
 
-            viewModel.updateForecasts {
-                navigationController.popupToInclusive("main")
+                viewModel.updateForecasts {
+                    navigationController.popupToInclusive("main")
+                }
             }
         }
     }
