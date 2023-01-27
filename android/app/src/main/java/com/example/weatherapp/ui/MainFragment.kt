@@ -6,25 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.findNavController
 import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.R
-import com.example.weatherapp.ui.screens.LoadingScreen
-import com.example.weatherapp.ui.screens.MainScreen
-import com.example.weatherapp.ui.screens.OfflineScreen
+import com.example.weatherapp.ui.screens.WeatherApp
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 
 class MainFragment: Fragment() {
@@ -51,7 +41,7 @@ class MainFragment: Fragment() {
                     WeatherApp(
                         viewModel,
                         onLocationMenuClicked = {
-                            findNavController().navigate(R.id.mainFragment)
+                            findNavController().navigate(R.id.settingsFragment)
                         },
                         onEmptyLocations = {
                             findNavController().navigate(R.id.settingsFragment)
@@ -63,50 +53,6 @@ class MainFragment: Fragment() {
     }
 }
 
-
-// @Preview(showBackground = true)
-@Composable
-fun WeatherApp(
-    viewModel: AppViewModel,
-    onLocationMenuClicked: () -> Unit,
-    onEmptyLocations: () -> Unit,
-) {
-    val navigationController = rememberNavController()
-    var hasBeenInitialized by remember { mutableStateOf(false) }
-
-    NavHost(navController = navigationController, startDestination = "loading") {
-        composable(route = "loading") {
-            LoadingScreen()
-        }
-        composable(route = "main") {
-            MainScreen(
-                viewModel = viewModel,
-                onLocationMenuClicked = onLocationMenuClicked,
-            )
-        }
-        composable(route = "no_internet_error") {
-            OfflineScreen()
-        }
-    }
-
-
-    // Load the last selected city
-    if (!hasBeenInitialized) {
-        hasBeenInitialized = true
-        viewModel.loadSelectedCity {
-            viewModel.syncLocations {
-                if (viewModel.city.value.id.isEmpty()) {
-                    onEmptyLocations()
-                    return@syncLocations
-                }
-
-                viewModel.updateForecasts {
-                    navigationController.popupToInclusive("main")
-                }
-            }
-        }
-    }
-}
 
 
 fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {

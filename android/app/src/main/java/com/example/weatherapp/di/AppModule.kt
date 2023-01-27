@@ -23,6 +23,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -72,9 +73,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideWeatherApi(
+        apiEntryPoint: String,
         httpClient: OkHttpClient,
     ): IWeatherApi {
-        val apiEntryPoint = "https://weather-app-8a034.web.app"
         return Retrofit.Builder().baseUrl(apiEntryPoint)
             .client(httpClient)
             .addConverterFactory(Json.asConverterFactory(MediaType.get("application/json")))
@@ -84,15 +85,38 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideApiEntryPoint(): String = "https://weather-app-8a034.web.app"
+
+    @Provides
+    @Singleton
     fun provideHttpClient(
-        httpLoggerInspector: HttpLoggingInterceptor,
-        eTagInspector: ETagInspector,
-    ): OkHttpClient = OkHttpClient.Builder()
-        .followRedirects(true)
-        .followSslRedirects(true)
-        .addInterceptor(httpLoggerInspector)
-        .addInterceptor(eTagInspector)
-        .build()
+        interceptors: List<Interceptor>,
+    ): OkHttpClient {
+        val builder = OkHttpClient.Builder()
+            .followRedirects(true)
+            .followSslRedirects(true)
+
+        for (it in interceptors) {
+            builder.addInterceptor(it)
+        }
+        return builder.build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideInterceptors(
+        eTagInspector: ETagInspector?,
+        httpLoggerInspector: HttpLoggingInterceptor?,
+    ): List<Interceptor> {
+        var results = mutableListOf<Interceptor>()
+        if (eTagInspector != null) {
+            results.add(eTagInspector)
+        }
+        if (httpLoggerInspector != null) {
+            results.add(httpLoggerInspector)
+        }
+        return results
+    }
 
     @Provides
     @Singleton
@@ -102,13 +126,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHttpLoggerInspector(): HttpLoggingInterceptor {
-        val loggerInterceptor = HttpLoggingInterceptor()
-        loggerInterceptor.level = when (BuildConfig.DEBUG) {
-            true -> HttpLoggingInterceptor.Level.BASIC
-            else -> HttpLoggingInterceptor.Level.NONE
+    fun provideHttpLoggerInspector(): HttpLoggingInterceptor? {
+        return when (BuildConfig.DEBUG) {
+            true -> HttpLoggingInterceptor().also { it.level = HttpLoggingInterceptor.Level.BASIC }
+            else -> null
         }
-        return loggerInterceptor
     }
 
     @Provides

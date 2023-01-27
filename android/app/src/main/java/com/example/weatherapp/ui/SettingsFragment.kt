@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.ui.screens.SelectCityScreen
 
@@ -32,6 +33,7 @@ class SettingsFragment: Fragment() {
                 viewModel.saveSelectedCity {
                     viewModel.updateForecasts {
                         // move back to the main fragment
+                        findNavController().popBackStack()
                         //navigationController.popupToInclusive("main")
                     }
                 }
