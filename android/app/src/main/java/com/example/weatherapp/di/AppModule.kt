@@ -30,6 +30,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -74,6 +75,7 @@ object AppModule {
     @Singleton
     fun provideWeatherApi(
         apiEntryPoint: String,
+        @EtagInterceptorOkHttpClient
         httpClient: OkHttpClient,
     ): IWeatherApi {
         return Retrofit.Builder().baseUrl(apiEntryPoint)
@@ -87,35 +89,42 @@ object AppModule {
     @Singleton
     fun provideApiEntryPoint(): String = "https://weather-app-8a034.web.app"
 
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class EtagInterceptorOkHttpClient
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class OtherInterceptorOkHttpClient
+
+    @EtagInterceptorOkHttpClient
     @Provides
     @Singleton
-    fun provideHttpClient(
-        interceptors: List<Interceptor>,
+    fun provideEtagHttpClient(
+        eTagInspector: ETagInspector,
+        httpLoggerInspector: HttpLoggingInterceptor,
     ): OkHttpClient {
         val builder = OkHttpClient.Builder()
             .followRedirects(true)
             .followSslRedirects(true)
+            .addInterceptor(eTagInspector)
+            .addInterceptor(httpLoggerInspector)
 
-        for (it in interceptors) {
-            builder.addInterceptor(it)
-        }
         return builder.build()
     }
 
+    @OtherInterceptorOkHttpClient
     @Provides
     @Singleton
-    fun provideInterceptors(
-        eTagInspector: ETagInspector?,
-        httpLoggerInspector: HttpLoggingInterceptor?,
-    ): List<Interceptor> {
-        var results = mutableListOf<Interceptor>()
-        if (eTagInspector != null) {
-            results.add(eTagInspector)
-        }
-        if (httpLoggerInspector != null) {
-            results.add(httpLoggerInspector)
-        }
-        return results
+    fun provideHttpClient(
+        httpLoggerInspector: HttpLoggingInterceptor,
+    ): OkHttpClient {
+        val builder = OkHttpClient.Builder()
+            .followRedirects(true)
+            .followSslRedirects(true)
+            .addInterceptor(httpLoggerInspector)
+
+        return builder.build()
     }
 
     @Provides
@@ -126,17 +135,15 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHttpLoggerInspector(): HttpLoggingInterceptor? {
-        return when (BuildConfig.DEBUG) {
-            true -> HttpLoggingInterceptor().also { it.level = HttpLoggingInterceptor.Level.BASIC }
-            else -> null
-        }
+    fun provideHttpLoggerInspector(): HttpLoggingInterceptor {
+        return HttpLoggingInterceptor().also { it.level = HttpLoggingInterceptor.Level.BASIC }
     }
 
     @Provides
     @Singleton
     fun provideCacheDao(
-        @ApplicationContext context: Context,
+        @ApplicationContext
+        context: Context,
     ) = Room.databaseBuilder(
         context = context,
         klass = CacheDB::class.java,
@@ -146,7 +153,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAppDb(
-        @ApplicationContext context: Context,
+        @ApplicationContext
+        context: Context,
     ) = Room.databaseBuilder(
         context = context,
         klass = AppDatabase::class.java,
@@ -156,6 +164,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideConnectivityManager(
-        @ApplicationContext context: Context,
+        @ApplicationContext
+        context: Context,
     ) = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }

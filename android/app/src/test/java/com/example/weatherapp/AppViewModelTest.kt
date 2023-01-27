@@ -1,7 +1,6 @@
 package com.example.weatherapp
 
 import com.example.weatherapp.database.KeyValueDao
-import com.example.weatherapp.database.KeyValuePair
 import com.example.weatherapp.database.PrefectureDao
 import com.example.weatherapp.di.AppModule
 import com.example.weatherapp.network.IWeatherApi
@@ -10,6 +9,7 @@ import com.example.weatherapp.network.model.City
 import com.example.weatherapp.network.model.Prefecture
 import com.example.weatherapp.utils.INetworkMonitor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.setMain
 import okhttp3.Interceptor
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.mockwebserver.MockResponse
@@ -18,21 +18,31 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
 
 class AppViewModelTest {
+
     private lateinit var viewModel: AppViewModel
     private lateinit var networkMonitor: INetworkMonitor
     private lateinit var weatherApi: IWeatherApi
     private lateinit var prefectureDao: PrefectureDao
     private lateinit var keyValueDao: KeyValueDao
     private val server: MockWebServer = MockWebServer()
+
+    val mockLogger = mock<HttpLoggingInterceptor> {
+        on { this.level } doReturn HttpLoggingInterceptor.Level.NONE
+    }
+
+    val mockEtagInspector = mock<ETagInspector> {
+        onBlocking { this.intercept(any()) } doAnswer {
+            val chain = it.getArgument<Interceptor.Chain>(0)
+            var request = chain.request()
+            chain.proceed(request)
+        }
+    }
 
     private val prefectures = listOf<Prefecture>(
         Prefecture(
@@ -72,7 +82,8 @@ class AppViewModelTest {
         val response = MockResponse()
             .addHeader("Content-Type", "application/json; charset=utf-8")
             .addHeader("X-CUSTOM-MESSAGE", "This response made by mock server")
-            .setBody("""
+            .setBody(
+                """
 {
   "last_update": "2023-01-19T20:56",
   "overall": "sunny",
@@ -99,34 +110,28 @@ class AppViewModelTest {
     }
   ]
 }
-            """.trimIndent())
+            """.trimIndent()
+            )
         server.enqueue(response);
         server.start()
 
-        networkMonitor = mock<INetworkMonitor> {
-            on { this.isOnline } doReturn true
+        networkMonitor = object : INetworkMonitor {
+            override var isOnline: Boolean
+                get() = true
+                set(value) {}
         }
 
-//        val mockLogger = mock<HttpLoggingInterceptor>() {
-//            on { this.level } doReturn HttpLoggingInterceptor.Level.NONE
-//        }
-//
-//        val mockEtagInspector = mock<ETagInspector>() {
-//            onBlocking { this.intercept(any(Interceptor.Chain::class.java)) } doAnswer  {
-//                val chain = it.getArgument<Interceptor.Chain>(0)
-//                var request = chain.request()
-//                chain.proceed(request)
-//            }
-//        }
-
-        val httpClient = AppModule.provideHttpClient(listOf())
+        val httpClient = AppModule.provideHttpClient(
+            mockEtagInspector,
+            mockLogger,
+        )
         weatherApi = AppModule.provideWeatherApi(
             apiEntryPoint = "http://localhost",
             httpClient = httpClient,
         )
 
         val mockPrefectureDao = mock<PrefectureDao> {
-            onBlocking { this.findByKey(anyString()) } doReturn null
+            onBlocking { this.findByKey(any()) } doReturn null
 
             onBlocking { this.count() } doReturn 0
 
@@ -134,13 +139,13 @@ class AppViewModelTest {
 
             onBlocking { this.clear() } doAnswer { }
 
-            onBlocking { this.insertAll(any(Prefecture::class.java)) } doAnswer { }
+            onBlocking { this.insertAll(any()) } doAnswer { }
         }
 
         val mockKeyValueDao = mock<KeyValueDao> {
-            onBlocking { this.get(anyString()) } doReturn null
+            onBlocking { this.get(any()) } doReturn null
 
-            onBlocking { this.put(any(KeyValuePair::class.java)) }
+            onBlocking { this.put(any()) }
         }
 
         viewModel = AppViewModel(
@@ -272,6 +277,8 @@ class AppViewModelTest {
 //
     @Test
     fun `obtain the weekly forecast correctly`() {
+        Dispatchers.setMain(Dispatchers.Unconfined)
+
         viewModel.city.value = City("city_a", "somewhere")
         viewModel.updateForecasts {
             assertEquals(1, viewModel.forecasts.size)

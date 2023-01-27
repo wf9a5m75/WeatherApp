@@ -19,7 +19,9 @@ import com.example.weatherapp.network.model.WeeklyForecastResponse
 import com.example.weatherapp.utils.INetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -37,6 +39,7 @@ class AppViewModel @Inject constructor(
     private val prefectureDao: PrefectureDao,
     private val keyValueDao: KeyValueDao,
 ) : ViewModel() {
+
     var city: MutableState<City> = mutableStateOf(
         City("", ""),
     )
@@ -85,7 +88,7 @@ class AppViewModel @Inject constructor(
     fun sprintDateFormat(day: ForecastDay): String {
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DATE, day.day)
-        return when(day) {
+        return when (day) {
             ForecastDay.TODAY -> {
                 val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm")
                 formatter.format(calendar.time)
@@ -102,7 +105,7 @@ class AppViewModel @Inject constructor(
         key: String,
         value: String,
         onFinished: () -> Unit = {},
-    ) {
+    ) = withContext((Dispatchers.IO)) {
         keyValueDao.put(KeyValuePair(key, value))
         onFinished()
     }
@@ -162,23 +165,24 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    private suspend fun readLocationsFromDB() {
+    private suspend fun readLocationsFromDB() = withContext((Dispatchers.IO)) {
         this@AppViewModel.locations.clear()
         val results = prefectureDao.getAll()
         this@AppViewModel.locations.addAll(results)
     }
 
-    private suspend fun saveLocationsToDB(locationResponse: LocationResponse) {
-        prefectureDao.clear()
-        val prefectures = locationResponse.prefectures.toTypedArray()
-        prefectureDao.insertAll(*prefectures)
-        keyValueDao.put(
-            KeyValuePair(
-                "location_lastupdate",
-                locationResponse.last_update,
-            ),
-        )
-    }
+    private suspend fun saveLocationsToDB(locationResponse: LocationResponse) =
+        withContext((Dispatchers.IO)) {
+            prefectureDao.clear()
+            val prefectures = locationResponse.prefectures.toTypedArray()
+            prefectureDao.insertAll(*prefectures)
+            keyValueDao.put(
+                KeyValuePair(
+                    "location_lastupdate",
+                    locationResponse.last_update,
+                ),
+            )
+        }
 
     fun updateForecasts(
         onFinished: () -> Unit
@@ -199,13 +203,16 @@ class AppViewModel @Inject constructor(
 
     private suspend fun getWeeklyForecast(
         onFinished: (response: WeeklyForecastResponse?) -> Unit,
-    ) {
+    ) = withContext((Dispatchers.IO)) {
         if (!networkMonitor.isOnline) {
             onFinished(null)
-            return
+            return@withContext
         }
 
         val response = weatherApi.getWeeklyForecast(city.value.id)
-        onFinished(response.body())
+
+        withContext(Dispatchers.Main) {
+            onFinished(response.body())
+        }
     }
 }
