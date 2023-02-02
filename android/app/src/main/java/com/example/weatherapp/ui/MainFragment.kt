@@ -1,6 +1,5 @@
 package com.example.weatherapp.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -51,11 +50,6 @@ class MainFragment : Fragment() {
                 }
             }
         }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        viewModel.updateForecasts {}
     }
 }
 

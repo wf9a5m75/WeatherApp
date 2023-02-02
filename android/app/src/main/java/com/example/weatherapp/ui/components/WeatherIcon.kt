@@ -49,7 +49,7 @@ fun WeatherIcon(
                 .wrapContentSize(Alignment.Center),
             text = "$temperature°",
             fontSize = 14.sp,
-            color = MaterialTheme.colors.onSecondary,
+            color = MaterialTheme.colors.primary,
             style = MaterialTheme.typography.body2,
         )
 
@@ -70,7 +70,7 @@ fun WeatherIcon(
                 .wrapContentSize(Alignment.Center),
             text = time,
             fontSize = 14.sp,
-            color = androidx.compose.ui.graphics.Color.Black,
+            color = MaterialTheme.colors.primary,
             style = MaterialTheme.typography.body2,
         )
     }

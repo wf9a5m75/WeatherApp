@@ -49,7 +49,6 @@ fun MainScreen(
     }
 
     LaunchedEffect(viewModel.city.value.id) {
-        viewModel.updateForecasts {
-        }
+        viewModel.updateForecasts { }
     }
 }

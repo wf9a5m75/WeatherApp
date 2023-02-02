@@ -34,14 +34,11 @@ class SettingsFragment: Fragment() {
             ) {
                 // If no preference, move to the selectCity screen
                 viewModel.saveSelectedCity {
-                    viewModel.updateForecasts {
-                        // move back to the main fragment
-                        if (navController.backQueue.size > 1) {
-                            navController.popBackStack()
-                        } else {
-                            navController.navigate(R.id.mainFragment)
-                        }
-                        //navigationController.popupToInclusive("main")
+                    // move back to the main fragment
+                    if (navController.backQueue.isNotEmpty()) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(R.id.mainFragment)
                     }
                 }
             }

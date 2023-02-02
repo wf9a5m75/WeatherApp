@@ -47,7 +47,7 @@ class AppViewModel @Inject constructor(
 
     val forecasts = mutableStateListOf<DailyForecast?>()
 
-    val updateForecastCallbacks = mutableListOf<()->Unit>()
+    private val updateForecastCallbacks = mutableListOf<()->Unit>()
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
