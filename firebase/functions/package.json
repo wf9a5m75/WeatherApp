@@ -6,7 +6,7 @@
     "serve": "firebase emulators:start --only functions,hosting",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy:functions": "firebase deploy --only functions",
+    "deploy:functions": "npm run build && firebase deploy --only functions",
     "deploy:hosting": "firebase deploy --only hosting",
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
