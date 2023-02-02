@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapp.database.WeeklyForecastDao
 import com.example.weatherapp.database.KeyValueDao
 import com.example.weatherapp.database.KeyValuePair
 import com.example.weatherapp.database.PrefectureDao
@@ -15,7 +16,7 @@ import com.example.weatherapp.network.model.DailyForecast
 import com.example.weatherapp.network.model.ForecastDay
 import com.example.weatherapp.network.model.LocationResponse
 import com.example.weatherapp.network.model.Prefecture
-import com.example.weatherapp.network.model.WeeklyForecastResponse
+import com.example.weatherapp.network.model.WeeklyForecast
 import com.example.weatherapp.utils.INetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,6 +37,7 @@ class AppViewModel @Inject constructor(
     private val weatherApi: IWeatherApi,
     private val prefectureDao: PrefectureDao,
     private val keyValueDao: KeyValueDao,
+    private val weeklyForecastDao: WeeklyForecastDao,
 ) : ViewModel() {
     var city: MutableState<City> = mutableStateOf(
         City("", ""),
@@ -44,6 +46,8 @@ class AppViewModel @Inject constructor(
     val locations = mutableStateListOf<Prefecture>()
 
     val forecasts = mutableStateListOf<DailyForecast?>()
+
+    val updateForecastCallbacks = mutableListOf<()->Unit>()
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -183,29 +187,58 @@ class AppViewModel @Inject constructor(
     fun updateForecasts(
         onFinished: () -> Unit
     ) {
-        viewModelScope.launch {
+        // If this method has been involved during processing,
+        // put the callback to the buffer.
+        // Resultant is the same.
+        if (updateForecastCallbacks.isNotEmpty()) {
+            updateForecastCallbacks.add(onFinished)
+            return
+        }
+        updateForecastCallbacks.add(onFinished)
+        viewModelScope.launch(dispatcher) {
             getWeeklyForecast {
-                if (it == null) {
-                    onFinished()
-                    return@getWeeklyForecast
+                forecasts.clear()
+
+                if (it != null) {
+                    forecasts.addAll(it.forecasts)
                 }
 
-                forecasts.clear()
-                forecasts.addAll(it.forecasts)
-                onFinished()
+                // Involve the all callbacks buffered during the process
+                viewModelScope.launch {
+                    updateForecastCallbacks.forEach {
+                        it()
+                    }
+                    updateForecastCallbacks.clear()
+                }
             }
         }
     }
 
     private suspend fun getWeeklyForecast(
-        onFinished: (response: WeeklyForecastResponse?) -> Unit,
+        onFinished: (response: WeeklyForecast?) -> Unit,
     ) {
+        val cityId = city.value.id
+
+        // If network is unavailable, read the stored data.
         if (!networkMonitor.isOnline) {
-            onFinished(null)
+            val data = weeklyForecastDao.find(cityId)
+            onFinished(data)
             return
         }
 
+
         val response = weatherApi.getWeeklyForecast(city.value.id)
-        onFinished(response.body())
+        var data = response.body()
+
+        // If we receive new data, store them into the database.
+        // If no new data is available, the server replies NOT_MODIFIED(304) status code.
+        // In that case, we need to use the cached data.
+        if ((response.code() == HttpURLConnection.HTTP_OK) && (data != null)) {
+            data.cityId = cityId
+            weeklyForecastDao.put(data)
+        } else {
+            data = weeklyForecastDao.find(cityId)
+        }
+        onFinished(data)
     }
 }

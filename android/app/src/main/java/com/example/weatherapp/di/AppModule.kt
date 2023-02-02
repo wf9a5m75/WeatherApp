@@ -6,6 +6,7 @@ import androidx.room.Room
 import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.BuildConfig
 import com.example.weatherapp.database.AppDatabase
+import com.example.weatherapp.database.WeeklyForecastDao
 import com.example.weatherapp.database.KeyValueDao
 import com.example.weatherapp.database.PrefectureDao
 import com.example.weatherapp.network.IWeatherApi
@@ -16,20 +17,16 @@ import com.example.weatherapp.utils.NetworkMonitor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -43,12 +40,14 @@ object AppModule {
         weatherApi: IWeatherApi,
         prefectureDao: PrefectureDao,
         keyValueDao: KeyValueDao,
+        weeklyForecastDao: WeeklyForecastDao,
     ) = AppViewModel(
         dispatcher = Dispatchers.IO,
         networkMonitor = networkMonitor,
         weatherApi = weatherApi,
         prefectureDao = prefectureDao,
         keyValueDao = keyValueDao,
+        weeklyForecastDao = weeklyForecastDao,
     )
 
     @Provides
@@ -62,6 +61,12 @@ object AppModule {
     fun provideKeyValueDao(
         appDatabase: AppDatabase,
     ) = appDatabase.keyValueDao()
+
+    @Provides
+    @Singleton
+    fun provideDailyForecastDao(
+        appDatabase: AppDatabase,
+    ) = appDatabase.weeklyForecastDao()
 
     @Provides
     @Singleton
@@ -86,37 +91,18 @@ object AppModule {
     @Provides
     @Singleton
     fun provideApiEntryPoint(): String = "https://weather-app-8a034.web.app"
+//    fun provideApiEntryPoint(): String = "http://192.168.86.31:5000"
 
     @Provides
     @Singleton
     fun provideHttpClient(
-        interceptors: List<Interceptor>,
-    ): OkHttpClient {
-        val builder = OkHttpClient.Builder()
+        eTagInspector: ETagInspector,
+        httpLoggerInspector: HttpLoggingInterceptor,
+    ): OkHttpClient = OkHttpClient.Builder()
             .followRedirects(true)
             .followSslRedirects(true)
-
-        for (it in interceptors) {
-            builder.addInterceptor(it)
-        }
-        return builder.build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideInterceptors(
-        eTagInspector: ETagInspector?,
-        httpLoggerInspector: HttpLoggingInterceptor?,
-    ): List<Interceptor> {
-        var results = mutableListOf<Interceptor>()
-        if (eTagInspector != null) {
-            results.add(eTagInspector)
-        }
-        if (httpLoggerInspector != null) {
-            results.add(httpLoggerInspector)
-        }
-        return results
-    }
+            .addInterceptor(eTagInspector)
+            .addInterceptor(httpLoggerInspector).build()
 
     @Provides
     @Singleton
@@ -126,10 +112,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHttpLoggerInspector(): HttpLoggingInterceptor? {
-        return when (BuildConfig.DEBUG) {
-            true -> HttpLoggingInterceptor().also { it.level = HttpLoggingInterceptor.Level.BASIC }
-            else -> null
+    fun provideHttpLoggerInspector(): HttpLoggingInterceptor {
+        return HttpLoggingInterceptor().also {
+            it.level = when(BuildConfig.DEBUG) {
+                true -> HttpLoggingInterceptor.Level.BASIC
+                else -> HttpLoggingInterceptor.Level.NONE
+            }
         }
     }
 

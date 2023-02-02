@@ -37,15 +37,10 @@ fun WeatherApp(
     LaunchedEffect(true) {
         viewModel.loadSelectedCity {
             if (viewModel.city.value.id.isEmpty()) {
-                viewModel.syncLocations {
-                    onEmptyLocations()
-                }
+                onEmptyLocations()
                 return@loadSelectedCity
             }
-
-            viewModel.updateForecasts {
-                navigationController.popupToInclusive("main")
-            }
+            navigationController.popupToInclusive("main")
         }
     }
 }

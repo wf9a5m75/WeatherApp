@@ -49,78 +49,80 @@ fun DailyWeatherScreen(
             refreshState.isRefreshing = false
         }
     }
-    if (viewModel.forecasts.isEmpty()) {
-        onRefresh()
-    }
 
     SwipeRefresh(
         state = refreshState,
         onRefresh = onRefresh,
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.bg_sunny),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Text(
-            text = viewModel.sprintDateFormat(day),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            fontSize = 24.sp,
-            color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.body2,
-        )
 
-        if (viewModel.forecasts[day.day]?.forecasts?.size != 24) return@SwipeRefresh
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize(Alignment.Center)
-                .verticalScroll(state = scrollState, enabled = true),
-        ) {
+        if (viewModel.forecasts.isEmpty() ||
+            viewModel.forecasts[day.day]?.forecasts?.size != 24) {
+            OfflineScreen()
+        } else {
             Image(
-                painter = weatherIconResource(
-                    "sunny", // TODO
-                    12,
-                ),
-                contentDescription = "",
+                painter = painterResource(id = R.drawable.bg_sunny),
+                contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(400.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .padding(all = 32.dp),
+                modifier = Modifier.fillMaxSize(),
             )
-            LazyRow(
+            Text(
+                text = viewModel.sprintDateFormat(day),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .scrollable(
-                        scrollStateForRow,
-                        orientation = Orientation.Horizontal,
-                    ),
-            ) {
-                items(
-                    items = when(day) {
-                        ForecastDay.TODAY -> {
-                            val nowH = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-                            viewModel.forecasts[day.day]!!.forecasts.filter {
-                                it.hours24 >= nowH
-                            }
-                        }
-                        else -> viewModel.forecasts[day.day]!!.forecasts
-                    },
+                    .padding(16.dp),
+                fontSize = 24.sp,
+                color = MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.body2,
+            )
 
-                    itemContent = {
-                        WeatherIcon(
-                            weather = it.status,
-                            temperature = it.temperature.toInt(),
-                            hour24 = it.hours24,
-                            modifier = Modifier.weight(1f),
-                        )
-                    },
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center)
+                    .verticalScroll(state = scrollState, enabled = true),
+            ) {
+                Image(
+                    painter = weatherIconResource(
+                        "sunny", // TODO
+                        12,
+                    ),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(400.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .padding(all = 32.dp),
                 )
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .scrollable(
+                            scrollStateForRow,
+                            orientation = Orientation.Horizontal,
+                        ),
+                ) {
+                    items(
+                        items = when (day) {
+                            ForecastDay.TODAY -> {
+                                val nowH = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                                viewModel.forecasts[day.day]!!.forecasts.filter {
+                                    it.hours24 >= nowH
+                                }
+                            }
+                            else -> viewModel.forecasts[day.day]!!.forecasts
+                        },
+
+                        itemContent = {
+                            WeatherIcon(
+                                weather = it.status,
+                                temperature = it.temperature.toInt(),
+                                hour24 = it.hours24,
+                                modifier = Modifier.weight(1f),
+                            )
+                        },
+                    )
+                }
             }
         }
     }

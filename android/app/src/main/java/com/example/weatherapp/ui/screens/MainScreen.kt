@@ -3,6 +3,7 @@ package com.example.weatherapp.ui.screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import com.example.weatherapp.AppViewModel
@@ -45,5 +46,10 @@ fun MainScreen(
                 }
             },
         )
+    }
+
+    LaunchedEffect(viewModel.city.value.id) {
+        viewModel.updateForecasts {
+        }
     }
 }

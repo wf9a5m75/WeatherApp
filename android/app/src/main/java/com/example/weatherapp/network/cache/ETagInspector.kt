@@ -21,9 +21,10 @@ class ETagInspector(
             )
         if (cache.eTag != "") {
             request = request.newBuilder()
-                .addHeader("If-None-Match", cache.eTag)
-                .addHeader("If-Modified-Since", cache.lastModified)
+                .header("if-none-match", cache.eTag)
+//                .addHeader("If-Modified-Since", cache.lastModified)
                 .build()
+
         }
 
         // Process the HTTP request

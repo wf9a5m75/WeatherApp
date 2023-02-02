@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +18,7 @@ import com.example.weatherapp.R
 import com.example.weatherapp.ui.screens.WeatherApp
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 
-class MainFragment: Fragment() {
+class MainFragment : Fragment() {
 
     val viewModel by activityViewModels<AppViewModel>()
 
@@ -51,9 +52,12 @@ class MainFragment: Fragment() {
             }
         }
     }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        viewModel.updateForecasts {}
+    }
 }
-
-
 
 fun NavHostController.popupToInclusive(route: String) = this.navigate(route) {
     // Pop up to the start destination of the graph

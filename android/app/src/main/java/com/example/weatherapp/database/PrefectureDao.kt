@@ -11,7 +11,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-class Converters {
+class PrefectureConverters {
     @OptIn(ExperimentalSerializationApi::class)
     @TypeConverter
     fun fromList(cities: List<City>): String {

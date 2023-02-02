@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.weatherapp.AppViewModel
+import com.example.weatherapp.R
 import com.example.weatherapp.ui.screens.SelectCityScreen
 
 class SettingsFragment: Fragment() {
@@ -25,6 +26,8 @@ class SettingsFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         view as ComposeView
+
+        val navController = findNavController()
         view.setContent {
             SelectCityScreen(
                 viewModel = viewModel,
@@ -33,7 +36,11 @@ class SettingsFragment: Fragment() {
                 viewModel.saveSelectedCity {
                     viewModel.updateForecasts {
                         // move back to the main fragment
-                        findNavController().popBackStack()
+                        if (navController.backQueue.size > 1) {
+                            navController.popBackStack()
+                        } else {
+                            navController.navigate(R.id.mainFragment)
+                        }
                         //navigationController.popupToInclusive("main")
                     }
                 }
