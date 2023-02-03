@@ -133,7 +133,9 @@ dependencies {
 
     // Mock Server
     testImplementation "com.squareup.okhttp3:mockwebserver:$mock_server_version"
-
+//    testImplementation("io.github.infeez.kotlin-mock-server:mock-server-core:1.0.0")
+//    testImplementation("io.github.infeez.kotlin-mock-server:mock-server-okhttp:1.0.0")
+//    testImplementation 'io.github.infeez.kotlin-mock-server:mock-server-junit4:1.0.0'
 
     // hilt (Dependency Injection)
     implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"

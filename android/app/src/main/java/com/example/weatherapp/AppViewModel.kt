@@ -140,6 +140,7 @@ class AppViewModel @Inject constructor(
 
             // Obtain the location list from the server if online
             val response = weatherApi.getLocations()
+
             when (response.code()) {
                 HttpURLConnection.HTTP_OK -> {
                     val body = response.body()

@@ -33,7 +33,7 @@ interface PrefectureDao {
     suspend fun getAll(): List<Prefecture>
 
     @Query("SELECT * FROM Prefecture where id = :keyId")
-    suspend fun findByKey(keyId: String): Prefecture?
+    suspend fun find(keyId: String): Prefecture?
 
     // vararg is similar to the arguments object of JS
     @Upsert
