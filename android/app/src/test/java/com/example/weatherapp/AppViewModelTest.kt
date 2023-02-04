@@ -1,13 +1,15 @@
 package com.example.weatherapp
 
-import com.example.weatherapp.providers.OfflineCaseProviders
-import com.example.weatherapp.providers.OnlineCaseProviders
+import com.example.weatherapp.database.PrefectureDao
+import com.example.weatherapp.providers.OfflineCaseDataset
+import com.example.weatherapp.providers.OnlineCaseDataset
 import com.example.weatherapp.network.model.City
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito
 
 class AppViewModelTest {
 
@@ -20,11 +22,11 @@ class AppViewModelTest {
     fun `updateForecasts should obtain data from server if the internet is online`() {
         val viewModel = AppViewModel(
             dispatcher = Dispatchers.Unconfined,
-            networkMonitor = OnlineCaseProviders.provideNetworkMonitor(),
-            weatherApi = OnlineCaseProviders.provideWeatherApi(),
-            prefectureDao = OnlineCaseProviders.providePrefectureDao(),
-            keyValueDao = OnlineCaseProviders.provideKeyValueDao(),
-            weeklyForecastDao = OnlineCaseProviders.provideWeeklyForecastDao(),
+            networkMonitor = OnlineCaseDataset.provideNetworkMonitor(),
+            weatherApi = OnlineCaseDataset.provideWeatherApi(),
+            prefectureDao = OnlineCaseDataset.providePrefectureDao(),
+            keyValueDao = OnlineCaseDataset.provideKeyValueDao(),
+            weeklyForecastDao = OnlineCaseDataset.provideWeeklyForecastDao(),
         )
         viewModel.city.value = City("city_a", "somewhere")
         viewModel.updateForecasts {
@@ -37,11 +39,11 @@ class AppViewModelTest {
     fun `updateForecasts should return the data from database if the device is offline`() {
         val viewModel = AppViewModel(
             dispatcher = Dispatchers.Unconfined,
-            networkMonitor = OfflineCaseProviders.provideNetworkMonitor(),
-            weatherApi = OfflineCaseProviders.provideWeatherApi(),
-            prefectureDao = OfflineCaseProviders.providePrefectureDao(),
-            keyValueDao = OfflineCaseProviders.provideKeyValueDao(),
-            weeklyForecastDao = OfflineCaseProviders.provideWeeklyForecastDao(),
+            networkMonitor = OfflineCaseDataset.provideNetworkMonitor(),
+            weatherApi = OfflineCaseDataset.provideWeatherApi(),
+            prefectureDao = OfflineCaseDataset.providePrefectureDao(),
+            keyValueDao = OfflineCaseDataset.provideKeyValueDao(),
+            weeklyForecastDao = OfflineCaseDataset.provideWeeklyForecastDao(),
         )
         viewModel.city.value = City("city_offline", "somewhere")
         viewModel.updateForecasts {
@@ -54,11 +56,11 @@ class AppViewModelTest {
     fun `updateForecasts should return null if the device is offline and no data is available in database`() {
         val viewModel = AppViewModel(
             dispatcher = Dispatchers.Unconfined,
-            networkMonitor = OfflineCaseProviders.provideNetworkMonitor(),
-            weatherApi = OfflineCaseProviders.provideWeatherApi(),
-            prefectureDao = OfflineCaseProviders.providePrefectureDao(),
-            keyValueDao = OfflineCaseProviders.provideKeyValueDao(),
-            weeklyForecastDao = OfflineCaseProviders.provideWeeklyForecastDao(),
+            networkMonitor = OfflineCaseDataset.provideNetworkMonitor(),
+            weatherApi = OfflineCaseDataset.provideWeatherApi(),
+            prefectureDao = OfflineCaseDataset.providePrefectureDao(),
+            keyValueDao = OfflineCaseDataset.provideKeyValueDao(),
+            weeklyForecastDao = OfflineCaseDataset.provideWeeklyForecastDao(),
         )
         viewModel.city.value = City("city_unknown", "somewhere")
         viewModel.updateForecasts {
@@ -69,20 +71,22 @@ class AppViewModelTest {
     @Test
     fun `syncLocation should obtain the latest location list if the device is online`() {
 
-        val mockPrefectureDao = OnlineCaseProviders.providePrefectureDao()
+        val mockPrefectureDao = OnlineCaseDataset.providePrefectureDao()
 
         val viewModel = AppViewModel(
             dispatcher = Dispatchers.Unconfined,
-            networkMonitor = OnlineCaseProviders.provideNetworkMonitor(),
-            weatherApi = OnlineCaseProviders.provideWeatherApi(),
+            networkMonitor = OnlineCaseDataset.provideNetworkMonitor(),
+            weatherApi = OnlineCaseDataset.provideWeatherApi(),
             prefectureDao = mockPrefectureDao,
-            keyValueDao = OnlineCaseProviders.provideKeyValueDao(),
-            weeklyForecastDao = OnlineCaseProviders.provideWeeklyForecastDao(),
+            keyValueDao = OnlineCaseDataset.provideKeyValueDao(),
+            weeklyForecastDao = OnlineCaseDataset.provideWeeklyForecastDao(),
         )
+
+        // TODO: spyが取れない
+//        mockPrefectureDao as Mockito.spy
         viewModel.syncLocations {
             assertEquals(2, viewModel.locations.size)
-            // TODO: hasBeenCalled?
-//            assertEquals()
+//            assertEquals(mockPrefectureDao)
             assertEquals("pref_a", viewModel.locations[0].id)
             assertEquals("city1_in_pref_a", viewModel.locations[0].cities[0].id)
             assertEquals("city2_in_pref_a", viewModel.locations[0].cities[1].id)

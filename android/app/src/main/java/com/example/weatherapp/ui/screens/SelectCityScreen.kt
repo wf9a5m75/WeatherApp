@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Icon
@@ -28,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -36,6 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherapp.AppViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Preview(showBackground = true)
 @Composable
@@ -43,8 +49,8 @@ fun SelectCityScreen(
     viewModel: AppViewModel = viewModel(),
     onClose: () -> Unit = {},
 ) {
-    val rememberScrollState = rememberScrollState()
-    val rememberAutoScrolled = remember { mutableStateOf(false) }
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     BackHandler(true) {
         onClose()
@@ -74,22 +80,9 @@ fun SelectCityScreen(
         }
 
         LazyColumn(
+            state = lazyListState,
             modifier = Modifier
-                .fillMaxSize()
-                .scrollable(
-                    state = rememberScrollState,
-                    orientation = Orientation.Vertical,
-                )
-//                .onGloballyPositioned {
-//                    if (!rememberAutoScrolled.value) {
-//                        rememberAutoScrolled.value = true
-//
-//                        val selectedIdx = viewModel.locations.indexOfFirst { it.id == viewModel.city.value.id }
-//
-//                        rememberScrollState.animateScrollTo(100)
-//                    }
-//                }
-
+                .fillMaxSize(),
         ) {
             items(
                 viewModel.locations,
@@ -135,6 +128,31 @@ fun SelectCityScreen(
         }
     }
     LaunchedEffect(true) {
-        viewModel.syncLocations {}
+        // Synchronize the location list data when this component is displayed first time.
+        viewModel.syncLocations {
+
+            // If user selected a city, scroll to the prefecture where includes the city.
+            var idx: Int = -1
+            viewModel.locations.forEachIndexed { index, prefecture ->
+                if (idx > -1) {
+                    return@forEachIndexed
+                }
+                for (city in prefecture.cities) {
+                    if (city.id == viewModel.city.value.id) {
+                        idx = index
+                        break
+                    }
+                }
+            }
+            if (idx == -1) {
+                return@syncLocations
+            }
+
+            coroutineScope.launch {
+                // Insert 0.5 sec delay to wait the lazyColumn drawing is completed.
+                delay(500)
+                lazyListState.animateScrollToItem(index = idx)
+            }
+        }
     }
 }
