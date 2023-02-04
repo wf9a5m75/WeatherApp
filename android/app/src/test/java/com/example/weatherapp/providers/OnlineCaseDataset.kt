@@ -99,7 +99,7 @@ object OnlineCaseDataset : ITestCaseDataset {
             LocationResponse(
                 last_update = "2023-02-02T00:00",
                 prefectures = dummyLocations,
-            )
+            ),
         )
     }
 

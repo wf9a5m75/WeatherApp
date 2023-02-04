@@ -16,7 +16,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.spy
 import retrofit2.Response
 
-object OfflineCaseDataset: ITestCaseDataset {
+object OfflineCaseDataset : ITestCaseDataset {
 
     override fun provideNetworkMonitor() = spy<INetworkMonitor> {
         on { this.isOnline } doReturn false
@@ -24,10 +24,10 @@ object OfflineCaseDataset: ITestCaseDataset {
 
     override fun provideWeatherApi() = spy<IWeatherApi> {
         onBlocking { this.getWeeklyForecast(any()) } doReturn
-                Response.error(500, "".toResponseBody(null))
+            Response.error(500, "".toResponseBody(null))
 
         onBlocking { this.getLocations() } doReturn
-                Response.error(500, "".toResponseBody(null))
+            Response.error(500, "".toResponseBody(null))
     }
 
     override fun providePrefectureDao() = spy<PrefectureDao> {
@@ -48,7 +48,6 @@ object OfflineCaseDataset: ITestCaseDataset {
         onBlocking { this.put(any()) } doAnswer {}
     }
 
-
     override fun provideWeeklyForecastDao() = spy<WeeklyForecastDao> {
         onBlocking { this.find(any()) } doAnswer {
             val cityId = it.getArgument(0, String::class.java)
@@ -66,12 +65,12 @@ object OfflineCaseDataset: ITestCaseDataset {
                                 Forecast(
                                     time = "00:00",
                                     temperature = 6.3,
-                                    status = "rain"
+                                    status = "rain",
                                 ),
                                 Forecast(
                                     time = "01:00",
                                     temperature = 6.0,
-                                    status = "rain"
+                                    status = "rain",
                                 ),
                             ),
                         ),
@@ -82,12 +81,12 @@ object OfflineCaseDataset: ITestCaseDataset {
                                 Forecast(
                                     time = "00:00",
                                     temperature = 8.1,
-                                    status = "clear"
+                                    status = "clear",
                                 ),
                                 Forecast(
                                     time = "01:00",
                                     temperature = 7.8,
-                                    status = "clear"
+                                    status = "clear",
                                 ),
                             ),
                         ),
