@@ -22,23 +22,33 @@ fun WeeklyWeatherScreen(viewModel: AppViewModel = viewModel()) {
         }
     }
 
+//    if (viewModel.forecasts.isEmpty()) {
+//        onRefresh()
+//    }
+
     if (viewModel.forecasts.isEmpty()) {
-        onRefresh()
-    }
+        if (viewModel.city.value.id.isBlank()) {
+            LoadingScreen()
+        } else {
+            OfflineScreen()
+        }
+    } else {
+        SwipeRefresh(
+            state = refreshState,
+            onRefresh = onRefresh
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(
+                    items = viewModel.forecasts,
 
-    SwipeRefresh(
-        state = refreshState,
-        onRefresh = onRefresh
-    ) {
-        LazyColumn(modifier = Modifier
-            .fillMaxSize()) {
-            items(
-                items = viewModel.forecasts,
-
-                itemContent = {
-                    DailyRow(it!!)
-                }
-            )
+                    itemContent = {
+                        DailyRow(it!!)
+                    }
+                )
+            }
         }
     }
 }

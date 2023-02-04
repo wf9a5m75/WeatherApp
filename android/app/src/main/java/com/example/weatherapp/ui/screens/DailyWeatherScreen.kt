@@ -50,15 +50,19 @@ fun DailyWeatherScreen(
         }
     }
 
-    SwipeRefresh(
-        state = refreshState,
-        onRefresh = onRefresh,
+    if (viewModel.forecasts.isEmpty() ||
+        viewModel.forecasts[day.day]?.forecasts?.size != 24
     ) {
-
-        if (viewModel.forecasts.isEmpty() ||
-            viewModel.forecasts[day.day]?.forecasts?.size != 24) {
-            OfflineScreen()
+        if (viewModel.city.value.id.isBlank()) {
+            LoadingScreen()
         } else {
+            OfflineScreen()
+        }
+    } else {
+        SwipeRefresh(
+            state = refreshState,
+            onRefresh = onRefresh,
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.bg_sunny),
                 contentDescription = null,
