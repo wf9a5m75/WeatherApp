@@ -6,10 +6,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherapp.database.WeeklyForecastDao
 import com.example.weatherapp.database.KeyValueDao
 import com.example.weatherapp.database.KeyValuePair
 import com.example.weatherapp.database.PrefectureDao
+import com.example.weatherapp.database.WeeklyForecastDao
 import com.example.weatherapp.network.IWeatherApi
 import com.example.weatherapp.network.model.City
 import com.example.weatherapp.network.model.DailyForecast
@@ -39,6 +39,7 @@ class AppViewModel @Inject constructor(
     private val keyValueDao: KeyValueDao,
     private val weeklyForecastDao: WeeklyForecastDao,
 ) : ViewModel() {
+
     var city: MutableState<City> = mutableStateOf(
         City("", ""),
     )
@@ -47,7 +48,7 @@ class AppViewModel @Inject constructor(
 
     val forecasts = mutableStateListOf<DailyForecast?>()
 
-    private val updateForecastCallbacks = mutableListOf<()->Unit>()
+    private val updateForecastCallbacks = mutableListOf<() -> Unit>()
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
@@ -89,7 +90,7 @@ class AppViewModel @Inject constructor(
     fun sprintDateFormat(day: ForecastDay): String {
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DATE, day.day)
-        return when(day) {
+        return when (day) {
             ForecastDay.TODAY -> {
                 val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm")
                 formatter.format(calendar.time)
@@ -186,7 +187,7 @@ class AppViewModel @Inject constructor(
     }
 
     fun updateForecasts(
-        onFinished: () -> Unit
+        onFinished: () -> Unit,
     ) {
         // If this method has been involved during processing,
         // put the callback to the buffer.
@@ -226,7 +227,6 @@ class AppViewModel @Inject constructor(
             onFinished(data)
             return
         }
-
 
         val response = weatherApi.getWeeklyForecast(city.value.id)
         var data = response.body()

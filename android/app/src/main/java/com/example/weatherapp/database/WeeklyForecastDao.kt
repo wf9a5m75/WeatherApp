@@ -12,6 +12,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class WeeklyForecastConverters {
+
     @OptIn(ExperimentalSerializationApi::class)
     @TypeConverter
     fun fromResponse(response: WeeklyForecast): String {
@@ -34,6 +35,7 @@ class WeeklyForecastConverters {
         return Json.decodeFromString(jsonStr)
     }
 }
+
 /**
  * WeeklyForecast DAO
  */

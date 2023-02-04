@@ -12,7 +12,7 @@ import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.R
 import com.example.weatherapp.ui.screens.SelectCityScreen
 
-class SettingsFragment: Fragment() {
+class SettingsFragment : Fragment() {
 
     val viewModel by activityViewModels<AppViewModel>()
 

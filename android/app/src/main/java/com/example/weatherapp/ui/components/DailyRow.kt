@@ -6,26 +6,22 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.example.weatherapp.network.model.Forecast
-import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.weatherapp.network.model.DailyForecast
+import com.example.weatherapp.network.model.Forecast
 import kotlin.math.round
 
 @Preview(showSystemUi = true)
@@ -72,14 +68,15 @@ fun DailyRow(
     val tmp = dailyForecast.date.split("-")
     val dateLabel = "${tmp[1]}/${tmp[2]}"
 
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .border(
-            width = 1.dp,
-            color = Color.Gray,
-        )
-        .wrapContentHeight()
-        .padding(vertical = 5.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = Color.Gray,
+            )
+            .wrapContentHeight()
+            .padding(vertical = 5.dp)
     ) {
         Column(
             modifier = Modifier
@@ -95,12 +92,13 @@ fun DailyRow(
                     .align(Alignment.CenterHorizontally),
             )
         }
-        LazyRow(modifier = Modifier
-            .fillMaxWidth()
-            .scrollable(
-                scrollState,
-                orientation = Orientation.Horizontal,
-            ),
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .scrollable(
+                    scrollState,
+                    orientation = Orientation.Horizontal,
+                ),
         ) {
             items(
                 items = dailyForecast.forecasts,

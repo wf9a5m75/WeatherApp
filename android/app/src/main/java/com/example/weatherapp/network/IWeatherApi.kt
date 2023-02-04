@@ -7,11 +7,13 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface IWeatherApi {
+
     @GET("/api/v1/locations/")
     suspend fun getLocations(): Response<LocationResponse>
 
     @GET("/api/v1/weekly/")
     suspend fun getWeeklyForecast(
-        @Query("city_id") city_id: String,
+        @Query("city_id")
+        city_id: String,
     ): Response<WeeklyForecast>
 }

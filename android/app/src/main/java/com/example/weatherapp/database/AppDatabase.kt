@@ -19,6 +19,7 @@ import com.example.weatherapp.network.model.WeeklyForecast
     WeeklyForecastConverters::class
 )
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun prefectureDao(): PrefectureDao
 
     abstract fun keyValueDao(): KeyValueDao

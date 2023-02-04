@@ -30,7 +30,8 @@ fun MainScreen(
                 when (menuId) {
                     "change_city" -> onLocationMenuClicked()
 
-                    else -> { /* stub */ }
+                    else -> { /* stub */
+                    }
                 }
             },
         )

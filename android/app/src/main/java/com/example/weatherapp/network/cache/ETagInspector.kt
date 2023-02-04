@@ -15,10 +15,10 @@ class ETagInspector(
 
         // Add "If-None-Match" header if cached ETag is available
         val cache = cacheDao.get(url) ?: CacheValue(
-                url = url,
-                eTag = "",
-                lastModified = "",
-            )
+            url = url,
+            eTag = "",
+            lastModified = "",
+        )
         if (cache.eTag != "") {
             request = request.newBuilder()
                 .header("if-none-match", cache.eTag)

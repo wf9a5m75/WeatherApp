@@ -20,7 +20,6 @@ data class Forecast(
     private var _month: Int = -1
     private var _date: Int = -1
 
-
     /*
      * timeにはISO8601形式で日時データが与えられる。
      * これをパースして、時間だけを取り出し、hour24で返す。

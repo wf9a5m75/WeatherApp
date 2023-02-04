@@ -6,9 +6,9 @@ import androidx.room.Room
 import com.example.weatherapp.AppViewModel
 import com.example.weatherapp.BuildConfig
 import com.example.weatherapp.database.AppDatabase
-import com.example.weatherapp.database.WeeklyForecastDao
 import com.example.weatherapp.database.KeyValueDao
 import com.example.weatherapp.database.PrefectureDao
+import com.example.weatherapp.database.WeeklyForecastDao
 import com.example.weatherapp.network.IWeatherApi
 import com.example.weatherapp.network.cache.CacheDB
 import com.example.weatherapp.network.cache.CacheDao
@@ -99,10 +99,10 @@ object AppModule {
         eTagInspector: ETagInspector,
         httpLoggerInspector: HttpLoggingInterceptor,
     ): OkHttpClient = OkHttpClient.Builder()
-            .followRedirects(true)
-            .followSslRedirects(true)
-            .addInterceptor(eTagInspector)
-            .addInterceptor(httpLoggerInspector).build()
+        .followRedirects(true)
+        .followSslRedirects(true)
+        .addInterceptor(eTagInspector)
+        .addInterceptor(httpLoggerInspector).build()
 
     @Provides
     @Singleton
@@ -114,7 +114,7 @@ object AppModule {
     @Singleton
     fun provideHttpLoggerInspector(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().also {
-            it.level = when(BuildConfig.DEBUG) {
+            it.level = when (BuildConfig.DEBUG) {
                 true -> HttpLoggingInterceptor.Level.BASIC
                 else -> HttpLoggingInterceptor.Level.NONE
             }
@@ -124,7 +124,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideCacheDao(
-        @ApplicationContext context: Context,
+        @ApplicationContext
+        context: Context,
     ) = Room.databaseBuilder(
         context = context,
         klass = CacheDB::class.java,
@@ -134,7 +135,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAppDb(
-        @ApplicationContext context: Context,
+        @ApplicationContext
+        context: Context,
     ) = Room.databaseBuilder(
         context = context,
         klass = AppDatabase::class.java,
@@ -144,6 +146,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideConnectivityManager(
-        @ApplicationContext context: Context,
+        @ApplicationContext
+        context: Context,
     ) = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }

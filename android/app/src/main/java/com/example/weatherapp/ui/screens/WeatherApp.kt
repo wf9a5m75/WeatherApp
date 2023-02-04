@@ -32,7 +32,6 @@ fun WeatherApp(
         }
     }
 
-
     // Load the last selected city
     LaunchedEffect(true) {
         viewModel.loadSelectedCity {

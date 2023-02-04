@@ -7,5 +7,6 @@ import androidx.room.TypeConverters
 @Database(entities = [CacheValue::class], version = 1)
 @TypeConverters(DateToLongConverter::class)
 abstract class CacheDB : RoomDatabase() {
+
     abstract fun cacheDao(): CacheDao
 }

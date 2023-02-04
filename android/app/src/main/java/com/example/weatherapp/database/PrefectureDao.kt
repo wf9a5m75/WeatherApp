@@ -12,6 +12,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class PrefectureConverters {
+
     @OptIn(ExperimentalSerializationApi::class)
     @TypeConverter
     fun fromList(cities: List<City>): String {
@@ -29,6 +30,7 @@ class PrefectureConverters {
  */
 @Dao
 interface PrefectureDao {
+
     @Query("SELECT * FROM Prefecture")
     suspend fun getAll(): List<Prefecture>
 

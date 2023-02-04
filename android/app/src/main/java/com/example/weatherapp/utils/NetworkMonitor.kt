@@ -7,6 +7,7 @@ import android.net.NetworkRequest
 import javax.inject.Inject
 
 interface INetworkMonitor {
+
     var isOnline: Boolean
 }
 
@@ -14,6 +15,7 @@ class NetworkMonitor @Inject constructor(
     connectivityManager: ConnectivityManager,
     override var isOnline: Boolean = false,
 ) : INetworkMonitor, ConnectivityManager.NetworkCallback() {
+
     override fun onAvailable(network: Network) {
         super.onAvailable(network)
         this.isOnline = true
