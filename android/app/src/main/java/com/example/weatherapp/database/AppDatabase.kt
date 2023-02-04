@@ -10,13 +10,13 @@ import com.example.weatherapp.network.model.WeeklyForecast
     entities = [
         Prefecture::class,
         KeyValuePair::class,
-        WeeklyForecast::class
+        WeeklyForecast::class,
     ],
-    version = 2
+    version = 2,
 )
 @TypeConverters(
     PrefectureConverters::class,
-    WeeklyForecastConverters::class
+    WeeklyForecastConverters::class,
 )
 abstract class AppDatabase : RoomDatabase() {
 

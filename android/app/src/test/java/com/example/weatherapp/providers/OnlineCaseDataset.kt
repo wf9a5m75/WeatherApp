@@ -14,11 +14,10 @@ import com.example.weatherapp.utils.INetworkMonitor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import retrofit2.Response
 
-object OnlineCaseDataset: ITestCaseDataset {
+object OnlineCaseDataset : ITestCaseDataset {
 
     private val dummyLocations = listOf(
         Prefecture(
@@ -93,13 +92,15 @@ object OnlineCaseDataset: ITestCaseDataset {
                         ),
                     ),
                 ),
-            )
+            ),
         )
 
-        onBlocking { this.getLocations() } doReturn Response.success(LocationResponse(
-            last_update = "2023-02-02T00:00",
-            prefectures = dummyLocations,
-        ))
+        onBlocking { this.getLocations() } doReturn Response.success(
+            LocationResponse(
+                last_update = "2023-02-02T00:00",
+                prefectures = dummyLocations,
+            )
+        )
     }
 
     override fun providePrefectureDao() = spy<PrefectureDao> {
@@ -119,7 +120,6 @@ object OnlineCaseDataset: ITestCaseDataset {
 
         onBlocking { this.put(any()) } doAnswer {}
     }
-
 
     override fun provideWeeklyForecastDao() = spy<WeeklyForecastDao> {
         onBlocking { this.find(any()) } doReturn null

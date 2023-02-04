@@ -24,7 +24,6 @@ class ETagInspector(
                 .header("if-none-match", cache.eTag)
 //                .addHeader("If-Modified-Since", cache.lastModified)
                 .build()
-
         }
 
         // Process the HTTP request

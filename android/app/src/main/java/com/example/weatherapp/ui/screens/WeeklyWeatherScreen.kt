@@ -35,18 +35,17 @@ fun WeeklyWeatherScreen(viewModel: AppViewModel = viewModel()) {
     } else {
         SwipeRefresh(
             state = refreshState,
-            onRefresh = onRefresh
+            onRefresh = onRefresh,
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 items(
                     items = viewModel.forecasts,
 
                     itemContent = {
                         DailyRow(it!!)
-                    }
+                    },
                 )
             }
         }

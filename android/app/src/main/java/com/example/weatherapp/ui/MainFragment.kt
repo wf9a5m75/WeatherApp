@@ -24,7 +24,7 @@ class MainFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View = ComposeView(requireContext())
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,7 +45,7 @@ class MainFragment : Fragment() {
                         },
                         onEmptyLocations = {
                             findNavController().navigate(R.id.settingsFragment)
-                        }
+                        },
                     )
                 }
             }

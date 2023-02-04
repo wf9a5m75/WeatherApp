@@ -1,6 +1,5 @@
 package com.example.weatherapp
 
-import com.example.weatherapp.database.PrefectureDao
 import com.example.weatherapp.providers.OfflineCaseDataset
 import com.example.weatherapp.providers.OnlineCaseDataset
 import com.example.weatherapp.network.model.City
@@ -9,17 +8,16 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
 
 class AppViewModelTest {
 
-
     @Before
-    fun `create instance`() {
+    fun `set Dispatcher before each test`() {
         Dispatchers.setMain(Dispatchers.Unconfined)
     }
+
     @Test
-    fun `updateForecasts should obtain data from server if the internet is online`() {
+    fun `should obtain data from server if the internet is online`() {
         val viewModel = AppViewModel(
             dispatcher = Dispatchers.Unconfined,
             networkMonitor = OnlineCaseDataset.provideNetworkMonitor(),
@@ -35,8 +33,9 @@ class AppViewModelTest {
             assertEquals("2023-01-31", viewModel.forecasts[1]!!.date)
         }
     }
+
     @Test
-    fun `updateForecasts should return the data from database if the device is offline`() {
+    fun `should return the data from database if the device is offline`() {
         val viewModel = AppViewModel(
             dispatcher = Dispatchers.Unconfined,
             networkMonitor = OfflineCaseDataset.provideNetworkMonitor(),
@@ -52,8 +51,9 @@ class AppViewModelTest {
             assertEquals("2023-02-03", viewModel.forecasts[1]!!.date)
         }
     }
+
     @Test
-    fun `updateForecasts should return null if the device is offline and no data is available in database`() {
+    fun `should return null if the device is offline and no data exists in database`() {
         val viewModel = AppViewModel(
             dispatcher = Dispatchers.Unconfined,
             networkMonitor = OfflineCaseDataset.provideNetworkMonitor(),
@@ -69,7 +69,7 @@ class AppViewModelTest {
     }
 
     @Test
-    fun `syncLocation should obtain the latest location list if the device is online`() {
+    fun `should obtain the latest location list if the device is online`() {
 
         val mockPrefectureDao = OnlineCaseDataset.providePrefectureDao()
 

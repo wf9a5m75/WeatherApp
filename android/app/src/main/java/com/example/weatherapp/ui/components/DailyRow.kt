@@ -33,27 +33,27 @@ fun DailyRow(
             Forecast(
                 "2022-12-23T00:00",
                 temperature = 13.2,
-                status = "sunny"
+                status = "sunny",
             ),
             Forecast(
                 "2022-12-23T03:00",
                 temperature = 13.2,
-                status = "sunny"
+                status = "sunny",
             ),
             Forecast(
                 "2022-12-23T06:00",
                 temperature = 13.2,
-                status = "sunny"
+                status = "sunny",
             ),
             Forecast(
                 "2022-12-23T09:00",
                 temperature = 13.2,
-                status = "sunny"
+                status = "sunny",
             ),
             Forecast(
                 "2022-12-23T12:00",
                 temperature = 13.2,
-                status = "sunny"
+                status = "sunny",
             ),
         ),
     ),
@@ -76,7 +76,7 @@ fun DailyRow(
                 color = Color.Gray,
             )
             .wrapContentHeight()
-            .padding(vertical = 5.dp)
+            .padding(vertical = 5.dp),
     ) {
         Column(
             modifier = Modifier

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.example.weatherapp.database.KeyValueDao
 import com.example.weatherapp.database.PrefectureDao
+import com.example.weatherapp.database.WeeklyForecastDao
 import com.example.weatherapp.network.IWeatherApi
 import com.example.weatherapp.network.model.City
 import com.example.weatherapp.network.model.LocationResponse
@@ -53,13 +54,12 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
                 City("pref3_city1", "City3-1"),
                 City("pref3_city2", "City3-2"),
             ),
-        )
+        ),
     )
 
     private val cityLabels = listOf(
         "City1-1", "City1-2", "City1-3", "City2-1", "City2-2", "City3-1", "City3-2",
     )
-
 
     @Before
     fun setup() {
@@ -76,7 +76,7 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
                 LocationResponse(
                     "2022-11-15T22:33",
                     prefectures,
-                )
+                ),
             )
         }
         val prefectureDao = spy<PrefectureDao> {
@@ -84,12 +84,15 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
         }
         val keyValueDao = spy<KeyValueDao> { }
 
+        val weeklyForecastDao = spy<WeeklyForecastDao> {}
+
         return AppViewModel(
             Dispatchers.IO,
             networkMonitor,
             weatherAPI,
             prefectureDao,
-            keyValueDao
+            keyValueDao,
+            weeklyForecastDao,
         )
     }
 

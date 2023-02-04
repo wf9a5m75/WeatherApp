@@ -78,8 +78,6 @@ fun DailyWeatherScreen(
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.body2,
             )
-
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -131,4 +129,3 @@ fun DailyWeatherScreen(
         }
     }
 }
-

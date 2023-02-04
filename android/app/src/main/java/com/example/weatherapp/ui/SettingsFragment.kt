@@ -19,7 +19,7 @@ class SettingsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View = ComposeView(requireContext())
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

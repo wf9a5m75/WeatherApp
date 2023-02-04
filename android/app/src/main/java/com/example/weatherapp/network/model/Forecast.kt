@@ -52,5 +52,4 @@ data class Forecast(
 
     val date
         get(): Int = this._date
-
 }

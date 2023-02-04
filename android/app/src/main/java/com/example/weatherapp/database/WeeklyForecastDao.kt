@@ -50,5 +50,4 @@ interface WeeklyForecastDao {
 
     @Query("DELETE FROM WeeklyForecast where cityId = :cityId")
     suspend fun remove(cityId: String)
-
 }

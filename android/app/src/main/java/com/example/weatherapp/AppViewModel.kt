@@ -52,7 +52,7 @@ class AppViewModel @Inject constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     fun loadSelectedCity(onFinished: () -> Unit) {
-        if (this@AppViewModel.city.value.id != "") {
+        if (this@AppViewModel.city.value.id.isNotBlank()) {
             onFinished()
             return
         }
