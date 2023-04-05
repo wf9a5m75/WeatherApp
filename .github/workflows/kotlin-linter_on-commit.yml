@@ -2,9 +2,6 @@ name: on_commit
 
 on:
   push:
-    paths:
-      - "android/app/src/**/*.kt"
-      - ".github/workflows/on_commit.yml"
 
 jobs:
   ktlint:
@@ -13,6 +10,12 @@ jobs:
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
 
-      - name: Kotlin linter
-        uses: lucasnlm/ktlint-action@master
+      - name: ktlint
+        uses: ScaCap/action-ktlint@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review # Change reporter
+          android: true
