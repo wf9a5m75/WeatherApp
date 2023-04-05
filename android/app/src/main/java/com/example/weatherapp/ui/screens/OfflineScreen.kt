@@ -33,7 +33,7 @@ fun OfflineScreen() {
             contentDescription = "",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(16.dp)
+.padding(16.dp)
                 .width(75.dp)
                 .height(75.dp),
         )
