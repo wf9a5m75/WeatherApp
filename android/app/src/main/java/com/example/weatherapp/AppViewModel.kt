@@ -35,7 +35,7 @@ class AppViewModel @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
     private val networkMonitor: INetworkMonitor,
     private val weatherApi: IWeatherApi,
-    private val prefectureDao: PrefectureDao,
+private val prefectureDao: PrefectureDao,
     private val keyValueDao: KeyValueDao,
     private val weeklyForecastDao: WeeklyForecastDao,
 ) : ViewModel() {
