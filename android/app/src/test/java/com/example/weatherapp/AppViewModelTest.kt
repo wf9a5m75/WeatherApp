@@ -1,8 +1,8 @@
 package com.example.weatherapp
 
+import com.example.weatherapp.network.model.City
 import com.example.weatherapp.providers.OfflineCaseDataset
 import com.example.weatherapp.providers.OnlineCaseDataset
-import com.example.weatherapp.network.model.City
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals

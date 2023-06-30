@@ -27,7 +27,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,7 +35,7 @@ class AppViewModel @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
     private val networkMonitor: INetworkMonitor,
     private val weatherApi: IWeatherApi,
-private val prefectureDao: PrefectureDao,
+    private val prefectureDao: PrefectureDao,
     private val keyValueDao: KeyValueDao,
     private val weeklyForecastDao: WeeklyForecastDao,
 ) : ViewModel() {

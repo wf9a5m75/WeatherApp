@@ -30,13 +30,12 @@ fun WeatherIcon(
     hour24: Int = 14,
     modifier: Modifier = Modifier,
 ) {
+    val amPm = when (hour24 < 12) {
+        true -> "am"
+        else -> "pm"
+    }
 
-    val time = "${hour24 % 12} ${
-        when (hour24 < 12) {
-            true -> "am"
-            else -> "pm"
-        }
-    }"
+    val time = "${hour24 % 12} $amPm"
     Column(
         modifier = modifier
             .wrapContentSize(),
