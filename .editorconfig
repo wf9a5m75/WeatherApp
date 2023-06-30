@@ -1,0 +1,6 @@
+# Based on the Google style, but changed code style to "android"
+# https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/.editorconfig
+
+root = true
+[*]
+trim_trailing_whitespace = false
