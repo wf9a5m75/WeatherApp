@@ -1,4 +1,4 @@
-name: on_commit
+name: on_pr
 
 on:
   pull_request:
@@ -11,11 +11,11 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Kotlin linter
         uses: ScaCap/action-ktlint@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.ACTION_TOKEN }}
           reporter: github-pr-review
           android: true
