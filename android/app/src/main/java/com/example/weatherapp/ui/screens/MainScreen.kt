@@ -16,7 +16,7 @@ import com.example.weatherapp.ui.components.OptionMenuItem
 @Composable
 fun MainScreen(
     viewModel: AppViewModel,
-    onLocationMenuClicked: () -> Unit
+    onLocationMenuClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -30,7 +30,8 @@ fun MainScreen(
                 when (menuId) {
                     "change_city" -> onLocationMenuClicked()
 
-                    else -> { /* stub */
+                    else -> {
+                        /* stub */
                     }
                 }
             },

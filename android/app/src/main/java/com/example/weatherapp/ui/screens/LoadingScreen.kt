@@ -23,7 +23,7 @@ fun LoadingScreen() {
         Text(
             text = stringResource(id = R.string.loading_message),
             fontSize = 18.sp,
-            color = MaterialTheme.colors.onBackground
+            color = MaterialTheme.colors.onBackground,
         )
     }
 }
