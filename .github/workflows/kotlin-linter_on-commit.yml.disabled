@@ -14,8 +14,8 @@ jobs:
           fetch-depth: 1
 
       - name: ktlint
-        uses: wf9a5m75/test-action@main
+        uses: ScaCap/action-ktlint@master
         with:
-          # github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           # reporter: github-pr-review # Change reporter
           android: true

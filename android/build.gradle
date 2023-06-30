@@ -1,27 +1,41 @@
 buildscript {
     ext {
-        compose_ui_version = '1.3.3'
-        hilt_version = '2.44.2'
+        kotlinx_coroutines_version = '1.7.0'
+        compose_ui_version = '1.4.3'
+        hilt_version = '2.46.1'
         hilt_navigaton_version = '1.0.0'
         junit_version = '4.13.2'
+        androidX_core_version = '1.10.1'
         androidX_test_version = '1.5.0'
         androidX_test_junit_version = '1.1.4'
-        espresso_version = '3.5.0'
-        mock_server_version = '4.10.0'
-        compose_navigation_version = '2.5.3'
+        androidX_appcompat_version = '1.6.1'
+        androidX_lifecycle_version = '2.6.1'
+        androidX_activity_version = '1.7.2'
+        androidX_fragment_version = '1.6.0'
 
-        room_version = '2.5.0'
+        espresso_version = '3.5.1'
+        androidX_test_version = '1.5.0'
+        mock_server_version = '4.10.0'
+        compose_navigation_version = '2.6.0'
+
+        room_version = '2.5.2'
         mockito_version = '4.9.0'
         mockito_kotlin_version = '4.1.0'
+
+        // Must specify a compatible version for kotlin_compiler_extension_version with
+        // kotlin_version.
+        // https://developer.android.com/jetpack/androidx/releases/compose-kotlin
+        kotlin_version = '1.8.22'
+        kotlin_compiler_extension_version = '1.4.8'
     }
     dependencies {
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
     }
 }
 plugins {
-    id 'com.android.application' version '7.3.1' apply false
-    id 'com.android.library' version '7.3.1' apply false
-    id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
+    id 'com.android.application' version '7.4.2' apply false
+    id 'com.android.library' version '7.4.2' apply false
+    id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
     id 'org.jlleitschuh.gradle.ktlint' version '11.0.0' apply true
 }
 

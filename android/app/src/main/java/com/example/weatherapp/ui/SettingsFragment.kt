@@ -35,11 +35,12 @@ class SettingsFragment : Fragment() {
                 // If no preference, move to the selectCity screen
                 viewModel.saveSelectedCity {
                     // move back to the main fragment
-                    if (navController.backQueue.isNotEmpty()) {
-                        navController.popBackStack()
-                    } else {
-                        navController.navigate(R.id.mainFragment)
-                    }
+                    navController.popBackStack(R.id.mainFragment, false)
+//                    if (navController.backQueue.isNotEmpty()) {
+//                        navController.popBackStack()
+//                    } else {
+//                        navController.navigate(R.id.mainFragment)
+//                    }
                 }
             }
         }
