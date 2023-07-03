@@ -30,7 +30,7 @@ class NetworkMonitorUnitTest() {
     }
 
     @Test
-    fun `isOnline should be true when connected to network`() {
+    fun isOnline_should_be_true_when_connected_to_network() {
         val monitor = NetworkMonitor(mockConnectivityManager)
 
         assert(ArgumentMatchers.eq(monitor.isOnline))

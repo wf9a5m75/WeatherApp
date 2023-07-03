@@ -7,7 +7,7 @@ import org.junit.Test
 
 class OfflineScreenInstrumentedTest : BaseActivityInstrumentedTest() {
     @Test
-    fun shouldDisplayMessage() {
+    fun should_display_message() {
 
         composeTestRule.apply {
             setContent {

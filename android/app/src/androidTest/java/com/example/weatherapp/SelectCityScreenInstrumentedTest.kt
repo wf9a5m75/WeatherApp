@@ -97,7 +97,7 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
     }
 
     @Test
-    fun shouldDisplayAllCities() {
+    fun should_display_all_cities() {
         val viewModel = this.createViewModel()
 
         viewModel.locations.addAll(prefectures)
@@ -118,7 +118,7 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
     }
 
     @Test
-    fun currentCityShouldSelected() {
+    fun current_city_should_selected() {
         val viewModel = this.createViewModel()
         val currentCity = City("pref2_city2", "City2-2")
         viewModel.city.value = currentCity
@@ -137,7 +137,7 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
     private interface Callback : () -> Unit
 
     @Test
-    fun shouldInvokeOnCloseWhenTapOnTheBackButtonOnNavigationBar() {
+    fun should_invoke_onClose_when_tap_on_the_backButton_on_navigationBar() {
         val currentCity = City("pref2_city2", "City2-2")
         val targetCity = City("pref3_city2", "City3-2")
 
@@ -169,7 +169,7 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
     }
 
     @Test
-    fun shouldInvokeOnCloseWhenTapOnTheBackButtonOfAndroid() {
+    fun should_invoke_onClose_when_tap_on_the_backButton_of_Android() {
         val currentCity = City("pref1_city1", "City1-1")
         val targetCity = City("pref3_city1", "City3-1")
 

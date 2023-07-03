@@ -8,7 +8,7 @@ import org.junit.Test
 class LoadingScreenInstrumentedTest : BaseActivityInstrumentedTest() {
 
     @Test
-    fun shouldDisplayMessage() {
+    fun should_display_message() {
         composeTestRule.apply {
             setContent {
                 LoadingScreen()
