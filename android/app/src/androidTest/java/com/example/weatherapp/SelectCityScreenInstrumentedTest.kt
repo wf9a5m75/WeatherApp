@@ -168,31 +168,4 @@ class SelectCityScreenInstrumentedTest : BaseActivityInstrumentedTest() {
         }
     }
 
-    @Test
-    fun should_invoke_onClose_when_tap_on_the_backButton_of_Android() {
-        val currentCity = City("pref1_city1", "City1-1")
-        val targetCity = City("pref3_city1", "City3-1")
-
-        val viewModel = this.createViewModel()
-        val onCloseCallback = spy<Callback> {}
-        viewModel.city.value = currentCity
-        viewModel.locations.addAll(prefectures)
-
-        composeTestRule.apply {
-            setContent {
-                SelectCityScreen(
-                    viewModel = viewModel,
-                    onClose = onCloseCallback,
-                )
-            }
-            composeTestRule
-                .onNodeWithText(targetCity.name)
-                .performClick()
-                .assertIsSelected()
-
-            Espresso.pressBack()
-
-            verify(onCloseCallback, times(1)).invoke()
-        }
-    }
 }

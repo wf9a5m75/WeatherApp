@@ -2,6 +2,9 @@ package com.example.weatherapp.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.Network
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,8 +34,20 @@ class NetworkMonitorUnitTest() {
 
     @Test
     fun isOnline_should_be_true_when_connected_to_network() {
-        val monitor = NetworkMonitor(mockConnectivityManager)
+        val monitor = NetworkMonitor(
+            mockConnectivityManager,
+            isOnline = true,
+        )
 
-        assert(ArgumentMatchers.eq(monitor.isOnline))
+        assertTrue(monitor.isOnline)
+    }
+    @Test
+    fun isOnline_should_be_false_when_connected_to_network() {
+        val monitor = NetworkMonitor(
+            mockConnectivityManager,
+            isOnline = false,
+        )
+
+        assertFalse(monitor.isOnline)
     }
 }
