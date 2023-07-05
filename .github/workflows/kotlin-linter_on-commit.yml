@@ -1,0 +1,20 @@
+name: on commit (for test)
+
+on:
+  push:
+
+jobs:
+  ktlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Kotlin linter
+        uses: wf9a5m75/action-ktlint@fix_ktlint_not_found  # <-- work with act
+        # uses: ScaCap/action-ktlint@master # <-- does not work with act
+        with:
+          android: true
