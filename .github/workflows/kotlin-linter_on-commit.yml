@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
 
       - name: Kotlin linter
-        # uses: wf9a5m75/action-ktlint@fix_ktlint_not_found  # <-- work with act
-        uses: ScaCap/action-ktlint@master # <-- does not work with act
+        # uses: wf9a5m75/action-ktlint@fix_ktlint_not_found  # <-- work on commit
+        uses: ScaCap/action-ktlint@master # <-- does not work on commit
         with:
           android: true
