@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlinx_coroutines_version = '1.6.0'
+        kotlinx_coroutines_version = '1.7.2'
         compose_ui_version = '1.4.3'
         hilt_version = '2.46.1'
         hilt_navigaton_version = '1.0.0'
