@@ -1,8 +1,8 @@
 # Weather App
 
-![](./screenshot.png)
+**Note: This app is developed for my playground. Not optimized and not maintained at all.**
 
-**Note: This app is developed for my playground. Not optimized at all.**
+![](./screenshot.png)
 
 This Android app displays forecasts for today, tomorrow, and one-week forecasts information obtained from [Open-Metro.com](https://open-metro.com).
 
