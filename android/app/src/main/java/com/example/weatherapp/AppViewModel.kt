@@ -86,22 +86,22 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    @SuppressLint("SimpleDateFormat")
-    fun sprintDateFormat(day: ForecastDay): String {
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DATE, day.day)
-        return when (day) {
-            ForecastDay.TODAY -> {
-                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm")
-                formatter.format(calendar.time)
-            }
+@SuppressLint("SimpleDateFormat")
+fun sprintDateFormat(day: ForecastDay): String {
+    val calendar = Calendar.getInstance()
+    calendar.add(Calendar.DATE, day.day)
+    return when (day) {
+        ForecastDay.TODAY -> {
+            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            formatter.format(calendar.time)
+        }
 
-            else -> {
-                val formatter = SimpleDateFormat("yyyy-MM-dd")
-                formatter.format(calendar.time)
-            }
+        else -> {
+            val formatter = SimpleDateFormat("yyyy-MM-dd")
+            formatter.format(calendar.time)
         }
     }
+}
 
     private suspend fun saveValue(
         key: String,
