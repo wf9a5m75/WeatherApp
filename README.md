@@ -4,7 +4,7 @@
 
 ![](./screenshot.png)
 
-This Android app displays forecasts for today, tomorrow, and one-week forecasts information obtained from [Open-Metro.com](https://open-metro.com).
+This Android app displays forecasts for today, tomorrow, and one-week forecasts information obtained from [Open-Meteo.com](https://open-meteo.com).
 
 The backend is built with Firebase Functions, and the Android app is developed using Kotlin and Jetpack Compose.
 
